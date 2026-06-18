@@ -276,5 +276,42 @@
             }
         });
     </script>
+
+<script>
+        let tempPoints = [];
+        const svgMap = document.querySelector('.map-overlay');
+        
+        svgMap.addEventListener('mousedown', function(e) {
+            // Get exact coordinates relative to the SVG canvas
+            let pt = svgMap.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            let svgP = pt.matrixTransform(svgMap.getScreenCTM().inverse());
+            
+            // Save the coordinate
+            tempPoints.push(`${Math.round(svgP.x)},${Math.round(svgP.y)}`);
+            
+            // Draw a temporary blue dot so you can see where you clicked
+            let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", svgP.x);
+            circle.setAttribute("cy", svgP.y);
+            circle.setAttribute("r", "5");
+            circle.setAttribute("fill", "#3b82f6");
+            svgMap.appendChild(circle);
+
+            // Once you click 4 corners, generate the code!
+            if(tempPoints.length === 4) {
+                let polyString = tempPoints.join(" ");
+                let generatedCode = `<polygon class="plot available" points="${polyString}" onclick="openPlotDetails('PLOT_NO', 'SQ_FT', 'DIMS', 'PRICE', 'Available')"></polygon>`;
+                
+                // Show prompt to easily copy the code
+                window.prompt("Copy this code for your index.html:", generatedCode);
+                
+                // Reset for the next plot
+                tempPoints = []; 
+            }
+        });
+    </script>
+    
 </body>
 </html>
