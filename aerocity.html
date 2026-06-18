@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aerocity Residency | Interactive Map</title>
+    <title>Aerocity Residency | Live Interactive Map</title>
     
     <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
-        /* Map Container Styling */
-        .map-container {
+        
+        .map-wrapper {
             position: relative;
             width: 100%;
             max-width: 1200px;
@@ -21,42 +21,54 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            user-select: none;
         }
         .map-image {
             width: 100%;
             height: auto;
             display: block;
+            pointer-events: none;
         }
-        /* SVG Overlay covering the exact image dimensions */
-        .map-overlay {
+        
+        /* Interactive Circles */
+        .plot-marker {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        /* Interactive Polygon Styles */
-        .plot {
-            stroke: white;
-            stroke-width: 2;
-            opacity: 0.6;
+            transform: translate(-50%, -50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 10;
         }
-        .plot:hover { opacity: 0.9; stroke-width: 3; }
-        .plot.available { fill: #22c55e; } /* Green */
-        .plot.sold { fill: #ef4444; } /* Red */
+        .plot-marker:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            z-index: 20;
+        }
+        .marker-available { background-color: #22c55e; color: #000; border: 2px solid #fff; }
+        .marker-sold { background-color: #ef4444; color: #fff; border: 2px solid #fff; }
+        
+        /* Admin Mode Active State */
+        .admin-active .map-wrapper { cursor: crosshair; }
+        .admin-active .plot-marker { pointer-events: none; opacity: 0.5; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
+    <!-- Navbar -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
             <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
                 <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span class="font-medium text-sm">वापस होम पर जाएँ (Back Home)</span>
+                <span class="font-medium text-sm">वापस होम (Home)</span>
             </a>
-            
             <div class="flex items-center gap-2">
                 <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
                     <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
@@ -66,119 +78,162 @@
         </div>
     </nav>
 
-    <header class="bg-slate-900 text-white py-12">
-        <div class="container mx-auto px-4 max-w-6xl">
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-10">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Aerocity Residency</h1>
-            <p class="text-lg text-indigo-100 mt-2">YOUR OWN EARTH, YOUR OWN SKY. A Premium Gated Plotted Development.</p>
-            <div class="flex gap-4 mt-6 text-sm text-slate-300">
-                <span>📍 Edge of Sirohi Airstrip</span>
-                <span>📏 14750 Sq. Meters</span>
-                <span>🛡️ 24x7 Security & CC Roads</span>
-            </div>
+            <p class="text-lg text-indigo-100 mt-2">YOUR OWN EARTH, YOUR OWN SKY. Premium Gated Development.</p>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-12 max-w-6xl">
+    <!-- Map Section -->
+    <main class="container mx-auto px-4 py-8 max-w-6xl" id="app-container">
         
-        <div class="mb-8 flex justify-between items-end">
+        <div class="mb-6 flex justify-between items-end">
             <div>
-                <h2 class="text-2xl font-bold text-slate-800">इंटरैक्टिव मास्टर प्लान</h2>
-                <p class="text-slate-500 text-sm mt-1">प्लॉट की जानकारी देखने के लिए मैप पर क्लिक करें। हरे प्लॉट्स उपलब्ध हैं, लाल बिक चुके हैं।</p>
+                <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टर प्लान</h2>
+                <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए सर्कल पर क्लिक करें।</p>
             </div>
-            <div class="flex gap-4">
-                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-green-500 rounded"></div><span class="text-sm font-bold">उपलब्ध (Available)</span></div>
-                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-red-500 rounded"></div><span class="text-sm font-bold">बिक गया (Sold)</span></div>
+            <div class="flex gap-4 items-center">
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-green-500 rounded-full border border-slate-300"></div><span class="text-sm font-bold">Available</span></div>
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-red-500 rounded-full border border-slate-300"></div><span class="text-sm font-bold">Sold</span></div>
+                <!-- Secret Admin Trigger -->
+                <button onclick="toggleAdminMode()" class="ml-4 text-slate-300 hover:text-slate-500" title="Admin Login">🔒</button>
             </div>
         </div>
 
-        <div class="map-container">
-            <img src="aerocity-map.jpg" alt="Aerocity Master Plan" class="map-image">
-            
-            <svg class="map-overlay" viewBox="0 0 1000 600" preserveAspectRatio="none">
-                <polygon class="plot available" points="150,100 250,100 250,200 150,200" 
-                    onclick="openPlotDetails('Plot 1', '1000 Sq. Ft.', '25 x 40', '₹1500', 'Available')"></polygon>
-                
-                <polygon class="plot sold" points="260,100 360,100 360,200 260,200" 
-                    onclick="openPlotDetails('Plot 2', '1250 Sq. Ft.', '25 x 50', '₹1500', 'Sold')"></polygon>
-                
-                </svg>
+        <!-- The Map Container -->
+        <div class="map-wrapper" id="mapWrapper">
+            <img src="aerocity-map.jpg" alt="Aerocity Map" class="map-image" id="mapImage">
+            <div id="markersContainer">
+                <!-- Markers will be injected here by JavaScript -->
+            </div>
         </div>
-
     </main>
 
-    <div id="plotModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
-            <button onclick="closeModal('plotModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. Admin Input Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative">
+            <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="text-xl font-bold text-indigo-700 mb-4">Add / Update Plot (Admin)</h3>
+            <form id="adminForm" class="space-y-3">
+                <input type="hidden" id="adminX">
+                <input type="hidden" id="adminY">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Plot Number</label>
+                        <input type="text" id="adminPlotNo" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                        <select id="adminStatus" class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold">
+                            <option value="Available" class="text-green-600">Available</option>
+                            <option value="Sold" class="text-red-600">Sold</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Total Sq. Feet</label>
+                        <input type="text" id="adminSqFt" placeholder="e.g. 1000" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Dimensions (L x W)</label>
+                        <input type="text" id="adminSize" placeholder="e.g. 25x40" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Price / Sq.Ft (₹)</label>
+                        <input type="text" id="adminPrice" placeholder="e.g. 1500" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Facing Direction</label>
+                        <select id="adminDirection" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                            <option value="East">East</option>
+                            <option value="West">West</option>
+                            <option value="North">North</option>
+                            <option value="South">South</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded transition-colors mt-2">
+                    Save to System
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. User Plot Details Modal -->
+    <div id="userModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative">
+            <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             
             <div class="flex items-center gap-3 mb-6">
-                <div id="statusBadge" class="w-4 h-4 rounded-full bg-green-500"></div>
-                <h3 id="modalPlotNo" class="text-2xl font-extrabold text-slate-800">Plot No.</h3>
+                <div id="uBadge" class="w-4 h-4 rounded-full"></div>
+                <h3 id="uPlotNo" class="text-2xl font-extrabold text-slate-800">Plot --</h3>
             </div>
             
-            <div class="space-y-4 mb-8">
+            <div class="space-y-3 mb-6 text-sm">
                 <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="text-slate-500">कुल क्षेत्रफल (Total Area):</span>
-                    <span id="modalSqFt" class="font-bold text-slate-800">--</span>
+                    <span class="text-slate-500">Status:</span>
+                    <span id="uStatus" class="font-bold">--</span>
                 </div>
                 <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="text-slate-500">लंबाई x चौड़ाई (L*W):</span>
-                    <span id="modalDimensions" class="font-bold text-slate-800">--</span>
+                    <span class="text-slate-500">Total Area:</span>
+                    <span class="font-bold text-slate-800"><span id="uSqFt">--</span> Sq.Ft</span>
                 </div>
                 <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="text-slate-500">प्रति वर्ग फीट (Price/Sq.Ft):</span>
-                    <span id="modalPrice" class="font-bold text-slate-800">--</span>
+                    <span class="text-slate-500">Size (L x W):</span>
+                    <span id="uSize" class="font-bold text-slate-800">--</span>
                 </div>
                 <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <span class="text-slate-500">स्टेटस (Status):</span>
-                    <span id="modalStatusText" class="font-bold">--</span>
+                    <span class="text-slate-500">Price/Sq.Ft:</span>
+                    <span class="font-bold text-slate-800">₹<span id="uPrice">--</span></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">Facing:</span>
+                    <span id="uDirection" class="font-bold text-slate-800">--</span>
                 </div>
             </div>
 
-            <button id="enquiryBtn" onclick="openAgentModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
+            <button id="btnContactAgent" onclick="openContactModal()" class="w-full bg-slate-800 hover:bg-black text-white font-bold py-3 rounded-xl transition-colors">
                 एजेंट से संपर्क करें (Contact Agent)
             </button>
         </div>
     </div>
 
-    <div id="agentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
-            <button onclick="closeModal('agentModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+    <!-- 3. Contact Agent Modal -->
+    <div id="contactModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full relative">
+            <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Inquiry for Plot <span id="contactPlotLabel" class="text-indigo-600"></span></h3>
             
-            <h3 class="text-xl font-bold text-slate-800 mb-4">संपर्क करें</h3>
-            
-            <form id="agentForm" class="space-y-4">
-                <input type="hidden" id="inquiryPlotNo">
+            <form id="contactForm" class="space-y-4">
+                <input type="hidden" id="cPlotNo">
+                <!-- HIDDEN FIELD FOR PROJECT NAME -->
+                <input type="hidden" id="cProjectName" value="Aerocity Residency">
                 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">आपका नाम</label>
-                    <input type="text" id="clientName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
                 </div>
-                
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">WhatsApp नंबर</label>
-                    <input type="tel" id="clientPhone" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
                 </div>
-                
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">एजेंट चुनें (Select Agents)</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Select Agents to Notify:</label>
                     <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" value="Suresh Parmar" class="agent-checkbox w-4 h-4 text-indigo-600">
-                            <span class="text-sm font-medium">Suresh Parmar (Head Developer)</span>
+                            <input type="checkbox" value="Suresh Parmar" checked class="agent-checkbox w-4 h-4 text-green-600">
+                            <span class="text-sm font-medium">Suresh Parmar</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" value="Agent 1" class="agent-checkbox w-4 h-4 text-indigo-600">
-                            <span class="text-sm font-medium">Sales Agent 1 (9876543210)</span>
+                            <input type="checkbox" value="Sales Team" class="agent-checkbox w-4 h-4 text-green-600">
+                            <span class="text-sm font-medium">Sales Team</span>
                         </label>
                     </div>
                 </div>
-
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors mt-2">
-                    संदेश भेजें
+                    Send Inquiry on WhatsApp
                 </button>
             </form>
             <div id="formSuccess" class="hidden mt-4 text-sm text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200">
@@ -187,131 +242,228 @@
         </div>
     </div>
 
+    <!-- ================= LOGIC & ARCHITECTURE ================= -->
     <script>
-        // Data populated from backend/admin can be linked here later.
+        // --- CONFIGURATION ---
+        const ADMIN_PASSWORD = "Aero@9026"; // Change this for real security later
         
-        function openPlotDetails(plotNo, sqFt, dims, price, status) {
-            document.getElementById('modalPlotNo').innerText = plotNo;
-            document.getElementById('modalSqFt').innerText = sqFt;
-            document.getElementById('modalDimensions').innerText = dims;
-            document.getElementById('modalPrice').innerText = price;
-            document.getElementById('modalStatusText').innerText = status;
-            
-            // Set Hidden input for the enquiry form
-            document.getElementById('inquiryPlotNo').value = plotNo;
+        // YOUR PROVIDED N8N INQUIRY WEBHOOK
+        const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
+        
+        // Webhooks to save/load map data (You will set these up in n8n later)
+        const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
+        const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
 
-            const badge = document.getElementById('statusBadge');
-            const statusText = document.getElementById('modalStatusText');
-            const btn = document.getElementById('enquiryBtn');
+        // Local State
+        let isAdmin = false;
+        let activePlots = []; 
 
-            if (status.toLowerCase() === 'sold') {
-                badge.className = 'w-4 h-4 rounded-full bg-red-500';
-                statusText.className = 'font-bold text-red-500';
-                btn.style.display = 'none'; // Hide contact button if sold
-            } else {
-                badge.className = 'w-4 h-4 rounded-full bg-green-500';
-                statusText.className = 'font-bold text-green-500';
-                btn.style.display = 'block'; 
+        // --- CORE FUNCTIONS ---
+
+        // 1. Fetch plots from n8n / DB on page load
+        async function loadPlots() {
+            try {
+                // Dummy Data for testing before your GET webhook is ready
+                const dummyData = [
+                    { plotNo: "54", x: "32.5", y: "65.2", status: "Available", sqFt: "1000", size: "25x40", price: "1500", dir: "East" },
+                    { plotNo: "39", x: "42.1", y: "65.2", status: "Sold", sqFt: "1250", size: "25x50", price: "1500", dir: "West" }
+                ];
+                activePlots = dummyData;
+                renderMarkers();
+                
+                /* UNCOMMENT THIS ONCE YOUR GET WEBHOOK IS READY
+                const response = await fetch(WEBHOOK_GET_PLOTS);
+                const liveData = await response.json();
+                activePlots = liveData;
+                renderMarkers();
+                */
+            } catch (error) {
+                console.error("Failed to load plots", error);
             }
-
-            document.getElementById('plotModal').classList.remove('hidden');
         }
 
-        function openAgentModal() {
-            document.getElementById('plotModal').classList.add('hidden');
-            document.getElementById('agentModal').classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        // Form Submit to n8n Webhook
-        document.getElementById('agentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // 2. Draw circles on the map
+        function renderMarkers() {
+            const container = document.getElementById('markersContainer');
+            container.innerHTML = ''; // Clear existing
             
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.innerText = 'Sending...';
+            activePlots.forEach(plot => {
+                const marker = document.createElement('div');
+                marker.style.left = `${plot.x}%`;
+                marker.style.top = `${plot.y}%`;
+                
+                marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
+                marker.innerText = plot.plotNo;
+                
+                // Click Event
+                marker.onclick = (e) => {
+                    e.stopPropagation(); 
+                    if(!isAdmin) openUserModal(plot);
+                };
+                
+                container.appendChild(marker);
+            });
+        }
 
-            // Get selected agents
+        // 3. Admin Click to Add New Plot
+        document.getElementById('mapWrapper').addEventListener('click', function(e) {
+            if (!isAdmin) return;
+            
+            const rect = this.getBoundingClientRect();
+            const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+            const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            document.getElementById('adminX').value = xPercent.toFixed(2);
+            document.getElementById('adminY').value = yPercent.toFixed(2);
+            
+            document.getElementById('adminModal').classList.remove('hidden');
+        });
+
+        // 4. Admin Save Plot to n8n
+        document.getElementById('adminForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerText = "Saving...";
+
+            const newPlot = {
+                projectName: document.getElementById('cProjectName').value, // Yeh line add ki gayi hai
+                plotNo: document.getElementById('adminPlotNo').value,
+                x: document.getElementById('adminX').value,
+                y: document.getElementById('adminY').value,
+                status: document.getElementById('adminStatus').value,
+                sqFt: document.getElementById('adminSqFt').value,
+                size: document.getElementById('adminSize').value,
+                price: document.getElementById('adminPrice').value,
+                dir: document.getElementById('adminDirection').value
+            };
+
+            // Optimistic UI Update
+            const existingIndex = activePlots.findIndex(p => p.plotNo === newPlot.plotNo);
+            if(existingIndex >= 0) {
+                activePlots[existingIndex] = newPlot;
+            } else {
+                activePlots.push(newPlot);
+            }
+            renderMarkers();
+
+            // SEND TO n8n to save in Google Sheets (Uncomment when ready)
+            // fetch(WEBHOOK_SAVE_PLOT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPlot) });
+            
+            closeModal('adminModal');
+            this.reset();
+            btn.innerText = "Save to System";
+        });
+
+        // 5. User Opens Plot Details
+        function openUserModal(plot) {
+            document.getElementById('uPlotNo').innerText = "Plot " + plot.plotNo;
+            document.getElementById('uSqFt').innerText = plot.sqFt;
+            document.getElementById('uSize').innerText = plot.size;
+            document.getElementById('uPrice').innerText = plot.price;
+            document.getElementById('uDirection').innerText = plot.dir;
+            
+            const statusEl = document.getElementById('uStatus');
+            const badge = document.getElementById('uBadge');
+            const btn = document.getElementById('btnContactAgent');
+
+            if (plot.status === 'Sold') {
+                statusEl.innerText = "Sold";
+                statusEl.className = "font-bold text-red-500";
+                badge.className = "w-4 h-4 rounded-full bg-red-500";
+                btn.style.display = 'none'; // Hide contact if sold
+            } else {
+                statusEl.innerText = "Available";
+                statusEl.className = "font-bold text-green-500";
+                badge.className = "w-4 h-4 rounded-full bg-green-500";
+                btn.style.display = 'block';
+            }
+            
+            // Set for contact form
+            document.getElementById('contactPlotLabel').innerText = plot.plotNo;
+            document.getElementById('cPlotNo').value = plot.plotNo;
+            
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        // 6. Contact Form Submission
+        function openContactModal() {
+            closeModal('userModal');
+            document.getElementById('contactModal').classList.remove('hidden');
+        }
+
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerText = "Sending...";
+
             const checkboxes = document.querySelectorAll('.agent-checkbox:checked');
             const selectedAgents = Array.from(checkboxes).map(cb => cb.value);
 
             if(selectedAgents.length === 0) {
                 alert("कृपया कम से कम एक एजेंट चुनें।");
-                submitBtn.innerText = 'संदेश भेजें';
+                btn.innerText = "Send Inquiry on WhatsApp";
                 return;
             }
-
+            
             const payload = {
-                source: "Aerocity Interactive Map",
-                plotNo: document.getElementById('inquiryPlotNo').value,
-                clientName: document.getElementById('clientName').value,
-                clientPhone: document.getElementById('clientPhone').value,
+                source: "Live Map Direct Inquiry",
+                projectName: document.getElementById('cProjectName').value,
+                plotNo: document.getElementById('cPlotNo').value,
+                name: document.getElementById('cName').value,
+                phone: document.getElementById('cPhone').value,
                 assignedAgents: selectedAgents
             };
 
-            // REPLACE WITH YOUR ACTUAL N8N WEBHOOK
-            const N8N_WEBHOOK = 'https://llcsolution.duckdns.org/webhook/7d93f98f-eef7-4635-b619-f181d9a425aa';
-
             try {
-                const response = await fetch(N8N_WEBHOOK, {
+                const response = await fetch(WEBHOOK_INQUIRY, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 if (response.ok) {
-                    document.getElementById('agentForm').reset();
                     document.getElementById('formSuccess').classList.remove('hidden');
                     setTimeout(() => {
                         document.getElementById('formSuccess').classList.add('hidden');
-                        closeModal('agentModal');
-                        submitBtn.innerText = 'संदेश भेजें';
+                        closeModal('contactModal');
+                        btn.innerText = "Send Inquiry on WhatsApp";
+                        this.reset();
                     }, 3000);
+                } else {
+                    alert("सर्वर एरर! कृपया बाद में प्रयास करें।");
+                    btn.innerText = "Send Inquiry on WhatsApp";
                 }
             } catch (error) {
                 alert('नेटवर्क एरर। कृपया दोबारा प्रयास करें।');
-                submitBtn.innerText = 'संदेश भेजें';
+                btn.innerText = "Send Inquiry on WhatsApp";
             }
         });
-    </script>
 
-<script>
-        let tempPoints = [];
-        const svgMap = document.querySelector('.map-overlay');
-        
-        svgMap.addEventListener('mousedown', function(e) {
-            // Get exact coordinates relative to the SVG canvas
-            let pt = svgMap.createSVGPoint();
-            pt.x = e.clientX;
-            pt.y = e.clientY;
-            let svgP = pt.matrixTransform(svgMap.getScreenCTM().inverse());
-            
-            // Save the coordinate
-            tempPoints.push(`${Math.round(svgP.x)},${Math.round(svgP.y)}`);
-            
-            // Draw a temporary blue dot so you can see where you clicked
-            let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", svgP.x);
-            circle.setAttribute("cy", svgP.y);
-            circle.setAttribute("r", "5");
-            circle.setAttribute("fill", "#3b82f6");
-            svgMap.appendChild(circle);
-
-            // Once you click 4 corners, generate the code!
-            if(tempPoints.length === 4) {
-                let polyString = tempPoints.join(" ");
-                let generatedCode = `<polygon class="plot available" points="${polyString}" onclick="openPlotDetails('PLOT_NO', 'SQ_FT', 'DIMS', 'PRICE', 'Available')"></polygon>`;
-                
-                // Show prompt to easily copy the code
-                window.prompt("Copy this code for your index.html:", generatedCode);
-                
-                // Reset for the next plot
-                tempPoints = []; 
+        // --- UTILS ---
+        function toggleAdminMode() {
+            if (isAdmin) {
+                isAdmin = false;
+                document.getElementById('app-container').classList.remove('admin-active');
+                document.getElementById('modeIndicator').innerText = "प्लॉट की जानकारी देखने के लिए सर्कल पर क्लिक करें।";
+                alert("Admin Mode Disabled");
+            } else {
+                const pwd = prompt("Enter Admin Password:");
+                if (pwd === ADMIN_PASSWORD) {
+                    isAdmin = true;
+                    document.getElementById('app-container').classList.add('admin-active');
+                    document.getElementById('modeIndicator').innerText = "ADMIN MODE: Click anywhere on the map to place a new plot marker.";
+                    document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-500";
+                } else if (pwd !== null) {
+                    alert("Incorrect Password");
+                }
             }
-        });
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        window.onload = loadPlots;
     </script>
-    
 </body>
 </html>
