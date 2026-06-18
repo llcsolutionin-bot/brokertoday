@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aerocity Residency | Interactive Map</title>
+    
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
         /* Map Container Styling */
         .map-container {
             position: relative;
@@ -46,7 +50,22 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
-    <!-- Header -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
+        <div class="container mx-auto max-w-6xl flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+                <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span class="font-medium text-sm">वापस होम पर जाएँ (Back Home)</span>
+            </a>
+            
+            <div class="flex items-center gap-2">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1 class="text-xl font-extrabold tracking-tight">Broker Today</h1>
+            </div>
+        </div>
+    </nav>
+
     <header class="bg-slate-900 text-white py-12">
         <div class="container mx-auto px-4 max-w-6xl">
             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Aerocity Residency</h1>
@@ -59,7 +78,6 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-12 max-w-6xl">
         
         <div class="mb-8 flex justify-between items-end">
@@ -73,27 +91,21 @@
             </div>
         </div>
 
-        <!-- INTERACTIVE MAP CONTAINER -->
         <div class="map-container">
-            <!-- Replace 'aerocity-map.jpg' with your actual blueprint image uploaded to GitHub -->
             <img src="aerocity-map.jpg" alt="Aerocity Master Plan" class="map-image">
             
             <svg class="map-overlay" viewBox="0 0 1000 600" preserveAspectRatio="none">
-                <!-- Example Plot 1: Available -->
                 <polygon class="plot available" points="150,100 250,100 250,200 150,200" 
                     onclick="openPlotDetails('Plot 1', '1000 Sq. Ft.', '25 x 40', '₹1500', 'Available')"></polygon>
                 
-                <!-- Example Plot 2: Sold -->
                 <polygon class="plot sold" points="260,100 360,100 360,200 260,200" 
                     onclick="openPlotDetails('Plot 2', '1250 Sq. Ft.', '25 x 50', '₹1500', 'Sold')"></polygon>
                 
-                <!-- Note: You will add more <polygon> tags here mapping to the exact coordinates of your image -->
-            </svg>
+                </svg>
         </div>
 
     </main>
 
-    <!-- Plot Details Modal (Hidden by default) -->
     <div id="plotModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
             <button onclick="closeModal('plotModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
@@ -130,7 +142,6 @@
         </div>
     </div>
 
-    <!-- Contact Agent Form Modal (Hidden by default) -->
     <div id="agentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
             <button onclick="closeModal('agentModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
@@ -176,7 +187,6 @@
         </div>
     </div>
 
-    <!-- Scripts for Logic -->
     <script>
         // Data populated from backend/admin can be linked here later.
         
