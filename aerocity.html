@@ -2,177 +2,183 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aerocity Residency | Live Interactive Map</title>
-    
-    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <title>Aerocity Residency | Interactive Map</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
-        
-        .map-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            user-select: none;
-            touch-action: none;
-        }
-        .map-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            pointer-events: none;
-        }
-        
-        .plot-marker {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
-            z-index: 10;
-        }
-        .plot-marker:hover {
-            transform: translate(-50%, -50%) scale(1.15);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-            z-index: 20;
-        }
-        .marker-available { background-color: #22c55e; color: #000; border: 2px solid #fff; }
-        .marker-sold { background-color: #ef4444; color: #fff; border: 2px solid #fff; }
-        
+        .map-wrapper { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); user-select: none; touch-action: none; }
+        .map-image { width: 100%; height: auto; display: block; pointer-events: none; }
+        .plot-marker { position: absolute; transform: translate(-50%, -50%); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 10; border: 2px solid white; transition: all 0.2s; }
+        .marker-available { background-color: #22c55e; color: black; }
+        .marker-sold { background-color: #ef4444; color: white; }
         .admin-active .map-wrapper { cursor: crosshair; }
-        .admin-active .map-wrapper::after {
-            content: "ADMIN MODE ACTIVE";
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(220, 38, 38, 0.9);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            pointer-events: none;
-            z-index: 30;
-        }
-        .admin-active .plot-marker { cursor: grab; pointer-events: auto; }
-        .admin-active .plot-marker:active { cursor: grabbing; }
+        .admin-active .plot-marker { cursor: grab; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body class="bg-slate-50">
 
-    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
+    <nav class="bg-slate-900 text-white p-4">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
-                <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span class="font-medium text-sm">वापस होम</span>
-            </a>
-            <div class="flex items-center gap-2">
-                <h1 class="text-xl font-extrabold tracking-tight">Broker Today</h1>
+            <span class="font-bold">Aerocity Residency</span>
+            <div class="flex gap-4">
+                <button onclick="toggleAdminMode()" id="adminBtn" class="text-sm">🔒 Admin</button>
+                <button onclick="saveAndExit()" id="exitBtn" class="hidden bg-red-600 px-3 py-1 rounded-full text-xs font-bold">Save & Exit</button>
             </div>
         </div>
     </nav>
 
-    <header class="bg-slate-900 text-white py-10">
-        <div class="container mx-auto px-4 max-w-6xl text-center">
-            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Aerocity Residency</h1>
-        </div>
-    </header>
-
-    <main class="container mx-auto px-4 py-8 max-w-6xl" id="app-container">
-        <div class="mb-6 flex justify-between items-end">
-            <div>
-                <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टर प्लान</h2>
-                <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी के लिए क्लिक करें।</p>
-            </div>
-            <div class="flex gap-3 items-center">
-                <button id="btnAdminLogin" onclick="enterAdminMode()" class="text-slate-300 hover:text-slate-500">🔒</button>
-                <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden bg-red-600 text-white text-xs font-bold py-1.5 px-3 rounded-full">Save & Exit</button>
-            </div>
-        </div>
-
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
         <div class="map-wrapper" id="mapWrapper">
-            <img src="aerocity-map.jpg" alt="Aerocity Map" class="map-image" id="mapImage">
+            <img src="aerocity-map.jpg" alt="Map" class="map-image">
             <div id="markersContainer"></div>
         </div>
     </main>
 
-    <script>
-        const PROJECT_NAME = "Aerocity Residency";
-        const ADMIN_PASSWORD = "Aero@9026";
-        
-        const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
-        const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
-        const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
+    <div id="adminModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm">
+            <h3 class="font-bold mb-4" id="modalTitle">Add/Edit Plot</h3>
+            <input type="hidden" id="adminX"><input type="hidden" id="adminY">
+            <input type="text" id="adminPlotNo" placeholder="Plot No" class="w-full border p-2 mb-2">
+            <select id="adminStatus" class="w-full border p-2 mb-2" onchange="togglePrice()">
+                <option value="Available">Available</option>
+                <option value="Sold">Sold</option>
+            </select>
+            <input type="text" id="adminSqFt" placeholder="Sq Ft" class="w-full border p-2 mb-2">
+            <input type="text" id="adminSize" placeholder="Size (L x W)" class="w-full border p-2 mb-2">
+            <input type="text" id="adminPrice" placeholder="Price/SqFt" class="w-full border p-2 mb-2">
+            <button onclick="savePlot()" class="bg-blue-600 text-white w-full py-2 rounded">Save</button>
+            <button onclick="deletePlot()" id="delBtn" class="bg-red-500 text-white w-full py-2 rounded mt-2 hidden">Delete</button>
+        </div>
+    </div>
 
+    <div id="userModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm">
+            <h3 class="font-bold text-xl mb-4" id="uPlotNo">Details</h3>
+            <p id="uStatus" class="mb-2"></p>
+            <p id="uSqFt" class="mb-2"></p>
+            <button onclick="openWhatsAppModal()" class="bg-green-600 text-white w-full py-2 rounded mt-4">Contact Agent</button>
+            <button onclick="closeModals()" class="mt-2 text-gray-500 w-full">Close</button>
+        </div>
+    </div>
+
+    <div id="whatsappModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm">
+            <h3 class="font-bold mb-4">Contact Agent</h3>
+            <input type="text" id="cName" placeholder="Your Name" class="w-full border p-2 mb-2">
+            <input type="tel" id="cPhone" placeholder="WhatsApp Number" class="w-full border p-2 mb-2">
+            <div class="mb-4">
+                <label><input type="checkbox" value="Suresh Parmar" class="agent-cb" checked> Suresh Parmar</label><br>
+                <label><input type="checkbox" value="Sales Team" class="agent-cb"> Sales Team</label>
+            </div>
+            <button onclick="submitInquiry()" class="bg-green-600 text-white w-full py-2 rounded">Send WhatsApp</button>
+        </div>
+    </div>
+
+    <script>
+        const PROJECT = "Aerocity Residency";
+        const PASSWORD = "Aero@9026";
+        const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
+        const WEBHOOK_SAVE = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404";
+        const WEBHOOK_GET = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
+        
         let isAdmin = false;
-        let activePlots = []; 
+        let plots = JSON.parse(localStorage.getItem('plots') || '[]');
 
         async function loadPlots() {
             try {
-                const response = await fetch(WEBHOOK_GET_PLOTS);
-                const liveData = await response.json();
-                activePlots = Array.isArray(liveData) ? liveData : [];
-            } catch (e) {
-                activePlots = JSON.parse(localStorage.getItem('aerocity_live_plots') || "[]");
-            }
-            renderMarkers();
+                const res = await fetch(WEBHOOK_GET);
+                const data = await res.json();
+                if(data.length > 0) { plots = data; localStorage.setItem('plots', JSON.stringify(plots)); }
+            } catch(e) { console.log("Offline mode"); }
+            render();
         }
 
-        function saveToLocal() {
-            localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
+        function toggleAdminMode() {
+            const p = prompt("Enter Password:");
+            if(p === PASSWORD) { isAdmin = true; document.body.classList.add('admin-active'); document.getElementById('exitBtn').classList.remove('hidden'); document.getElementById('adminBtn').classList.add('hidden'); }
         }
 
-        function renderMarkers() {
-            const container = document.getElementById('markersContainer');
-            container.innerHTML = ''; 
-            activePlots.forEach(plot => {
-                const marker = document.createElement('div');
-                marker.style.left = `${plot.x}%`;
-                marker.style.top = `${plot.y}%`;
-                marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
-                marker.innerText = plot.plotNo;
-                marker.onclick = (e) => { e.stopPropagation(); if(!isAdmin) openUserModal(plot); else openAdminModal(plot); };
-                container.appendChild(marker);
+        function saveAndExit() { isAdmin = false; document.body.classList.remove('admin-active'); document.getElementById('exitBtn').classList.add('hidden'); document.getElementById('adminBtn').classList.remove('hidden'); }
+
+        document.getElementById('mapWrapper').addEventListener('click', (e) => {
+            if(!isAdmin || e.target.classList.contains('plot-marker')) return;
+            const rect = document.getElementById('mapWrapper').getBoundingClientRect();
+            document.getElementById('adminX').value = ((e.clientX - rect.left) / rect.width) * 100;
+            document.getElementById('adminY').value = ((e.clientY - rect.top) / rect.height) * 100;
+            document.getElementById('adminModal').classList.remove('hidden');
+        });
+
+        function savePlot() {
+            const data = {
+                uid: PROJECT + "_" + document.getElementById('adminPlotNo').value,
+                projectName: PROJECT,
+                plotNo: document.getElementById('adminPlotNo').value,
+                x: document.getElementById('adminX').value,
+                y: document.getElementById('adminY').value,
+                status: document.getElementById('adminStatus').value,
+                sqFt: document.getElementById('adminSqFt').value,
+                size: document.getElementById('adminSize').value,
+                price: document.getElementById('adminStatus').value === 'Sold' ? "" : document.getElementById('adminPrice').value
+            };
+            plots = plots.filter(p => p.plotNo !== data.plotNo);
+            plots.push(data);
+            localStorage.setItem('plots', JSON.stringify(plots));
+            render(); closeModals();
+            fetch(WEBHOOK_SAVE, {method:'POST', body: JSON.stringify(data)});
+        }
+
+        function render() {
+            const c = document.getElementById('markersContainer');
+            c.innerHTML = '';
+            plots.forEach(p => {
+                const d = document.createElement('div');
+                d.className = `plot-marker ${p.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
+                d.style.left = p.x + '%'; d.style.top = p.y + '%';
+                d.innerText = p.plotNo;
+                d.onclick = (e) => { e.stopPropagation(); isAdmin ? openEdit(p) : openUser(p); };
+                c.appendChild(d);
             });
         }
 
-        // Logic for Add/Update/Delete follows here...
-        // ... (use the logic provided in the previous full code block) ...
-
-        function enterAdminMode() {
-            const pwd = prompt("Enter Admin Password:");
-            if (pwd === ADMIN_PASSWORD) {
-                isAdmin = true;
-                document.getElementById('app-container').classList.add('admin-active');
-                document.getElementById('btnAdminLogin').classList.add('hidden');
-                document.getElementById('btnAdminExit').classList.remove('hidden');
-            }
-        }
-        
-        function exitAdminMode() {
-            isAdmin = false;
-            document.getElementById('app-container').classList.remove('admin-active');
-            document.getElementById('btnAdminExit').classList.add('hidden');
-            document.getElementById('btnAdminLogin').classList.remove('hidden');
+        function openEdit(p) {
+            document.getElementById('adminPlotNo').value = p.plotNo;
+            document.getElementById('adminStatus').value = p.status;
+            document.getElementById('adminSqFt').value = p.sqFt;
+            document.getElementById('adminSize').value = p.size;
+            document.getElementById('adminPrice').value = p.price;
+            document.getElementById('adminModal').classList.remove('hidden');
+            document.getElementById('delBtn').classList.remove('hidden');
         }
 
+        function openUser(p) {
+            document.getElementById('uPlotNo').innerText = "Plot " + p.plotNo;
+            document.getElementById('uStatus').innerText = "Status: " + p.status;
+            document.getElementById('uSqFt').innerText = "Area: " + p.sqFt + " SqFt";
+            window.currentPlot = p;
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function openWhatsAppModal() { closeModals(); document.getElementById('whatsappModal').classList.remove('hidden'); }
+
+        async function submitInquiry() {
+            const agents = Array.from(document.querySelectorAll('.agent-cb:checked')).map(cb => cb.value);
+            const payload = {
+                projectName: PROJECT,
+                plotNo: window.currentPlot.plotNo,
+                name: document.getElementById('cName').value,
+                phone: document.getElementById('cPhone').value,
+                assignedAgents: agents
+            };
+            fetch(WEBHOOK_INQUIRY, {method:'POST', body: JSON.stringify(payload)});
+            alert("Sent!"); closeModals();
+        }
+
+        function deletePlot() {
+            plots = plots.filter(p => p.plotNo !== document.getElementById('adminPlotNo').value);
+            localStorage.setItem('plots', JSON.stringify(plots));
+            render(); closeModals();
+        }
+
+        function closeModals() { document.querySelectorAll('.fixed').forEach(m => m.classList.add('hidden')); }
         window.onload = loadPlots;
     </script>
 </body>
