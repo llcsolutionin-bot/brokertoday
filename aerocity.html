@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aerocity Residency | Interactive Map</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Map Container Styling */
+        .map-container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .map-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        /* SVG Overlay covering the exact image dimensions */
+        .map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        /* Interactive Polygon Styles */
+        .plot {
+            stroke: white;
+            stroke-width: 2;
+            opacity: 0.6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .plot:hover { opacity: 0.9; stroke-width: 3; }
+        .plot.available { fill: #22c55e; } /* Green */
+        .plot.sold { fill: #ef4444; } /* Red */
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Aerocity Residency</h1>
+            <p class="text-lg text-indigo-100 mt-2">YOUR OWN EARTH, YOUR OWN SKY. A Premium Gated Plotted Development.</p>
+            <div class="flex gap-4 mt-6 text-sm text-slate-300">
+                <span>📍 Edge of Sirohi Airstrip</span>
+                <span>📏 14750 Sq. Meters</span>
+                <span>🛡️ 24x7 Security & CC Roads</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12 max-w-6xl">
+        
+        <div class="mb-8 flex justify-between items-end">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">इंटरैक्टिव मास्टर प्लान</h2>
+                <p class="text-slate-500 text-sm mt-1">प्लॉट की जानकारी देखने के लिए मैप पर क्लिक करें। हरे प्लॉट्स उपलब्ध हैं, लाल बिक चुके हैं।</p>
+            </div>
+            <div class="flex gap-4">
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-green-500 rounded"></div><span class="text-sm font-bold">उपलब्ध (Available)</span></div>
+                <div class="flex items-center gap-2"><div class="w-4 h-4 bg-red-500 rounded"></div><span class="text-sm font-bold">बिक गया (Sold)</span></div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE MAP CONTAINER -->
+        <div class="map-container">
+            <!-- Replace 'aerocity-map.jpg' with your actual blueprint image uploaded to GitHub -->
+            <img src="aerocity-map.jpg" alt="Aerocity Master Plan" class="map-image">
+            
+            <svg class="map-overlay" viewBox="0 0 1000 600" preserveAspectRatio="none">
+                <!-- Example Plot 1: Available -->
+                <polygon class="plot available" points="150,100 250,100 250,200 150,200" 
+                    onclick="openPlotDetails('Plot 1', '1000 Sq. Ft.', '25 x 40', '₹1500', 'Available')"></polygon>
+                
+                <!-- Example Plot 2: Sold -->
+                <polygon class="plot sold" points="260,100 360,100 360,200 260,200" 
+                    onclick="openPlotDetails('Plot 2', '1250 Sq. Ft.', '25 x 50', '₹1500', 'Sold')"></polygon>
+                
+                <!-- Note: You will add more <polygon> tags here mapping to the exact coordinates of your image -->
+            </svg>
+        </div>
+
+    </main>
+
+    <!-- Plot Details Modal (Hidden by default) -->
+    <div id="plotModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button onclick="closeModal('plotModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <div id="statusBadge" class="w-4 h-4 rounded-full bg-green-500"></div>
+                <h3 id="modalPlotNo" class="text-2xl font-extrabold text-slate-800">Plot No.</h3>
+            </div>
+            
+            <div class="space-y-4 mb-8">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">कुल क्षेत्रफल (Total Area):</span>
+                    <span id="modalSqFt" class="font-bold text-slate-800">--</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">लंबाई x चौड़ाई (L*W):</span>
+                    <span id="modalDimensions" class="font-bold text-slate-800">--</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">प्रति वर्ग फीट (Price/Sq.Ft):</span>
+                    <span id="modalPrice" class="font-bold text-slate-800">--</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">स्टेटस (Status):</span>
+                    <span id="modalStatusText" class="font-bold">--</span>
+                </div>
+            </div>
+
+            <button id="enquiryBtn" onclick="openAgentModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
+                एजेंट से संपर्क करें (Contact Agent)
+            </button>
+        </div>
+    </div>
+
+    <!-- Contact Agent Form Modal (Hidden by default) -->
+    <div id="agentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button onclick="closeModal('agentModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h3 class="text-xl font-bold text-slate-800 mb-4">संपर्क करें</h3>
+            
+            <form id="agentForm" class="space-y-4">
+                <input type="hidden" id="inquiryPlotNo">
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">आपका नाम</label>
+                    <input type="text" id="clientName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">WhatsApp नंबर</label>
+                    <input type="tel" id="clientPhone" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">एजेंट चुनें (Select Agents)</label>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="Suresh Parmar" class="agent-checkbox w-4 h-4 text-indigo-600">
+                            <span class="text-sm font-medium">Suresh Parmar (Head Developer)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="Agent 1" class="agent-checkbox w-4 h-4 text-indigo-600">
+                            <span class="text-sm font-medium">Sales Agent 1 (9876543210)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors mt-2">
+                    संदेश भेजें
+                </button>
+            </form>
+            <div id="formSuccess" class="hidden mt-4 text-sm text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200">
+                मैसेज भेज दिया गया है! एजेंट जल्द संपर्क करेंगे।
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts for Logic -->
+    <script>
+        // Data populated from backend/admin can be linked here later.
+        
+        function openPlotDetails(plotNo, sqFt, dims, price, status) {
+            document.getElementById('modalPlotNo').innerText = plotNo;
+            document.getElementById('modalSqFt').innerText = sqFt;
+            document.getElementById('modalDimensions').innerText = dims;
+            document.getElementById('modalPrice').innerText = price;
+            document.getElementById('modalStatusText').innerText = status;
+            
+            // Set Hidden input for the enquiry form
+            document.getElementById('inquiryPlotNo').value = plotNo;
+
+            const badge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('modalStatusText');
+            const btn = document.getElementById('enquiryBtn');
+
+            if (status.toLowerCase() === 'sold') {
+                badge.className = 'w-4 h-4 rounded-full bg-red-500';
+                statusText.className = 'font-bold text-red-500';
+                btn.style.display = 'none'; // Hide contact button if sold
+            } else {
+                badge.className = 'w-4 h-4 rounded-full bg-green-500';
+                statusText.className = 'font-bold text-green-500';
+                btn.style.display = 'block'; 
+            }
+
+            document.getElementById('plotModal').classList.remove('hidden');
+        }
+
+        function openAgentModal() {
+            document.getElementById('plotModal').classList.add('hidden');
+            document.getElementById('agentModal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Form Submit to n8n Webhook
+        document.getElementById('agentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerText = 'Sending...';
+
+            // Get selected agents
+            const checkboxes = document.querySelectorAll('.agent-checkbox:checked');
+            const selectedAgents = Array.from(checkboxes).map(cb => cb.value);
+
+            if(selectedAgents.length === 0) {
+                alert("कृपया कम से कम एक एजेंट चुनें।");
+                submitBtn.innerText = 'संदेश भेजें';
+                return;
+            }
+
+            const payload = {
+                source: "Aerocity Interactive Map",
+                plotNo: document.getElementById('inquiryPlotNo').value,
+                clientName: document.getElementById('clientName').value,
+                clientPhone: document.getElementById('clientPhone').value,
+                assignedAgents: selectedAgents
+            };
+
+            // REPLACE WITH YOUR ACTUAL N8N WEBHOOK
+            const N8N_WEBHOOK = 'https://llcsolution.duckdns.org/webhook/7d93f98f-eef7-4635-b619-f181d9a425aa';
+
+            try {
+                const response = await fetch(N8N_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    document.getElementById('agentForm').reset();
+                    document.getElementById('formSuccess').classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('formSuccess').classList.add('hidden');
+                        closeModal('agentModal');
+                        submitBtn.innerText = 'संदेश भेजें';
+                    }, 3000);
+                }
+            } catch (error) {
+                alert('नेटवर्क एरर। कृपया दोबारा प्रयास करें।');
+                submitBtn.innerText = 'संदेश भेजें';
+            }
+        });
+    </script>
+</body>
+</html>
