@@ -22,6 +22,7 @@
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             user-select: none;
+            touch-action: none; /* Prevents scroll when dragging on mobile */
         }
         .map-image {
             width: 100%;
@@ -44,7 +45,7 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
             z-index: 10;
         }
         .plot-marker:hover {
@@ -57,7 +58,11 @@
         
         /* Admin Mode Active State */
         .admin-active .map-wrapper { cursor: crosshair; }
-        .admin-active .plot-marker { pointer-events: none; opacity: 0.5; }
+        .admin-active .plot-marker { 
+            cursor: grab; 
+            pointer-events: auto; /* Allow dragging & clicking */
+        }
+        .admin-active .plot-marker:active { cursor: grabbing; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
@@ -88,7 +93,6 @@
 
     <!-- Map Section -->
     <main class="container mx-auto px-4 py-8 max-w-6xl" id="app-container">
-        
         <div class="mb-6 flex justify-between items-end">
             <div>
                 <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टर प्लान</h2>
@@ -105,19 +109,18 @@
         <!-- The Map Container -->
         <div class="map-wrapper" id="mapWrapper">
             <img src="aerocity-map.jpg" alt="Aerocity Map" class="map-image" id="mapImage">
-            <div id="markersContainer">
-                <!-- Markers will be injected here by JavaScript -->
-            </div>
+            <div id="markersContainer"></div>
         </div>
     </main>
 
     <!-- ================= MODALS ================= -->
 
-    <!-- 1. Admin Input Modal -->
+    <!-- 1. Admin Add/Edit Modal -->
     <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative">
             <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
-            <h3 class="text-xl font-bold text-indigo-700 mb-4">Add / Update Plot (Admin)</h3>
+            <h3 class="text-xl font-bold text-indigo-700 mb-4" id="adminModalTitle">Add New Plot</h3>
+            
             <form id="adminForm" class="space-y-3">
                 <input type="hidden" id="adminX">
                 <input type="hidden" id="adminY">
@@ -125,7 +128,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Plot Number</label>
-                        <input type="text" id="adminPlotNo" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <input type="text" id="adminPlotNo" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold text-indigo-700">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Status</label>
@@ -142,7 +145,7 @@
                         <label class="block text-xs font-bold text-slate-700 mb-1">Dimensions (L x W)</label>
                         <input type="text" id="adminSize" placeholder="e.g. 25x40" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
-                    <div>
+                    <div id="priceContainer">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Price / Sq.Ft (₹)</label>
                         <input type="text" id="adminPrice" placeholder="e.g. 1500" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
@@ -156,9 +159,15 @@
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded transition-colors mt-2">
-                    Save to System
-                </button>
+                
+                <div class="flex gap-3 mt-4 pt-2">
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded transition-colors">
+                        Save Plot
+                    </button>
+                    <button type="button" id="btnDeletePlot" onclick="deletePlot()" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded transition-colors">
+                        Delete
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -186,7 +195,7 @@
                     <span class="text-slate-500">Size (L x W):</span>
                     <span id="uSize" class="font-bold text-slate-800">--</span>
                 </div>
-                <div class="flex justify-between border-b border-slate-100 pb-2">
+                <div id="uPriceRow" class="flex justify-between border-b border-slate-100 pb-2">
                     <span class="text-slate-500">Price/Sq.Ft:</span>
                     <span class="font-bold text-slate-800">₹<span id="uPrice">--</span></span>
                 </div>
@@ -210,7 +219,6 @@
             
             <form id="contactForm" class="space-y-4">
                 <input type="hidden" id="cPlotNo">
-                <!-- HIDDEN FIELD FOR PROJECT NAME -->
                 <input type="hidden" id="cProjectName" value="Aerocity Residency">
                 
                 <div>
@@ -245,57 +253,99 @@
     <!-- ================= LOGIC & ARCHITECTURE ================= -->
     <script>
         // --- CONFIGURATION ---
-        const ADMIN_PASSWORD = "Aero@9026"; // Change this for real security later
+        const ADMIN_PASSWORD = "Aero@9026";
         
-        // YOUR PROVIDED N8N INQUIRY WEBHOOK
+        // YOUR N8N WEBHOOKS
         const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
-        
-        // Webhooks to save/load map data (You will set these up in n8n later)
         const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
         const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
 
-        // Local State
+        // State
         let isAdmin = false;
         let activePlots = []; 
+        let draggingPlot = null;
+        let hasDragged = false;
 
-        // --- CORE FUNCTIONS ---
-
-        // 1. Fetch plots from n8n / DB on page load
+        // 1. Load Plots from n8n GET Webhook
         async function loadPlots() {
             try {
-                // Dummy Data for testing before your GET webhook is ready
-                const dummyData = [
-                    { plotNo: "54", x: "32.5", y: "65.2", status: "Available", sqFt: "1000", size: "25x40", price: "1500", dir: "East" },
-                    { plotNo: "39", x: "42.1", y: "65.2", status: "Sold", sqFt: "1250", size: "25x50", price: "1500", dir: "West" }
-                ];
-                activePlots = dummyData;
-                renderMarkers();
-                
-                /* UNCOMMENT THIS ONCE YOUR GET WEBHOOK IS READY
                 const response = await fetch(WEBHOOK_GET_PLOTS);
                 const liveData = await response.json();
-                activePlots = liveData;
+                
+                // If API returns valid array, use it. Otherwise use dummy fallback.
+                if (Array.isArray(liveData) && liveData.length > 0) {
+                    activePlots = liveData;
+                } else {
+                    activePlots = [
+                        { plotNo: "54", x: "32.50", y: "65.20", status: "Available", sqFt: "1000", size: "25x40", price: "1500", dir: "East" },
+                        { plotNo: "39", x: "42.10", y: "65.20", status: "Sold", sqFt: "1250", size: "25x50", price: "", dir: "West" }
+                    ];
+                }
                 renderMarkers();
-                */
             } catch (error) {
-                console.error("Failed to load plots", error);
+                console.error("Using fallback data due to fetch error", error);
+                activePlots = [
+                    { plotNo: "54", x: "32.50", y: "65.20", status: "Available", sqFt: "1000", size: "25x40", price: "1500", dir: "East" }
+                ];
+                renderMarkers();
             }
         }
 
-        // 2. Draw circles on the map
+        // 2. Render Draggable Markers
         function renderMarkers() {
             const container = document.getElementById('markersContainer');
-            container.innerHTML = ''; // Clear existing
+            container.innerHTML = ''; 
             
             activePlots.forEach(plot => {
                 const marker = document.createElement('div');
                 marker.style.left = `${plot.x}%`;
                 marker.style.top = `${plot.y}%`;
-                
                 marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
                 marker.innerText = plot.plotNo;
                 
-                // Click Event
+                // DRAG & DROP AND EDIT LOGIC (Pointer Events)
+                marker.onpointerdown = (e) => {
+                    if (!isAdmin) return;
+                    e.stopPropagation();
+                    draggingPlot = plot;
+                    hasDragged = false;
+                    marker.setPointerCapture(e.pointerId); // Lock cursor to marker
+                };
+
+                marker.onpointermove = (e) => {
+                    if (!draggingPlot || draggingPlot.plotNo !== plot.plotNo) return;
+                    hasDragged = true;
+                    const rect = document.getElementById('mapWrapper').getBoundingClientRect();
+                    let xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+                    let yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+                    
+                    // Keep marker inside map bounds
+                    xPercent = Math.max(0, Math.min(100, xPercent));
+                    yPercent = Math.max(0, Math.min(100, yPercent));
+
+                    marker.style.left = `${xPercent}%`;
+                    marker.style.top = `${yPercent}%`;
+                    plot.x = xPercent.toFixed(2);
+                    plot.y = yPercent.toFixed(2);
+                };
+
+                marker.onpointerup = (e) => {
+                    if (!isAdmin) return;
+                    e.stopPropagation();
+                    marker.releasePointerCapture(e.pointerId);
+                    
+                    if (hasDragged) {
+                        // Just finished dragging, save new coordinates to DB silently
+                        sendDataToN8n(plot, 'save');
+                    } else {
+                        // Clicked without dragging, open EDIT modal
+                        openAdminModal(plot);
+                    }
+                    draggingPlot = null;
+                    hasDragged = false;
+                };
+
+                // User Click Logic
                 marker.onclick = (e) => {
                     e.stopPropagation(); 
                     if(!isAdmin) openUserModal(plot);
@@ -305,39 +355,80 @@
             });
         }
 
-        // 3. Admin Click to Add New Plot
+        // 3. Admin Click on Empty Map (Add New)
         document.getElementById('mapWrapper').addEventListener('click', function(e) {
             if (!isAdmin) return;
+            if (e.target.classList.contains('plot-marker')) return; // Ignore if clicked on marker
             
             const rect = this.getBoundingClientRect();
             const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
             const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
             
-            document.getElementById('adminX').value = xPercent.toFixed(2);
-            document.getElementById('adminY').value = yPercent.toFixed(2);
-            
-            document.getElementById('adminModal').classList.remove('hidden');
+            openAdminModal(null, xPercent.toFixed(2), yPercent.toFixed(2));
         });
 
-        // 4. Admin Save Plot to n8n
+        // 4. Handle Status Change (Hide/Show Price logic)
+        document.getElementById('adminStatus').addEventListener('change', function() {
+            const priceContainer = document.getElementById('priceContainer');
+            const priceInput = document.getElementById('adminPrice');
+            if(this.value === 'Sold') {
+                priceContainer.style.display = 'none';
+                priceInput.required = false;
+            } else {
+                priceContainer.style.display = 'block';
+            }
+        });
+
+        // 5. Open Admin Add/Edit Modal
+        function openAdminModal(plot = null, x = 0, y = 0) {
+            document.getElementById('adminForm').reset();
+            
+            if(plot) {
+                // Edit Mode
+                document.getElementById('adminModalTitle').innerText = "Edit Plot " + plot.plotNo;
+                document.getElementById('adminPlotNo').value = plot.plotNo;
+                document.getElementById('adminPlotNo').readOnly = true; // Cannot change ID
+                document.getElementById('adminX').value = plot.x;
+                document.getElementById('adminY').value = plot.y;
+                document.getElementById('adminStatus').value = plot.status;
+                document.getElementById('adminSqFt').value = plot.sqFt;
+                document.getElementById('adminSize').value = plot.size;
+                document.getElementById('adminPrice').value = plot.price || "";
+                document.getElementById('adminDirection').value = plot.dir;
+                
+                document.getElementById('btnDeletePlot').classList.remove('hidden');
+            } else {
+                // Add Mode
+                document.getElementById('adminModalTitle').innerText = "Add New Plot";
+                document.getElementById('adminPlotNo').readOnly = false;
+                document.getElementById('adminX').value = x;
+                document.getElementById('adminY').value = y;
+                document.getElementById('btnDeletePlot').classList.add('hidden');
+            }
+            
+            // Trigger status change to update price field visibility
+            document.getElementById('adminStatus').dispatchEvent(new Event('change'));
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        // 6. Save Plot to DB
         document.getElementById('adminForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]');
             btn.innerText = "Saving...";
 
             const newPlot = {
-                projectName: document.getElementById('cProjectName').value, // Yeh line add ki gayi hai
                 plotNo: document.getElementById('adminPlotNo').value,
                 x: document.getElementById('adminX').value,
                 y: document.getElementById('adminY').value,
                 status: document.getElementById('adminStatus').value,
                 sqFt: document.getElementById('adminSqFt').value,
                 size: document.getElementById('adminSize').value,
-                price: document.getElementById('adminPrice').value,
+                price: document.getElementById('adminStatus').value === 'Sold' ? "" : document.getElementById('adminPrice').value,
                 dir: document.getElementById('adminDirection').value
             };
 
-            // Optimistic UI Update
+            // Update UI instantly
             const existingIndex = activePlots.findIndex(p => p.plotNo === newPlot.plotNo);
             if(existingIndex >= 0) {
                 activePlots[existingIndex] = newPlot;
@@ -346,46 +437,80 @@
             }
             renderMarkers();
 
-            // SEND TO n8n to save in Google Sheets (Uncomment when ready)
-            // fetch(WEBHOOK_SAVE_PLOT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPlot) });
+            // Send to DB
+            await sendDataToN8n(newPlot, 'save');
             
             closeModal('adminModal');
-            this.reset();
-            btn.innerText = "Save to System";
+            btn.innerText = "Save Plot";
         });
 
-        // 5. User Opens Plot Details
+        // 7. Delete Plot
+        async function deletePlot() {
+            const plotNo = document.getElementById('adminPlotNo').value;
+            if(!confirm(`Are you sure you want to completely DELETE Plot ${plotNo}?`)) return;
+
+            // Remove from UI
+            activePlots = activePlots.filter(p => p.plotNo !== plotNo);
+            renderMarkers();
+            
+            // Send Delete Action to DB
+            await sendDataToN8n({ plotNo: plotNo }, 'delete');
+            closeModal('adminModal');
+        }
+
+        // Helper Function to send Save/Update/Delete actions
+        async function sendDataToN8n(plotData, actionType) {
+            const payload = {
+                ...plotData,
+                action: actionType, // 'save' or 'delete'
+                projectName: "Aerocity Residency"
+            };
+            try {
+                fetch(WEBHOOK_SAVE_PLOT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.error("DB Sync Error:", err);
+            }
+        }
+
+        // 8. Open User Details
         function openUserModal(plot) {
             document.getElementById('uPlotNo').innerText = "Plot " + plot.plotNo;
             document.getElementById('uSqFt').innerText = plot.sqFt;
             document.getElementById('uSize').innerText = plot.size;
-            document.getElementById('uPrice').innerText = plot.price;
             document.getElementById('uDirection').innerText = plot.dir;
             
             const statusEl = document.getElementById('uStatus');
             const badge = document.getElementById('uBadge');
             const btn = document.getElementById('btnContactAgent');
+            const priceRow = document.getElementById('uPriceRow');
 
             if (plot.status === 'Sold') {
                 statusEl.innerText = "Sold";
                 statusEl.className = "font-bold text-red-500";
                 badge.className = "w-4 h-4 rounded-full bg-red-500";
-                btn.style.display = 'none'; // Hide contact if sold
+                priceRow.style.display = 'none'; // Hide Price Row
+                btn.style.display = 'none'; // Hide Contact Button
             } else {
                 statusEl.innerText = "Available";
                 statusEl.className = "font-bold text-green-500";
                 badge.className = "w-4 h-4 rounded-full bg-green-500";
+                document.getElementById('uPrice').innerText = plot.price;
+                priceRow.style.display = 'flex'; // Show Price Row
                 btn.style.display = 'block';
             }
             
-            // Set for contact form
+            // Set Hidden fields for Inquiry form
             document.getElementById('contactPlotLabel').innerText = plot.plotNo;
             document.getElementById('cPlotNo').value = plot.plotNo;
             
             document.getElementById('userModal').classList.remove('hidden');
         }
 
-        // 6. Contact Form Submission
+        // 9. Contact Inquiry Submission
         function openContactModal() {
             closeModal('userModal');
             document.getElementById('contactModal').classList.remove('hidden');
@@ -420,7 +545,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
                 if (response.ok) {
                     document.getElementById('formSuccess').classList.remove('hidden');
                     setTimeout(() => {
@@ -429,12 +553,9 @@
                         btn.innerText = "Send Inquiry on WhatsApp";
                         this.reset();
                     }, 3000);
-                } else {
-                    alert("सर्वर एरर! कृपया बाद में प्रयास करें।");
-                    btn.innerText = "Send Inquiry on WhatsApp";
                 }
             } catch (error) {
-                alert('नेटवर्क एरर। कृपया दोबारा प्रयास करें।');
+                alert('एरर। कृपया दोबारा प्रयास करें।');
                 btn.innerText = "Send Inquiry on WhatsApp";
             }
         });
@@ -451,7 +572,7 @@
                 if (pwd === ADMIN_PASSWORD) {
                     isAdmin = true;
                     document.getElementById('app-container').classList.add('admin-active');
-                    document.getElementById('modeIndicator').innerText = "ADMIN MODE: Click anywhere on the map to place a new plot marker.";
+                    document.getElementById('modeIndicator').innerText = "ADMIN MODE (Active): Click on map to Add, drag markers to Move, or click markers to Edit/Delete.";
                     document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-500";
                 } else if (pwd !== null) {
                     alert("Incorrect Password");
