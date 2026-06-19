@@ -101,6 +101,12 @@
             0% { transform: rotate(0deg); } 
             100% { transform: rotate(360deg); } 
         }
+
+        /* ZOOM FIX FOR MODAL CONTENT */
+        .zoom-fixed-content {
+            transition: transform 0.1s ease-out;
+            transform-origin: center center;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
@@ -111,8 +117,8 @@
         <p class="text-sm text-slate-500 mt-2">Fetching live updates from server</p>
     </div>
 
-    <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative">
+    <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative zoom-fixed-content">
             <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             <h3 class="font-bold text-lg mb-4 text-slate-800">Admin Login</h3>
             <input type="password" id="adminPwdInput" placeholder="Enter Password" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500">
@@ -182,8 +188,8 @@
         </div>
     </main>
 
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative">
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative zoom-fixed-content">
             <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             <h3 class="text-xl font-bold text-indigo-700 mb-4" id="adminModalTitle">Add New Plot</h3>
             
@@ -238,8 +244,8 @@
         </div>
     </div>
 
-    <div id="userModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative">
+    <div id="userModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative zoom-fixed-content">
             <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             
             <div class="flex items-center gap-3 mb-6">
@@ -275,8 +281,8 @@
         </div>
     </div>
 
-    <div id="contactModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full relative">
+    <div id="contactModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full relative zoom-fixed-content">
             <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             <h3 class="text-xl font-bold text-slate-800 mb-4">Inquiry for Plot <span id="contactPlotLabel" class="text-indigo-600"></span></h3>
             
@@ -349,23 +355,75 @@
         const PROJECT_NAME = "Aerocity Residency";
         const ADMIN_PASSWORD = "Aero@9026";
         
-        // n8n Webhook URLs
         const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
         const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
         const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
-        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega"; // Updated Agent Webhook
+        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
         const N8N_CHAT_WEBHOOK_URL = 'https://llcsolution.duckdns.org/webhook/7750d216-8bb4-4030-9b30-aeba85986268-widget';
 
-        // Global State Variables
         let isAdmin = false;
         let activePlots = []; 
         let activeAgents = []; 
         let draggingPlot = null;
         let hasDragged = false;
 
+        // ==========================================
+        // SMART MOBILE ZOOM FIX LOGIC
+        // ==========================================
+        function fixModalZoom(modalId) {
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('.zoom-fixed-content'); 
+            
+            function updatePosition() {
+                if (modal.classList.contains('hidden') || !window.visualViewport) return;
+                
+                const vv = window.visualViewport;
+                // If user is zoomed in via pinch-to-zoom
+                if (vv.scale > 1.05) {
+                    modal.style.position = 'absolute';
+                    modal.style.left = `${vv.pageLeft}px`;
+                    modal.style.top = `${vv.pageTop}px`;
+                    modal.style.width = `${vv.width}px`;
+                    modal.style.height = `${vv.height}px`;
+                    
+                    // Counter-scale popup to normal 1x size
+                    content.style.transform = `scale(${1 / vv.scale})`;
+                } else {
+                    // Normal state
+                    modal.style.position = '';
+                    modal.style.left = '';
+                    modal.style.top = '';
+                    modal.style.width = '';
+                    modal.style.height = '';
+                    content.style.transform = '';
+                }
+            }
+
+            updatePosition();
+            window.visualViewport.addEventListener('resize', updatePosition);
+            window.visualViewport.addEventListener('scroll', updatePosition);
+            modal._zoomHandler = updatePosition; 
+        }
+
+        function removeZoomFix(modalId) {
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('.zoom-fixed-content');
+            if (modal._zoomHandler && window.visualViewport) {
+                window.visualViewport.removeEventListener('resize', modal._zoomHandler);
+                window.visualViewport.removeEventListener('scroll', modal._zoomHandler);
+            }
+            modal.style.position = ''; modal.style.left = ''; modal.style.top = ''; modal.style.width = ''; modal.style.height = '';
+            if(content) { content.style.transform = ''; }
+        }
+
+        function closeModal(id) {
+            removeZoomFix(id); 
+            document.getElementById(id).classList.add('hidden');
+        }
+        // ==========================================
+
         // --- 2. DATA FETCHING LOGIC ---
 
-        // Fetch Agents from Database
         async function loadAgents() {
             try {
                 const cacheBuster = new Date().getTime();
@@ -377,7 +435,6 @@
                 const jsonRes = await response.json();
                 let parsedAgents = [];
 
-                // Parse nested n8n JSON safely
                 if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
                     parsedAgents = jsonRes[0].myField;
                 } else if (jsonRes.myField) {
@@ -386,19 +443,16 @@
                     parsedAgents = jsonRes;
                 }
 
-                // Filter to ensure we only save valid agent data (agents have phone/rating)
                 activeAgents = parsedAgents.filter(item => item.phone || item.rating);
                 
                 if (activeAgents.length > 0) {
                     localStorage.setItem('broker_agents', JSON.stringify(activeAgents));
                 }
             } catch (error) {
-                console.warn("Using offline agents data.");
                 activeAgents = JSON.parse(localStorage.getItem('broker_agents') || '[]');
             }
         }
 
-        // Fetch Plots from Database
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.remove('hidden'); 
@@ -416,7 +470,6 @@
                 const jsonRes = await response.json();
                 let liveData = [];
                 
-                // Parse nested n8n JSON safely
                 if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
                     liveData = jsonRes[0].myField;
                 } else if (jsonRes.myField) {
@@ -426,18 +479,15 @@
                 }
 
                 if (Array.isArray(liveData) && liveData.length > 0) {
-                    // Filter to ensure we only save valid plot data
                     activePlots = liveData.filter(item => item.plotNo);
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
-                console.warn("Using offline plots data.");
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
                 if (savedLocal) {
                     activePlots = JSON.parse(savedLocal);
                 }
             } finally {
-                // Hide Loader smoothly
                 overlay.style.opacity = '0';
                 setTimeout(() => overlay.classList.add('hidden'), 300);
                 renderMarkers();
@@ -459,7 +509,6 @@
                 marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
                 marker.innerText = plot.plotNo;
                 
-                // Drag Start
                 marker.onpointerdown = (e) => {
                     if (!isAdmin) return;
                     e.stopPropagation();
@@ -468,7 +517,6 @@
                     marker.setPointerCapture(e.pointerId);
                 };
 
-                // Drag Move
                 marker.onpointermove = (e) => {
                     if (!draggingPlot || draggingPlot.plotNo !== plot.plotNo) return;
                     hasDragged = true;
@@ -483,25 +531,21 @@
                     plot.y = yPercent.toFixed(2);
                 };
 
-                // Drag End
                 marker.onpointerup = (e) => {
                     if (!isAdmin) return;
                     e.stopPropagation();
                     marker.releasePointerCapture(e.pointerId);
                     
                     if (hasDragged) {
-                        // Plot was moved, save new location
                         localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                         sendDataToN8n(plot, 'update_location'); 
                     } else {
-                        // Plot was just clicked, open edit modal
                         openAdminModal(plot);
                     }
                     draggingPlot = null;
                     hasDragged = false;
                 };
 
-                // Click to view (User Mode)
                 marker.onclick = (e) => {
                     e.stopPropagation(); 
                     if (!isAdmin) {
@@ -513,7 +557,6 @@
             });
         }
 
-        // Click on empty map to add new plot
         document.getElementById('mapWrapper').addEventListener('click', function(e) {
             if (!isAdmin || e.target.classList.contains('plot-marker')) return; 
             
@@ -526,7 +569,6 @@
 
         // --- 4. ADMIN PANEL LOGIC ---
 
-        // Hide price field if status is 'Sold'
         document.getElementById('adminStatus').addEventListener('change', function() {
             document.getElementById('priceContainer').style.display = this.value === 'Sold' ? 'none' : 'block';
         });
@@ -556,9 +598,9 @@
             
             document.getElementById('adminStatus').dispatchEvent(new Event('change'));
             document.getElementById('adminModal').classList.remove('hidden');
+            fixModalZoom('adminModal');
         }
 
-        // Save Plot Form
         document.getElementById('adminForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]');
@@ -594,7 +636,6 @@
             btn.innerText = "Save Plot";
         });
 
-        // Delete Plot
         async function deletePlot() {
             const plotNo = document.getElementById('adminPlotNo').value;
             if (!confirm(`Are you sure you want to completely DELETE Plot ${plotNo}?`)) return;
@@ -652,6 +693,7 @@
             document.getElementById('cPlotNo').value = plot.plotNo;
             
             document.getElementById('userModal').classList.remove('hidden');
+            fixModalZoom('userModal');
         }
 
         // --- 6. AGENT CONTACT LOGIC ---
@@ -659,21 +701,18 @@
         function populateDynamicAgents() {
             const list = document.getElementById('dynamicAgentList');
             
-            // 1. Filter agents assigned to this project
             const projectAgents = activeAgents.filter(ag => {
                 if (!ag.projects) return false;
                 let agentProjects = [];
                 if (Array.isArray(ag.projects)) {
                     agentProjects = ag.projects;
                 } else if (typeof ag.projects === 'string') {
-                    // Clean array-like strings coming from Google Sheets
                     let cleanString = ag.projects.replace(/[\[\]"]/g, '');
                     agentProjects = cleanString.split(',').map(p => p.trim());
                 }
                 return agentProjects.includes(PROJECT_NAME);
             });
             
-            // 2. Render Checkboxes
             if (!projectAgents || projectAgents.length === 0) {
                 list.innerHTML = `<span class="text-sm text-red-500 font-bold p-2 block text-center">अभी इस प्रोजेक्ट के लिए कोई एजेंट असाइन नहीं है।</span>`;
                 return;
@@ -702,9 +741,9 @@
             closeModal('userModal');
             populateDynamicAgents();
             document.getElementById('contactModal').classList.remove('hidden');
+            fixModalZoom('contactModal');
         }
 
-        // Contact WhatsApp Form Submit
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]');
@@ -755,6 +794,7 @@
         function openPasswordModal() {
             document.getElementById('adminPwdInput').value = '';
             document.getElementById('passwordModal').classList.remove('hidden');
+            fixModalZoom('passwordModal');
         }
 
         function verifyPassword() {
@@ -782,10 +822,6 @@
             document.getElementById('modeIndicator').className = "text-sm mt-1 text-slate-500";
             
             loadPlots(); 
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
         }
 
         // --- 8. CHAT WIDGET LOGIC ---
@@ -864,9 +900,7 @@
 
         // --- 9. INITIALIZE ON LOAD ---
         window.onload = async () => {
-            // First fetch the agents list in the background
             await loadAgents(); 
-            // Then fetch and render the map plots
             loadPlots();        
         };
     </script>
