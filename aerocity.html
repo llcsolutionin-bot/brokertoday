@@ -314,17 +314,27 @@
                 
                 const jsonRes = await response.json();
                 
-                let liveData = jsonRes;
-                if (jsonRes.myField) {
+                // --- THE CRITICAL FIX IS HERE ---
+                let liveData = [];
+                
+                // Scenario 1: n8n sends [{ myField: [...] }] (This is what your screenshot shows)
+                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
+                    liveData = jsonRes[0].myField;
+                } 
+                // Scenario 2: n8n sends { myField: [...] }
+                else if (jsonRes.myField) {
                     liveData = jsonRes.myField;
                 }
-                
-                if (Array.isArray(liveData)) {
+                // Scenario 3: n8n sends just the raw array [...]
+                else if (Array.isArray(jsonRes)) {
+                    liveData = jsonRes;
+                }
+
+                if (Array.isArray(liveData) && liveData.length > 0) {
                     activePlots = liveData;
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
-                // ... rest of the catch block remains the same
                 console.warn("Falling back to local storage.", error);
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
                 if(savedLocal) {
