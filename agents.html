@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Management | Broker Today</title>
+    <title>एजेंट प्रबंधन पैनल | Broker Today</title>
+    
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -15,116 +17,124 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="loader mb-4"></div>
-        <h2 class="text-xl font-bold text-slate-800">एजेंट्स की लिस्ट लोड हो रही है...</h2>
+        <h2 class="text-xl font-bold text-slate-800">एजेंट्स की सूची लोड हो रही है...</h2>
     </div>
 
-    <!-- Password Modal -->
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative">
             <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
-            <h3 class="font-bold text-lg mb-4">Admin Security Check</h3>
-            <p class="text-xs text-slate-500 mb-4">एजेंट्स को Edit या Delete करने के लिए पासवर्ड डालें।</p>
-            <input type="password" id="adminPwdInput" placeholder="Enter Password" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500">
-            <button onclick="verifyPassword()" class="bg-indigo-600 text-white font-bold w-full py-3 rounded-lg hover:bg-indigo-700">Unlock Admin Mode</button>
+            <h3 class="font-bold text-lg mb-4">एडमिन सुरक्षा जांच</h3>
+            <p class="text-xs text-slate-500 mb-4">एजेंट्स को जोड़ने, एडिट या डिलीट करने के लिए पासवर्ड डालें।</p>
+            <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500">
+            <button onclick="verifyPassword()" class="bg-indigo-600 text-white font-bold w-full py-3 rounded-lg hover:bg-indigo-700">एडमिन मोड अनलॉक करें</button>
         </div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="glass-nav text-white p-4 sticky top-0 z-50">
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+                <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 <span class="font-medium text-sm">वापस होम (Home)</span>
             </a>
-            <h1 class="text-xl font-extrabold tracking-tight">Broker Today</h1>
+            <div class="flex items-center gap-2">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1 class="text-xl font-extrabold tracking-tight">Broker Today</h1>
+            </div>
         </div>
     </nav>
 
-    <!-- Header & Controls -->
     <header class="bg-slate-900 text-white py-10">
         <div class="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Our Trusted Agents</h1>
-                <p class="text-indigo-200 mt-1 text-sm">Find the best property experts for your needs.</p>
+                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">हमारे विश्वसनीय प्रॉपर्टी एक्सपर्ट्स</h1>
+                <p class="text-indigo-200 mt-1 text-sm">आपकी आवश्यकताओं के लिए सिरोही के सर्वश्रेष्ठ रियल एस्टेट विशेषज्ञ।</p>
             </div>
             <div>
                 <button id="btnAdminLogin" onclick="openPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                    <span>🔒 Admin Access</span>
+                    <span>🔒 एडमिन एक्सेस</span>
                 </button>
                 <div id="adminControls" class="hidden flex gap-2">
                     <button onclick="openAgentModal()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                        <span>➕ Add New Agent</span>
+                        <span>➕ नया एजेंट जोड़ें</span>
                     </button>
                     <button onclick="exitAdminMode()" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                        <span>✖ Exit Admin</span>
+                        <span>✖ एडमिन मोड बंद करें</span>
                     </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Agents Grid Container -->
     <main class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
         <div id="agentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Agent Cards will be injected here via JS -->
-        </div>
+            </div>
         
-        <!-- Empty State -->
         <div id="emptyState" class="hidden text-center py-20">
             <span class="text-6xl mb-4 block">🕵️‍♂️</span>
             <h3 class="text-xl font-bold text-slate-700">कोई एजेंट नहीं मिला</h3>
-            <p class="text-slate-500">अभी तक कोई एजेंट सिस्टम में नहीं जोड़ा गया है।</p>
+            <p class="text-slate-500">अभी तक सिस्टम में कोई विशेषज्ञ नहीं जोड़ा गया है।</p>
         </div>
     </main>
 
-    <!-- Agent Add/Edit Modal (Only accessible via Admin) -->
     <div id="agentModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('agentModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
-            <h3 class="text-xl font-bold text-indigo-700 mb-4" id="modalTitle">Add New Agent</h3>
+            <h3 class="text-xl font-bold text-indigo-700 mb-4" id="modalTitle">नया एजेंट जोड़ें</h3>
             
             <form id="agentForm" class="space-y-4">
                 <input type="hidden" id="agentUid">
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Agent Full Name</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">एजेंट का पूरा नाम</label>
                     <input type="text" id="aName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp / Phone Number</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">व्हाट्सएप / फोन नंबर</label>
                     <input type="tel" id="aPhone" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Star Rating (1 to 5)</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">स्टार रेटिंग (1 से 5)</label>
                     <select id="aRating" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg font-bold">
-                        <option value="5">⭐⭐⭐⭐⭐ (5 Stars)</option>
-                        <option value="4">⭐⭐⭐⭐ (4 Stars)</option>
-                        <option value="3">⭐⭐⭐ (3 Stars)</option>
-                        <option value="2">⭐⭐ (2 Stars)</option>
-                        <option value="1">⭐ (1 Star)</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (5 स्टार)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 स्टार)</option>
+                        <option value="3">⭐⭐⭐ (3 स्टार)</option>
+                        <option value="2">⭐⭐ (2 स्टार)</option>
+                        <option value="1">⭐ (1 स्टार)</option>
                     </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">प्रोजेक्ट्स / लिस्टिंग असाइन करें (एक या अधिक चुनें)</label>
+                    <div id="projectCheckboxes" class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-40 overflow-y-auto">
+                        </div>
                 </div>
                 
                 <div class="flex gap-3 mt-6">
-                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">
-                        Save Agent Data
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        एजेंट डेटा सुरक्षित करें
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Logic & Architecture -->
     <script>
         const ADMIN_PASSWORD = "Agent@9026";
         
-        // Provided Webhooks
+        // Webhooks
         const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
         const WEBHOOK_SAVE_AGENT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
         
+        // Website Par Available Dynamic Project/Listing List
+        const WEBSITE_PROJECTS = [
+            "Aerocity Residency",
+            "कमर्शियल ऑफिस स्पेस"
+        ];
+
         let isAdmin = false;
         let agentsList = [];
 
@@ -141,7 +151,6 @@
                 
                 const jsonRes = await response.json();
                 
-                // Parse n8n response safely
                 if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
                     agentsList = jsonRes[0].myField;
                 } else if (jsonRes.myField) {
@@ -152,20 +161,22 @@
                     agentsList = [];
                 }
 
+                // Filter out plot maps data if the same webhook returns mixed results
+                agentsList = agentsList.filter(item => item.phone || item.rating);
+
                 localStorage.setItem('broker_agents', JSON.stringify(agentsList));
 
             } catch (error) {
                 console.warn("Offline Fallback: Fetching from Local Storage", error);
                 const savedLocal = localStorage.getItem('broker_agents');
                 if(savedLocal) agentsList = JSON.parse(savedLocal);
-            } finally {
+            } {
                 overlay.style.opacity = '0';
                 setTimeout(() => overlay.classList.add('hidden'), 300);
                 renderAgents();
             }
         }
 
-        // Generate Star Icons based on rating
         function getStars(rating) {
             let starsHtml = '';
             for(let i=0; i<5; i++) {
@@ -181,29 +192,32 @@
         function renderAgents() {
             const grid = document.getElementById('agentsGrid');
             const emptyState = document.getElementById('emptyState');
-            
             grid.innerHTML = '';
 
             if (agentsList.length === 0) {
-                emptyState.classList.remove('hidden');
-                grid.classList.add('hidden');
-                return;
+                emptyState.classList.remove('hidden'); grid.classList.add('hidden'); return;
             }
 
-            emptyState.classList.add('hidden');
-            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden'); grid.classList.remove('hidden');
 
             agentsList.forEach(agent => {
-                // If not admin, do not show phone number
                 const phoneHtml = isAdmin 
-                    ? `<div class="mt-3 text-sm text-slate-600 bg-slate-100 p-2 rounded flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> <b>${agent.phone}</b></div>` 
+                    ? `<div class="mt-3 text-sm text-slate-600 bg-slate-100 p-2 rounded flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> <b>${agent.phone}</b></div>` 
                     : ``;
 
-                // Admin Controls (Edit/Delete)
+                // Handle both Array or comma-string from Google Sheet rows safely
+                let projectArray = [];
+                if(Array.isArray(agent.projects)) projectArray = agent.projects;
+                else if(typeof agent.projects === 'string') projectArray = agent.projects.split(',').map(p=>p.trim());
+
+                const projectsBadgeHtml = projectArray.length > 0 
+                    ? `<div class="mt-2 flex flex-wrap gap-1">${projectArray.map(p => `<span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-medium">${p}</span>`).join('')}</div>`
+                    : `<div class="text-[10px] text-slate-400 mt-2">कोई प्रोजेक्ट असाइन नहीं है</div>`;
+
                 const controlsHtml = isAdmin
                     ? `<div class="mt-4 flex gap-2 border-t pt-4">
-                        <button onclick='openAgentModal(${JSON.stringify(agent)})' class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-bold py-2 rounded transition-colors">Edit</button>
-                        <button onclick="deleteAgent('${agent.uid}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold py-2 rounded transition-colors">Delete</button>
+                        <button onclick='openAgentModal(${JSON.stringify(agent)})' class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-bold py-2 rounded transition-colors">एडिट</button>
+                        <button onclick="deleteAgent('${agent.uid}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold py-2 rounded transition-colors">डिलीट</button>
                        </div>`
                     : ``;
 
@@ -216,12 +230,11 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-lg text-slate-800 leading-tight">${agent.name}</h3>
-                            <div class="text-xs text-slate-500">Real Estate Expert</div>
+                            <div class="text-xs text-slate-500">प्रॉपर्टी एक्सपर्ट</div>
                         </div>
                     </div>
-                    <div class="mb-2">
-                        ${getStars(parseInt(agent.rating || 5))}
-                    </div>
+                    <div class="mb-2">${getStars(parseInt(agent.rating || 5))}</div>
+                    ${projectsBadgeHtml}
                     ${phoneHtml}
                     ${controlsHtml}
                 `;
@@ -229,118 +242,110 @@
             });
         }
 
-        // --- Authentication Logic ---
         function openPasswordModal() {
             document.getElementById('adminPwdInput').value = '';
             document.getElementById('passwordModal').classList.remove('hidden');
         }
 
         function verifyPassword() {
-            const pwd = document.getElementById('adminPwdInput').value;
-            if (pwd === ADMIN_PASSWORD) {
+            if (document.getElementById('adminPwdInput').value === ADMIN_PASSWORD) {
                 isAdmin = true;
                 document.getElementById('btnAdminLogin').classList.add('hidden');
                 document.getElementById('adminControls').classList.remove('hidden');
                 closeModal('passwordModal');
-                renderAgents(); // Re-render to show hidden phone numbers & buttons
-            } else {
-                alert("पासवर्ड गलत है! (Incorrect Password)");
-            }
+                renderAgents(); 
+            } else alert("गलत पासवर्ड!");
         }
 
         function exitAdminMode() {
             isAdmin = false;
             document.getElementById('adminControls').classList.add('hidden');
             document.getElementById('btnAdminLogin').classList.remove('hidden');
-            renderAgents(); // Re-render to hide phone numbers & buttons
+            renderAgents(); 
         }
 
-        // --- Form Modal & Submit Logic ---
         function openAgentModal(agent = null) {
-            const form = document.getElementById('agentForm');
-            form.reset();
+            const form = document.getElementById('agentForm'); form.reset();
+            const container = document.getElementById('projectCheckboxes');
             
+            // Build Checkbox HTML dynamically
+            container.innerHTML = WEBSITE_PROJECTS.map((proj, i) => `
+                <label class="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
+                    <input type="checkbox" value="${proj}" class="project-selector-cb w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
+                    <span>${proj}</span>
+                </label>
+            `).join('');
+
             if (agent) {
-                document.getElementById('modalTitle').innerText = "Edit Agent Details";
+                document.getElementById('modalTitle').innerText = "एजेंट विवरण संपादित करें";
                 document.getElementById('agentUid').value = agent.uid;
                 document.getElementById('aName').value = agent.name;
                 document.getElementById('aPhone').value = agent.phone;
                 document.getElementById('aRating').value = agent.rating || "5";
+
+                let savedProjects = [];
+                if(Array.isArray(agent.projects)) savedProjects = agent.projects;
+                else if(typeof agent.projects === 'string') savedProjects = agent.projects.split(',').map(p=>p.trim());
+
+                document.querySelectorAll('.project-selector-cb').forEach(cb => {
+                    if(savedProjects.includes(cb.value)) cb.checked = true;
+                });
             } else {
-                document.getElementById('modalTitle').innerText = "Add New Agent";
+                document.getElementById('modalTitle').innerText = "नया एजेंट जोड़ें";
                 document.getElementById('agentUid').value = "";
             }
-            
             document.getElementById('agentModal').classList.remove('hidden');
         }
 
         document.getElementById('agentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = this.querySelector('button[type="submit"]');
-            btn.innerText = "Saving...";
-
+            const btn = this.querySelector('button[type="submit"]'); btn.innerText = "सुरक्षित किया जा रहा है...";
             const uid = document.getElementById('agentUid').value || `ag_${new Date().getTime()}`;
             
+            // Collect all checked projects
+            const selectedProj = Array.from(document.querySelectorAll('.project-selector-cb:checked')).map(cb => cb.value);
+
             const newAgentData = {
                 uid: uid,
                 name: document.getElementById('aName').value,
                 phone: document.getElementById('aPhone').value,
                 rating: document.getElementById('aRating').value,
+                projects: selectedProj, // Array sent to n8n
                 action: 'save'
             };
 
-            // Update Local State
             const existingIndex = agentsList.findIndex(a => a.uid === uid);
-            if(existingIndex >= 0) {
-                agentsList[existingIndex] = newAgentData;
-            } else {
-                agentsList.push(newAgentData);
-            }
+            if(existingIndex >= 0) agentsList[existingIndex] = newAgentData; else agentsList.push(newAgentData);
             
             localStorage.setItem('broker_agents', JSON.stringify(agentsList));
             renderAgents();
             
-            // Send to n8n Webhook
             try {
                 await fetch(WEBHOOK_SAVE_AGENT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newAgentData)
                 });
-            } catch(error) {
-                console.error("Failed to sync to database", error);
-            }
+            } catch(error) { console.error(error); }
             
-            closeModal('agentModal');
-            btn.innerText = "Save Agent Data";
+            closeModal('agentModal'); btn.innerText = "एजेंट डेटा सुरक्षित करें";
         });
 
-        // --- Delete Logic ---
         async function deleteAgent(uid) {
-            if(!confirm(`क्या आप वाकई इस एजेंट को लिस्ट से हटाना चाहते हैं?`)) return;
-
-            // Remove Locally
+            if(!confirm(`क्या आप इस एजेंट को हटाना चाहते हैं?`)) return;
             agentsList = agentsList.filter(a => a.uid !== uid);
             localStorage.setItem('broker_agents', JSON.stringify(agentsList));
             renderAgents();
-
-            // Notify n8n Webhook
             try {
                 await fetch(WEBHOOK_SAVE_AGENT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ uid: uid, action: 'delete' })
                 });
-            } catch(error) {
-                console.error("Failed to delete from database", error);
-            }
+            } catch(error) {}
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        // Initialize on load
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         window.onload = loadAgents;
     </script>
 </body>
