@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>एजेंट प्रबंधन पैनल | Broker Today</title>
-    
     <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -17,11 +16,13 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
+    <!-- लोडिंग स्क्रीन -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="loader mb-4"></div>
         <h2 class="text-xl font-bold text-slate-800">एजेंट्स की सूची लोड हो रही है...</h2>
     </div>
 
+    <!-- सुरक्षा पासवर्ड modal -->
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative">
             <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
@@ -32,6 +33,7 @@
         </div>
     </div>
 
+    <!-- नेविगेशन बार -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
             <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
@@ -47,6 +49,7 @@
         </div>
     </nav>
 
+    <!-- हेडर -->
     <header class="bg-slate-900 text-white py-10">
         <div class="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
@@ -69,10 +72,9 @@
         </div>
     </header>
 
+    <!-- मुख्य सूची -->
     <main class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
-        <div id="agentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
-        
+        <div id="agentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         <div id="emptyState" class="hidden text-center py-20">
             <span class="text-6xl mb-4 block">🕵️‍♂️</span>
             <h3 class="text-xl font-bold text-slate-700">कोई एजेंट नहीं मिला</h3>
@@ -80,6 +82,7 @@
         </div>
     </main>
 
+    <!-- एजेंट फॉर्म Modal -->
     <div id="agentModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('agentModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
@@ -87,7 +90,6 @@
             
             <form id="agentForm" class="space-y-4">
                 <input type="hidden" id="agentUid">
-                
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">एजेंट का पूरा नाम</label>
                     <input type="text" id="aName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
@@ -106,13 +108,12 @@
                         <option value="1">⭐ (1 स्टार)</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">प्रोजेक्ट्स / लिस्टिंग असाइन करें (एक या अधिक चुनें)</label>
                     <div id="projectCheckboxes" class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-40 overflow-y-auto">
-                        </div>
+                        <!-- JS से प्रोजेक्ट लिस्ट भरी जाएगी -->
+                    </div>
                 </div>
-                
                 <div class="flex gap-3 mt-6">
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">
                         एजेंट डेटा सुरक्षित करें
@@ -125,54 +126,35 @@
     <script>
         const ADMIN_PASSWORD = "Agent@9026";
         
-        // Webhooks
+        // NEW WEBHOOKS UPDATED HERE
         const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
         const WEBHOOK_SAVE_AGENT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404sa"; 
         
-        // Website Par Available Dynamic Project/Listing List
-        const WEBSITE_PROJECTS = [
-            "Aerocity Residency",
-            "कमर्शियल ऑफिस स्पेस"
-        ];
+        const WEBSITE_PROJECTS = ["Aerocity Residency", "कमर्शियल ऑफिस स्पेस"];
 
-        let isAdmin = false;
-        let agentsList = [];
+        let isAdmin = false; let agentsList = [];
 
         async function loadAgents() {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.classList.remove('hidden'); 
-            
+            const overlay = document.getElementById('loadingOverlay'); overlay.classList.remove('hidden'); 
             try {
                 const cacheBuster = new Date().getTime();
                 const response = await fetch(`${WEBHOOK_GET_AGENTS}?t=${cacheBuster}`, {
-                    method: 'GET',
-                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                    method: 'GET', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                 });
-                
                 const jsonRes = await response.json();
                 
-                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
-                    agentsList = jsonRes[0].myField;
-                } else if (jsonRes.myField) {
-                    agentsList = jsonRes.myField;
-                } else if (Array.isArray(jsonRes)) {
-                    agentsList = jsonRes;
-                } else {
-                    agentsList = [];
-                }
+                let parsed = [];
+                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) parsed = jsonRes[0].myField;
+                else if (jsonRes.myField) parsed = jsonRes.myField;
+                else if (Array.isArray(jsonRes)) parsed = jsonRes;
 
-                // Filter out plot maps data if the same webhook returns mixed results
-                agentsList = agentsList.filter(item => item.phone || item.rating);
-
+                agentsList = parsed.filter(item => item.phone || item.rating);
                 localStorage.setItem('broker_agents', JSON.stringify(agentsList));
-
             } catch (error) {
-                console.warn("Offline Fallback: Fetching from Local Storage", error);
                 const savedLocal = localStorage.getItem('broker_agents');
                 if(savedLocal) agentsList = JSON.parse(savedLocal);
-            } {
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.classList.add('hidden'), 300);
+            } finally {
+                overlay.style.opacity = '0'; setTimeout(() => overlay.classList.add('hidden'), 300);
                 renderAgents();
             }
         }
@@ -180,96 +162,60 @@
         function getStars(rating) {
             let starsHtml = '';
             for(let i=0; i<5; i++) {
-                if(i < rating) {
-                    starsHtml += `<svg class="w-5 h-5 text-yellow-400 inline" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
-                } else {
-                    starsHtml += `<svg class="w-5 h-5 text-slate-300 inline" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
-                }
+                if(i < rating) starsHtml += `<svg class="w-5 h-5 text-yellow-400 inline" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+                else starsHtml += `<svg class="w-5 h-5 text-slate-300 inline" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
             }
             return starsHtml;
         }
 
         function renderAgents() {
-            const grid = document.getElementById('agentsGrid');
-            const emptyState = document.getElementById('emptyState');
+            const grid = document.getElementById('agentsGrid'); const emptyState = document.getElementById('emptyState');
             grid.innerHTML = '';
-
-            if (agentsList.length === 0) {
-                emptyState.classList.remove('hidden'); grid.classList.add('hidden'); return;
-            }
-
+            if (agentsList.length === 0) { emptyState.classList.remove('hidden'); grid.classList.add('hidden'); return; }
             emptyState.classList.add('hidden'); grid.classList.remove('hidden');
 
             agentsList.forEach(agent => {
-                const phoneHtml = isAdmin 
-                    ? `<div class="mt-3 text-sm text-slate-600 bg-slate-100 p-2 rounded flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> <b>${agent.phone}</b></div>` 
-                    : ``;
+                const phoneHtml = isAdmin ? `<div class="mt-3 text-sm text-slate-600 bg-slate-100 p-2 rounded flex items-center gap-2"><b>${agent.phone}</b></div>` : ``;
 
-                // Handle both Array or comma-string from Google Sheet rows safely
+                // Robust Parsing
                 let projectArray = [];
                 if(Array.isArray(agent.projects)) projectArray = agent.projects;
-                else if(typeof agent.projects === 'string') projectArray = agent.projects.split(',').map(p=>p.trim());
+                else if(typeof agent.projects === 'string') {
+                    let cleanStr = agent.projects.replace(/[\[\]"]/g, '');
+                    projectArray = cleanStr.split(',').map(p=>p.trim()).filter(p=>p);
+                }
 
                 const projectsBadgeHtml = projectArray.length > 0 
                     ? `<div class="mt-2 flex flex-wrap gap-1">${projectArray.map(p => `<span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-medium">${p}</span>`).join('')}</div>`
                     : `<div class="text-[10px] text-slate-400 mt-2">कोई प्रोजेक्ट असाइन नहीं है</div>`;
 
-                const controlsHtml = isAdmin
-                    ? `<div class="mt-4 flex gap-2 border-t pt-4">
-                        <button onclick='openAgentModal(${JSON.stringify(agent)})' class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-bold py-2 rounded transition-colors">एडिट</button>
-                        <button onclick="deleteAgent('${agent.uid}')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold py-2 rounded transition-colors">डिलीट</button>
-                       </div>`
-                    : ``;
+                const controlsHtml = isAdmin ? `<div class="mt-4 flex gap-2 border-t pt-4">
+                        <button onclick='openAgentModal(${JSON.stringify(agent)})' class="flex-1 bg-indigo-50 text-indigo-700 text-sm font-bold py-2 rounded">एडिट</button>
+                        <button onclick="deleteAgent('${agent.uid}')" class="flex-1 bg-red-50 text-red-600 text-sm font-bold py-2 rounded">डिलीट</button>
+                       </div>` : ``;
 
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl shadow-lg border border-slate-100 p-6 hover:shadow-xl transition-shadow";
+                const card = document.createElement('div'); card.className = "bg-white rounded-2xl shadow-lg border border-slate-100 p-6 hover:shadow-xl transition-shadow";
                 card.innerHTML = `
                     <div class="flex items-center gap-4 mb-2">
-                        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-black">
-                            ${agent.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-slate-800 leading-tight">${agent.name}</h3>
-                            <div class="text-xs text-slate-500">प्रॉपर्टी एक्सपर्ट</div>
-                        </div>
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-black">${agent.name.charAt(0).toUpperCase()}</div>
+                        <div><h3 class="font-bold text-lg text-slate-800 leading-tight">${agent.name}</h3><div class="text-xs text-slate-500">प्रॉपर्टी एक्सपर्ट</div></div>
                     </div>
                     <div class="mb-2">${getStars(parseInt(agent.rating || 5))}</div>
-                    ${projectsBadgeHtml}
-                    ${phoneHtml}
-                    ${controlsHtml}
+                    ${projectsBadgeHtml} ${phoneHtml} ${controlsHtml}
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function openPasswordModal() {
-            document.getElementById('adminPwdInput').value = '';
-            document.getElementById('passwordModal').classList.remove('hidden');
-        }
-
-        function verifyPassword() {
-            if (document.getElementById('adminPwdInput').value === ADMIN_PASSWORD) {
-                isAdmin = true;
-                document.getElementById('btnAdminLogin').classList.add('hidden');
-                document.getElementById('adminControls').classList.remove('hidden');
-                closeModal('passwordModal');
-                renderAgents(); 
-            } else alert("गलत पासवर्ड!");
-        }
-
-        function exitAdminMode() {
-            isAdmin = false;
-            document.getElementById('adminControls').classList.add('hidden');
-            document.getElementById('btnAdminLogin').classList.remove('hidden');
-            renderAgents(); 
-        }
+        function openPasswordModal() { document.getElementById('adminPwdInput').value = ''; document.getElementById('passwordModal').classList.remove('hidden'); }
+        function verifyPassword() { if (document.getElementById('adminPwdInput').value === ADMIN_PASSWORD) { isAdmin = true; document.getElementById('btnAdminLogin').classList.add('hidden'); document.getElementById('adminControls').classList.remove('hidden'); closeModal('passwordModal'); renderAgents(); } else alert("गलत पासवर्ड!"); }
+        function exitAdminMode() { isAdmin = false; document.getElementById('adminControls').classList.add('hidden'); document.getElementById('btnAdminLogin').classList.remove('hidden'); renderAgents(); }
 
         function openAgentModal(agent = null) {
             const form = document.getElementById('agentForm'); form.reset();
             const container = document.getElementById('projectCheckboxes');
             
-            // Build Checkbox HTML dynamically
-            container.innerHTML = WEBSITE_PROJECTS.map((proj, i) => `
+            container.innerHTML = WEBSITE_PROJECTS.map((proj) => `
                 <label class="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
                     <input type="checkbox" value="${proj}" class="project-selector-cb w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
                     <span>${proj}</span>
@@ -277,22 +223,19 @@
             `).join('');
 
             if (agent) {
-                document.getElementById('modalTitle').innerText = "एजेंट विवरण संपादित करें";
-                document.getElementById('agentUid').value = agent.uid;
-                document.getElementById('aName').value = agent.name;
-                document.getElementById('aPhone').value = agent.phone;
-                document.getElementById('aRating').value = agent.rating || "5";
+                document.getElementById('modalTitle').innerText = "एजेंट विवरण संपादित करें"; document.getElementById('agentUid').value = agent.uid;
+                document.getElementById('aName').value = agent.name; document.getElementById('aPhone').value = agent.phone; document.getElementById('aRating').value = agent.rating || "5";
 
                 let savedProjects = [];
                 if(Array.isArray(agent.projects)) savedProjects = agent.projects;
-                else if(typeof agent.projects === 'string') savedProjects = agent.projects.split(',').map(p=>p.trim());
+                else if(typeof agent.projects === 'string') {
+                    let cleanStr = agent.projects.replace(/[\[\]"]/g, '');
+                    savedProjects = cleanStr.split(',').map(p=>p.trim());
+                }
 
-                document.querySelectorAll('.project-selector-cb').forEach(cb => {
-                    if(savedProjects.includes(cb.value)) cb.checked = true;
-                });
+                document.querySelectorAll('.project-selector-cb').forEach(cb => { if(savedProjects.includes(cb.value)) cb.checked = true; });
             } else {
-                document.getElementById('modalTitle').innerText = "नया एजेंट जोड़ें";
-                document.getElementById('agentUid').value = "";
+                document.getElementById('modalTitle').innerText = "नया एजेंट जोड़ें"; document.getElementById('agentUid').value = "";
             }
             document.getElementById('agentModal').classList.remove('hidden');
         }
@@ -301,50 +244,26 @@
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]'); btn.innerText = "सुरक्षित किया जा रहा है...";
             const uid = document.getElementById('agentUid').value || `ag_${new Date().getTime()}`;
-            
-            // Collect all checked projects
             const selectedProj = Array.from(document.querySelectorAll('.project-selector-cb:checked')).map(cb => cb.value);
 
             const newAgentData = {
-                uid: uid,
-                name: document.getElementById('aName').value,
-                phone: document.getElementById('aPhone').value,
-                rating: document.getElementById('aRating').value,
-                projects: selectedProj, // Array sent to n8n
-                action: 'save'
+                uid: uid, name: document.getElementById('aName').value, phone: document.getElementById('aPhone').value,
+                rating: document.getElementById('aRating').value, projects: selectedProj, action: 'save'
             };
 
             const existingIndex = agentsList.findIndex(a => a.uid === uid);
             if(existingIndex >= 0) agentsList[existingIndex] = newAgentData; else agentsList.push(newAgentData);
             
-            localStorage.setItem('broker_agents', JSON.stringify(agentsList));
-            renderAgents();
-            
-            try {
-                await fetch(WEBHOOK_SAVE_AGENT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newAgentData)
-                });
-            } catch(error) { console.error(error); }
-            
+            localStorage.setItem('broker_agents', JSON.stringify(agentsList)); renderAgents();
+            try { await fetch(WEBHOOK_SAVE_AGENT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newAgentData) }); } catch(error) {}
             closeModal('agentModal'); btn.innerText = "एजेंट डेटा सुरक्षित करें";
         });
 
         async function deleteAgent(uid) {
             if(!confirm(`क्या आप इस एजेंट को हटाना चाहते हैं?`)) return;
-            agentsList = agentsList.filter(a => a.uid !== uid);
-            localStorage.setItem('broker_agents', JSON.stringify(agentsList));
-            renderAgents();
-            try {
-                await fetch(WEBHOOK_SAVE_AGENT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ uid: uid, action: 'delete' })
-                });
-            } catch(error) {}
+            agentsList = agentsList.filter(a => a.uid !== uid); localStorage.setItem('broker_agents', JSON.stringify(agentsList)); renderAgents();
+            try { await fetch(WEBHOOK_SAVE_AGENT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: uid, action: 'delete' }) }); } catch(error) {}
         }
-
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         window.onload = loadAgents;
     </script>
