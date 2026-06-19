@@ -30,23 +30,23 @@
             pointer-events: none;
         }
         
-        /* NEW DESIGN: Sirf Numbers, Black Outline Ke Sath */
+       /* NEW DESIGN: Sirf Numbers, Black Outline Ke Sath (Extra Small for Mobile) */
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            /* Mobile me chota, laptop me bada dikhega, padhne me aasan hoga */
-            font-size: clamp(14px, 2.5vw, 22px);
+            /* Mobile me min size 9px kar diya hai, laptop me 20px rahega */
+            font-size: clamp(9px, 1.8vw, 20px);
             font-weight: 900; /* Extra Bold */
             cursor: pointer;
             z-index: 10;
             line-height: 1;
-            /* Ye property numbers ke charo taraf black outline banati h */
+            /* Chhote numbers par outline clean dikhe isliye shadow thodi sharp ki hai */
             text-shadow: 
                 -1px -1px 0 #000,  
                  1px -1px 0 #000,
                 -1px  1px 0 #000,
                  1px  1px 0 #000,
-                 0px  2px 5px rgba(0,0,0,0.6); /* 3D effect ke liye shadow */
+                 0px  1.5px 3px rgba(0,0,0,0.8); 
             transition: transform 0.2s;
         }
         .plot-marker:hover {
