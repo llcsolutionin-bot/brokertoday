@@ -17,21 +17,24 @@
 
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            
+            <div class="flex flex-col">
+                <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                        <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+                </div>
+                <a href="agents.html" class="text-blue-300 hover:text-white text-xs font-bold mt-1 ml-10 flex items-center gap-1 transition-colors drop-shadow-md">
+                    👥 हमारे प्रॉपर्टी एक्सपर्ट्स
+                </a>
             </div>
+
             <span class="bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs px-3 py-1.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
                 Sirohi Hub
             </span>
         </div>
     </nav>
-
-    <div class="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-yellow-900 text-center py-3 font-bold text-sm tracking-wide shadow-md relative z-40">
-        <span class="animate-pulse inline-block mr-2">🚧</span> यह वेबसाइट अभी निर्माणाधीन (Under Construction) है। <span class="animate-pulse inline-block ml-2">🚧</span>
-    </div>
 
     <header class="relative bg-slate-900 text-white py-20 overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/40 via-slate-900 to-slate-900"></div>
@@ -39,15 +42,11 @@
         
         <div class="container mx-auto px-4 max-w-4xl text-center relative z-10 flex flex-col items-center">
             <h2 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200 mb-6 drop-shadow-sm leading-tight">
-                सिरोही के टॉप डेवलपर्स <br/> और प्रॉपर्टीज से जुड़ें
+                सिरोही के TOP डेवलपर्स <br/> और प्रॉपर्टीज से जुड़ें
             </h2>
             <p class="text-lg text-blue-100 max-w-2xl mx-auto font-light leading-relaxed mb-8">
                 प्रॉपर्टी लिस्ट करने और लीड्स को ऑटोमेट करने का सबसे तेज़ तरीका।
             </p>
-            
-            <a href="agents.html" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg border border-slate-700">
-                <span class="text-xl">👥</span> Agent Management
-            </a>
         </div>
     </header>
 
@@ -57,7 +56,7 @@
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden flex flex-col cursor-pointer" onclick="window.location.href='aerocity.html'">
                 <div class="h-48 bg-gradient-to-br from-indigo-100 to-blue-50 relative overflow-hidden bg-cover bg-center" style="background-image: url('aerocity-cover.jpg');">
                     <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-indigo-700 text-xs px-3 py-1.5 rounded-full font-bold uppercase tracking-wider shadow-sm">
-                        प्रीमियम गेटेड डेवलपमेंट
+                        प्रीमियम गेटेड कम्युनिटी
                     </div>
                     <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all"></div>
                 </div>
@@ -142,7 +141,7 @@
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">आप क्या खोज रहे हैं / प्रॉपर्टी का विवरण?</label>
-                    <textarea id="message" rows="3" required placeholder="उदाहरण: मुझे Bhaatkda में अपना प्लॉट लिस्ट करना है..." class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm resize-none"></textarea>
+                    <textarea id="message" rows="3" required placeholder="उदाहरण: मुझे भाटकड़ा में अपना प्लॉट लिस्ट करना है..." class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm resize-none"></textarea>
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-indigo-500/25 transform hover:-translate-y-0.5 transition-all duration-200 mt-2">
@@ -152,50 +151,9 @@
 
             <div id="successMessage" class="hidden mt-6 bg-emerald-50 text-emerald-700 p-4 rounded-xl border border-emerald-200 text-center font-bold shadow-inner flex items-center justify-center gap-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                सफलतापूर्वक भेज दिया गया! आपका विवरण सिस्टम को प्राप्त हो गया है।
+                सफलतापूर्वक भेज दिया गया! आपका विवरण प्राप्त हो गया है।
             </div>
         </div>
     </main>
-
-    <script>
-        document.getElementById('leadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const N8N_WEBHOOK_URL = 'https://llcsolution.duckdns.org/webhook/7d93f98f-eef7-4635-b619-f181d9a425aa';
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerText;
-            submitBtn.innerText = 'भेजा जा रहा है...';
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-75');
-
-            const payload = {
-                name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
-                role: document.getElementById('role').value,
-                message: document.getElementById('message').value,
-                source: 'Broker Today Website'
-            };
-
-            try {
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    document.getElementById('leadForm').reset();
-                    document.getElementById('successMessage').classList.remove('hidden');
-                    document.getElementById('successMessage').classList.add('animate-bounce');
-                    setTimeout(() => document.getElementById('successMessage').classList.remove('animate-bounce'), 1000);
-                } else alert('सर्वर एरर: n8n से कनेक्ट करने में समस्या आ रही है।');
-            } catch (error) {
-                alert('नेटवर्क एरर! कृपया सुनिश्चित करें कि आपका n8n सर्वर चालू है।');
-            } finally {
-                submitBtn.innerText = originalBtnText;
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-75');
-            }
-        });
-    </script>
 </body>
 </html>
