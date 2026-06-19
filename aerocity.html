@@ -55,7 +55,7 @@
         .marker-available { background-color: #22c55e; color: #000; border: 2px solid #fff; }
         .marker-sold { background-color: #ef4444; color: #fff; border: 2px solid #fff; }
         
-        /* Admin Mode Active Styling */
+        /* Admin Mode */
         .admin-active .map-wrapper { cursor: crosshair; }
         .admin-active .map-wrapper::after {
             content: "ADMIN MODE ACTIVE - MAP IS EDITABLE";
@@ -80,8 +80,8 @@
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4f46e5;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -111,9 +111,6 @@
                 <span class="font-medium text-sm">वापस होम (Home)</span>
             </a>
             <div class="flex items-center gap-2">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
                 <h1 class="text-xl font-extrabold tracking-tight">Broker Today</h1>
             </div>
         </div>
@@ -252,10 +249,10 @@
                 <input type="hidden" id="cPlotNo">
                 
                 <div>
-                    <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-2">Select Agents to Notify:</label>
@@ -274,8 +271,8 @@
                     Send Inquiry on WhatsApp
                 </button>
             </form>
-            <div id="formSuccess" class="hidden mt-4 text-sm text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200">
-                मैसेज भेज दिया गया है! एजेंट जल्द संपर्क करेंगे।
+            <div id="formSuccess" class="hidden mt-4 text-sm text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200 font-bold">
+                मैसेज भेज दिया गया है!
             </div>
         </div>
     </div>
@@ -296,13 +293,12 @@
         let draggingPlot = null;
         let hasDragged = false;
 
-        // 1. Load Plots (Fixing Cross-Device Sync & n8n JSON Structure)
+        // 1. Load Plots (CLEAN ARRAY EXPECTED & CORS SUPPORT)
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.remove('hidden'); 
             
             try {
-                // ADDED projectName TO THE QUERY STRING
                 const cacheBuster = new Date().getTime();
                 const url = `${WEBHOOK_GET_PLOTS}?projectName=${encodeURIComponent(PROJECT_NAME)}&t=${cacheBuster}`;
                 
@@ -312,30 +308,15 @@
                     cache: 'no-store'
                 });
                 
-                const jsonRes = await response.json();
+                const liveData = await response.json();
+                console.log("n8n Live Data Received:", liveData); // Debug log
                 
-                // --- THE CRITICAL FIX IS HERE ---
-                let liveData = [];
-                
-                // Scenario 1: n8n sends [{ myField: [...] }] (This is what your screenshot shows)
-                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
-                    liveData = jsonRes[0].myField;
-                } 
-                // Scenario 2: n8n sends { myField: [...] }
-                else if (jsonRes.myField) {
-                    liveData = jsonRes.myField;
-                }
-                // Scenario 3: n8n sends just the raw array [...]
-                else if (Array.isArray(jsonRes)) {
-                    liveData = jsonRes;
-                }
-
-                if (Array.isArray(liveData) && liveData.length > 0) {
+                if (Array.isArray(liveData)) {
                     activePlots = liveData;
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
-                console.warn("Falling back to local storage.", error);
+                console.error("Fetch Error (Check CORS or n8n Connection):", error);
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
                 if(savedLocal) {
                     activePlots = JSON.parse(savedLocal);
@@ -354,6 +335,9 @@
             container.innerHTML = ''; 
             
             activePlots.forEach(plot => {
+                // Failsafe validation
+                if(!plot.x || !plot.y) return; 
+
                 const marker = document.createElement('div');
                 marker.style.left = `${plot.x}%`;
                 marker.style.top = `${plot.y}%`;
@@ -615,7 +599,7 @@
 
         // --- ADMIN CONTROLS (Hidden Password Form) ---
         function openPasswordModal() {
-            document.getElementById('adminPwdInput').value = ''; // Reset input
+            document.getElementById('adminPwdInput').value = ''; 
             document.getElementById('passwordModal').classList.remove('hidden');
         }
 
