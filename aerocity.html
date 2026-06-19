@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -39,12 +38,11 @@
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            font-size: clamp(9px, 1.8vw, 20px); /* Scales down for mobile */
+            font-size: clamp(9px, 1.8vw, 20px);
             font-weight: 900; 
             cursor: pointer;
             z-index: 10;
             line-height: 1;
-            /* Black Outline for high visibility */
             text-shadow: 
                 -1px -1px 0 #000,  
                  1px -1px 0 #000,
@@ -58,13 +56,13 @@
             z-index: 20; 
         }
         
-        .marker-available { color: #22c55e; } /* Green */
-        .marker-sold { color: #ef4444; } /* Red */
+        .marker-available { color: #22c55e; }
+        .marker-sold { color: #ef4444; }
         
         /* Admin Mode Layout */
         .admin-active .map-wrapper { 
             cursor: crosshair; 
-            touch-action: none; /* Disable zoom only in admin mode */
+            touch-action: none; 
         }
         .admin-active .map-wrapper::after {
             content: "ADMIN MODE ACTIVE - MAP IS EDITABLE";
@@ -114,12 +112,14 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
+    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="loader mb-4"></div>
         <h2 class="text-xl font-bold text-slate-800">डेटा लोड हो रहा है...</h2>
         <p class="text-sm text-slate-500 mt-2">Fetching live updates from server</p>
     </div>
 
+    <!-- Admin Password Modal -->
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative zoom-fixed-content">
             <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
@@ -129,6 +129,7 @@
         </div>
     </div>
 
+    <!-- Navigation Bar -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
             <div class="flex flex-col">
@@ -155,6 +156,7 @@
         </div>
     </nav>
 
+    <!-- Header -->
     <header class="bg-slate-900 text-white py-10">
         <div class="container mx-auto px-4 max-w-6xl text-center">
             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200" id="projectTitle">Aerocity Residency</h1>
@@ -162,6 +164,7 @@
         </div>
     </header>
 
+    <!-- Map Section -->
     <main class="container mx-auto px-4 py-8 max-w-6xl" id="app-container">
         <div class="mb-6 flex justify-between items-end">
             <div>
@@ -191,6 +194,7 @@
         </div>
     </main>
 
+    <!-- Admin Add/Edit Plot Modal -->
     <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative zoom-fixed-content">
             <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
@@ -247,6 +251,7 @@
         </div>
     </div>
 
+    <!-- User Plot Details Modal -->
     <div id="userModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative zoom-fixed-content">
             <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
@@ -284,6 +289,7 @@
         </div>
     </div>
 
+    <!-- Contact Agent WhatsApp Modal -->
     <div id="contactModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full relative zoom-fixed-content">
             <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
@@ -316,6 +322,7 @@
         </div>
     </div>
 
+    <!-- CHAT WIDGET -->
     <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
         <button id="chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -352,26 +359,23 @@
         </div>
     </div>
 
-
+    <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
         // --- 1. CONFIGURATION & WEBHOOKS ---
         const PROJECT_NAME = "Aerocity Residency";
         const ADMIN_PASSWORD = "Aero@9026";
         
-        // n8n Webhook URLs
         const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
         const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
         const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
-        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega"; // Updated Agent Webhook
+        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
         const N8N_CHAT_WEBHOOK_URL = 'https://llcsolution.duckdns.org/webhook/7750d216-8bb4-4030-9b30-aeba85986268-widget';
 
-        // Global State Variables
         let isAdmin = false;
         let activePlots = []; 
         let activeAgents = []; 
         let draggingPlot = null;
         let hasDragged = false;
-
 
         // ==========================================
         // SMART MOBILE ZOOM FIX LOGIC (ANTI-SQUASH)
@@ -384,36 +388,37 @@
                 if (modal.classList.contains('hidden') || !window.visualViewport) return;
                 
                 const vv = window.visualViewport;
-                
-                // 1. Position the dark overlay exactly over the visible zoomed screen area
-                modal.style.position = 'absolute';
-                modal.style.left = `${vv.pageLeft}px`;
-                modal.style.top = `${vv.pageTop}px`;
-                modal.style.width = `${vv.width}px`;
-                modal.style.height = `${vv.height}px`;
-                
-                // 2. Prevent content squashing
+
                 if (vv.scale > 1.05) {
-                    const normalScreenWidth = window.innerWidth;
-                    
-                    // Force the inner box to have a normal un-zoomed physical width 
-                    // (so the text does not wrap and squash)
-                    content.style.width = `${Math.min(400, normalScreenWidth * 0.9)}px`;
-                    content.style.maxWidth = 'none'; 
-                    content.style.maxHeight = `${window.innerHeight * 0.9}px`;
-                    
-                    // Scale it down visually to fit inside the zoomed viewport
+                    // 1. Lock the dark background to the exact zoomed coordinates
+                    modal.style.position = 'absolute';
+                    modal.style.left = `${vv.pageLeft}px`;
+                    modal.style.top = `${vv.pageTop}px`;
+                    modal.style.width = `${vv.width}px`;
+                    modal.style.height = `${vv.height}px`;
+
+                    // 2. FORCE a fixed width so it doesn't squash (overrides Tailwind w-full)
+                    // 340px ensures a normal readable box width before scaling.
+                    content.style.width = '340px';
+                    content.style.flexShrink = '0';
+
+                    // 3. Counter-scale the content box to fit inside the zoomed screen
                     content.style.transform = `scale(${1 / vv.scale})`;
-                    content.style.transformOrigin = 'center center';
                 } else {
-                    // Reset to normal Tailwind layout if not zoomed
+                    // Reset to normal layout
+                    modal.style.position = '';
+                    modal.style.left = '';
+                    modal.style.top = '';
+                    modal.style.width = '';
+                    modal.style.height = '';
+                    
                     content.style.width = '';
-                    content.style.maxWidth = '';
-                    content.style.maxHeight = '90vh';
+                    content.style.flexShrink = '';
                     content.style.transform = '';
                 }
             }
 
+            // Apply immediately and listen for changes
             updatePosition();
             window.visualViewport.addEventListener('resize', updatePosition);
             window.visualViewport.addEventListener('scroll', updatePosition);
@@ -423,13 +428,23 @@
         function removeZoomFix(modalId) {
             const modal = document.getElementById(modalId);
             const content = modal.querySelector('.zoom-fixed-content');
+            
             if (modal._zoomHandler && window.visualViewport) {
                 window.visualViewport.removeEventListener('resize', modal._zoomHandler);
                 window.visualViewport.removeEventListener('scroll', modal._zoomHandler);
             }
-            modal.style.position = ''; modal.style.left = ''; modal.style.top = ''; modal.style.width = ''; modal.style.height = '';
+            
+            // Cleanup all inline styles
+            modal.style.position = ''; 
+            modal.style.left = ''; 
+            modal.style.top = ''; 
+            modal.style.width = ''; 
+            modal.style.height = '';
+            
             if(content) { 
-                content.style.width = ''; content.style.maxWidth = ''; content.style.maxHeight = ''; content.style.transform = ''; 
+                content.style.width = ''; 
+                content.style.flexShrink = ''; 
+                content.style.transform = ''; 
             }
         }
 
@@ -438,10 +453,8 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-
         // --- 2. DATA FETCHING LOGIC ---
 
-        // Fetch Agents from Database
         async function loadAgents() {
             try {
                 const cacheBuster = new Date().getTime();
@@ -453,7 +466,6 @@
                 const jsonRes = await response.json();
                 let parsedAgents = [];
 
-                // Parse nested n8n JSON safely
                 if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
                     parsedAgents = jsonRes[0].myField;
                 } else if (jsonRes.myField) {
@@ -462,19 +474,16 @@
                     parsedAgents = jsonRes;
                 }
 
-                // Filter to ensure we only save valid agent data (agents have phone/rating)
                 activeAgents = parsedAgents.filter(item => item.phone || item.rating);
                 
                 if (activeAgents.length > 0) {
                     localStorage.setItem('broker_agents', JSON.stringify(activeAgents));
                 }
             } catch (error) {
-                console.warn("Using offline agents data.");
                 activeAgents = JSON.parse(localStorage.getItem('broker_agents') || '[]');
             }
         }
 
-        // Fetch Plots from Database
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.remove('hidden'); 
@@ -492,7 +501,6 @@
                 const jsonRes = await response.json();
                 let liveData = [];
                 
-                // Parse nested n8n JSON safely
                 if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
                     liveData = jsonRes[0].myField;
                 } else if (jsonRes.myField) {
@@ -502,18 +510,15 @@
                 }
 
                 if (Array.isArray(liveData) && liveData.length > 0) {
-                    // Filter to ensure we only save valid plot data
                     activePlots = liveData.filter(item => item.plotNo);
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
-                console.warn("Using offline plots data.");
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
                 if (savedLocal) {
                     activePlots = JSON.parse(savedLocal);
                 }
             } finally {
-                // Hide Loader smoothly
                 overlay.style.opacity = '0';
                 setTimeout(() => overlay.classList.add('hidden'), 300);
                 renderMarkers();
@@ -535,7 +540,6 @@
                 marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
                 marker.innerText = plot.plotNo;
                 
-                // Drag Start
                 marker.onpointerdown = (e) => {
                     if (!isAdmin) return;
                     e.stopPropagation();
@@ -544,7 +548,6 @@
                     marker.setPointerCapture(e.pointerId);
                 };
 
-                // Drag Move
                 marker.onpointermove = (e) => {
                     if (!draggingPlot || draggingPlot.plotNo !== plot.plotNo) return;
                     hasDragged = true;
@@ -559,25 +562,21 @@
                     plot.y = yPercent.toFixed(2);
                 };
 
-                // Drag End
                 marker.onpointerup = (e) => {
                     if (!isAdmin) return;
                     e.stopPropagation();
                     marker.releasePointerCapture(e.pointerId);
                     
                     if (hasDragged) {
-                        // Plot was moved, save new location
                         localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                         sendDataToN8n(plot, 'update_location'); 
                     } else {
-                        // Plot was just clicked, open edit modal
                         openAdminModal(plot);
                     }
                     draggingPlot = null;
                     hasDragged = false;
                 };
 
-                // Click to view (User Mode)
                 marker.onclick = (e) => {
                     e.stopPropagation(); 
                     if (!isAdmin) {
@@ -589,7 +588,6 @@
             });
         }
 
-        // Click on empty map to add new plot
         document.getElementById('mapWrapper').addEventListener('click', function(e) {
             if (!isAdmin || e.target.classList.contains('plot-marker')) return; 
             
@@ -602,7 +600,6 @@
 
         // --- 4. ADMIN PANEL LOGIC ---
 
-        // Hide price field if status is 'Sold'
         document.getElementById('adminStatus').addEventListener('change', function() {
             document.getElementById('priceContainer').style.display = this.value === 'Sold' ? 'none' : 'block';
         });
@@ -632,12 +629,9 @@
             
             document.getElementById('adminStatus').dispatchEvent(new Event('change'));
             document.getElementById('adminModal').classList.remove('hidden');
-            
-            // Apply Zoom Fix
             fixModalZoom('adminModal');
         }
 
-        // Save Plot Form
         document.getElementById('adminForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]');
@@ -673,7 +667,6 @@
             btn.innerText = "Save Plot";
         });
 
-        // Delete Plot
         async function deletePlot() {
             const plotNo = document.getElementById('adminPlotNo').value;
             if (!confirm(`Are you sure you want to completely DELETE Plot ${plotNo}?`)) return;
@@ -731,8 +724,6 @@
             document.getElementById('cPlotNo').value = plot.plotNo;
             
             document.getElementById('userModal').classList.remove('hidden');
-            
-            // Apply Zoom Fix
             fixModalZoom('userModal');
         }
 
@@ -741,21 +732,18 @@
         function populateDynamicAgents() {
             const list = document.getElementById('dynamicAgentList');
             
-            // 1. Filter agents assigned to this project
             const projectAgents = activeAgents.filter(ag => {
                 if (!ag.projects) return false;
                 let agentProjects = [];
                 if (Array.isArray(ag.projects)) {
                     agentProjects = ag.projects;
                 } else if (typeof ag.projects === 'string') {
-                    // Clean array-like strings coming from Google Sheets
                     let cleanString = ag.projects.replace(/[\[\]"]/g, '');
                     agentProjects = cleanString.split(',').map(p => p.trim());
                 }
                 return agentProjects.includes(PROJECT_NAME);
             });
             
-            // 2. Render Checkboxes
             if (!projectAgents || projectAgents.length === 0) {
                 list.innerHTML = `<span class="text-sm text-red-500 font-bold p-2 block text-center">अभी इस प्रोजेक्ट के लिए कोई एजेंट असाइन नहीं है।</span>`;
                 return;
@@ -784,12 +772,9 @@
             closeModal('userModal');
             populateDynamicAgents();
             document.getElementById('contactModal').classList.remove('hidden');
-            
-            // Apply Zoom Fix
             fixModalZoom('contactModal');
         }
 
-        // Contact WhatsApp Form Submit
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]');
@@ -840,8 +825,6 @@
         function openPasswordModal() {
             document.getElementById('adminPwdInput').value = '';
             document.getElementById('passwordModal').classList.remove('hidden');
-            
-            // Apply Zoom Fix
             fixModalZoom('passwordModal');
         }
 
@@ -948,9 +931,7 @@
 
         // --- 9. INITIALIZE ON LOAD ---
         window.onload = async () => {
-            // First fetch the agents list in the background
             await loadAgents(); 
-            // Then fetch and render the map plots
             loadPlots();        
         };
     </script>
