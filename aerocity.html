@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
+
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
@@ -22,7 +22,7 @@
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             user-select: none;
-            touch-action: none;
+            /* touch-action: none; यहाँ से हटा दिया गया है ताकि मोबाइल में ज़ूम हो सके */
         }
         .map-image {
             width: 100%;
@@ -34,13 +34,15 @@
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            width: 32px;
-            height: 32px;
+            /* CIRCLE SIZE FIX: clamp() से मोबाइल में अपने आप छोटा और लैपटॉप में 32px रहेगा */
+            width: clamp(16px, 3.5vw, 32px);
+            height: clamp(16px, 3.5vw, 32px);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            /* TEXT SIZE FIX: अंदर का नंबर भी स्क्रीन के हिसाब से एडजस्ट होगा */
+            font-size: clamp(8px, 1.5vw, 12px);
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
@@ -56,7 +58,11 @@
         .marker-sold { background-color: #ef4444; color: #fff; border: 2px solid #fff; }
         
         /* Admin Mode */
-        .admin-active .map-wrapper { cursor: crosshair; }
+        .admin-active .map-wrapper { 
+            cursor: crosshair; 
+            /* ज़ूम/पैन सिर्फ तब बंद होगा जब एडमिन प्लॉट को ड्रैग कर रहा हो */
+            touch-action: none; 
+        }
         .admin-active .map-wrapper::after {
             content: "ADMIN MODE ACTIVE - MAP IS EDITABLE";
             position: absolute;
@@ -85,7 +91,9 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+            </style>
+    
+    
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
