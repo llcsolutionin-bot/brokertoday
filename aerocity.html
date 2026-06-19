@@ -31,24 +31,24 @@
             pointer-events: none;
         }
         
-        .plot-marker {
+                .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            /* CIRCLE SIZE FIX: clamp() से मोबाइल में अपने आप छोटा और लैपटॉप में 32px रहेगा */
-            width: clamp(16px, 3.5vw, 32px);
-            height: clamp(16px, 3.5vw, 32px);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* TEXT SIZE FIX: अंदर का नंबर भी स्क्रीन के हिसाब से एडजस्ट होगा */
-            font-size: clamp(8px, 1.5vw, 12px);
+            /* मोबाइल पर इसे और भी छोटा (14px) कर दिया गया है */
+            width: clamp(14px, 2.5vw, 30px);
+            height: clamp(14px, 2.5vw, 30px);
+            /* नंबर का साइज़ भी सर्कल के हिसाब से फिट होगा */
+            font-size: clamp(7px, 1.2vw, 12px);
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            /* बॉर्डर और शैडो को भी थोड़ा हल्का किया है ताकि छोटे साइज़ में क्लीन दिखे */
+            border: 1.5px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
             z-index: 10;
-        }
+            line-height: 1;
+                }
+        
         .plot-marker:hover {
             transform: translate(-50%, -50%) scale(1.15);
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
