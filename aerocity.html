@@ -10,37 +10,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
-        
-        .map-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            user-select: none;
+        body { 
+            font-family: 'Inter', sans-serif; 
         }
-        .map-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            pointer-events: none;
+        .glass-nav { 
+            background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(10px); 
+        }
+        .map-wrapper { 
+            position: relative; 
+            width: 100%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            user-select: none; 
+        }
+        .map-image { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            pointer-events: none; 
         }
         
-       /* NEW DESIGN: Sirf Numbers, Black Outline Ke Sath (Extra Small for Mobile) */
+        /* NUMBER MARKERS DESIGN (No Background Circle) */
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            /* Mobile me min size 9px kar diya hai, laptop me 20px rahega */
-            font-size: clamp(9px, 1.8vw, 20px);
-            font-weight: 900; /* Extra Bold */
+            font-size: clamp(9px, 1.8vw, 20px); /* Scales down for mobile */
+            font-weight: 900; 
             cursor: pointer;
             z-index: 10;
             line-height: 1;
-            /* Chhote numbers par outline clean dikhe isliye shadow thodi sharp ki hai */
+            /* Black Outline for high visibility */
             text-shadow: 
                 -1px -1px 0 #000,  
                  1px -1px 0 #000,
@@ -49,19 +52,18 @@
                  0px  1.5px 3px rgba(0,0,0,0.8); 
             transition: transform 0.2s;
         }
-        .plot-marker:hover {
-            transform: translate(-50%, -50%) scale(1.4);
-            z-index: 20;
+        .plot-marker:hover { 
+            transform: translate(-50%, -50%) scale(1.4); 
+            z-index: 20; 
         }
         
-        /* Red and Green Text Colors */
-        .marker-available { color: #22c55e; } /* Hara Rang */
-        .marker-sold { color: #ef4444; } /* Laal Rang */
+        .marker-available { color: #22c55e; } /* Green */
+        .marker-sold { color: #ef4444; } /* Red */
         
-        /* Admin Mode */
+        /* Admin Mode Layout */
         .admin-active .map-wrapper { 
             cursor: crosshair; 
-            touch-action: none; 
+            touch-action: none; /* Disable zoom only in admin mode */
         }
         .admin-active .map-wrapper::after {
             content: "ADMIN MODE ACTIVE - MAP IS EDITABLE";
@@ -78,10 +80,15 @@
             pointer-events: none;
             z-index: 30;
         }
-        .admin-active .plot-marker { cursor: grab; pointer-events: auto; }
-        .admin-active .plot-marker:active { cursor: grabbing; }
+        .admin-active .plot-marker { 
+            cursor: grab; 
+            pointer-events: auto; 
+        }
+        .admin-active .plot-marker:active { 
+            cursor: grabbing; 
+        }
 
-        /* Loader Animation */
+        /* Loading Spinner */
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4f46e5;
@@ -90,7 +97,10 @@
             height: 50px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
@@ -112,15 +122,26 @@
 
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
-                <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span class="font-medium text-sm">वापस होम (Home)</span>
-            </a>
-            <div class="flex items-center gap-2">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <h1 class="text-xl font-extrabold tracking-tight">Broker Today</h1>
+            <div class="flex flex-col">
+                <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                        <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+                </div>
+                <a href="agents.html" class="mt-2 ml-10 inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-slate-300 hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                    हमारे प्रॉपर्टी एक्सपर्ट्स
+                </a>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group mr-4">
+                    <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span class="font-medium text-sm">वापस होम (Home)</span>
+                </a>
+                <span class="hidden md:inline-block bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs px-3 py-1.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
+                    Sirohi Hub
+                </span>
             </div>
         </div>
     </nav>
@@ -135,7 +156,7 @@
     <main class="container mx-auto px-4 py-8 max-w-6xl" id="app-container">
         <div class="mb-6 flex justify-between items-end">
             <div>
-                <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टरप्लान (Residency Map)</h2>
+                <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टरप्लान</h2>
                 <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।</p>
             </div>
             <div class="flex gap-4 items-center">
@@ -148,7 +169,7 @@
                     <span class="text-xs font-bold text-slate-600">Sold</span>
                 </div>
                 
-                <button id="btnAdminLogin" onclick="openPasswordModal()" class="ml-2 text-slate-300 hover:text-slate-500" title="Admin Login">🔒</button>
+                <button id="btnAdminLogin" onclick="openPasswordModal()" class="ml-2 text-slate-300 hover:text-slate-500 text-xl" title="Admin Login">🔒</button>
                 <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow-md transition-all">
                     Save & Exit Admin
                 </button>
@@ -286,24 +307,65 @@
         </div>
     </div>
 
+    <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <button id="chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+        </button>
+
+        <div id="chat-window" class="hidden w-80 max-h-96 bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col mt-4 overflow-hidden transform origin-bottom-right transition-all duration-300">
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center rounded-t-2xl">
+                <h4 class="font-bold">Broker Today Support</h4>
+                <button id="chat-close" class="text-white hover:text-blue-200 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3 h-64">
+                <div class="flex items-start">
+                    <div class="bg-white border border-slate-200 text-slate-700 text-sm p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
+                        नमस्ते! मैं Broker Today का डिजिटल असिस्टेंट हूँ। मैं आपकी कैसे मदद कर सकता हूँ?
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 bg-white border-t border-slate-100 flex items-center">
+                <input type="text" id="chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
+                <button id="chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
+        // --- 1. CONFIGURATION & WEBHOOKS ---
         const PROJECT_NAME = "Aerocity Residency";
         const ADMIN_PASSWORD = "Aero@9026";
         
-        // N8N WEBHOOKS
+        // n8n Webhook URLs
         const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
         const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
         const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
-        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
+        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega"; // Updated Agent Webhook
+        const N8N_CHAT_WEBHOOK_URL = 'https://llcsolution.duckdns.org/webhook/7750d216-8bb4-4030-9b30-aeba85986268-widget';
 
-        // State
+        // Global State Variables
         let isAdmin = false;
         let activePlots = []; 
         let activeAgents = []; 
         let draggingPlot = null;
         let hasDragged = false;
 
-        // FETCH AGENTS AND SYNC ROBUSTLY
+        // --- 2. DATA FETCHING LOGIC ---
+
+        // Fetch Agents from Database
         async function loadAgents() {
             try {
                 const cacheBuster = new Date().getTime();
@@ -311,9 +373,11 @@
                     method: 'GET',
                     headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                 });
+                
                 const jsonRes = await response.json();
                 let parsedAgents = [];
 
+                // Parse nested n8n JSON safely
                 if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
                     parsedAgents = jsonRes[0].myField;
                 } else if (jsonRes.myField) {
@@ -322,20 +386,19 @@
                     parsedAgents = jsonRes;
                 }
 
-                // Filter out plots data if sheets return mixed arrays
+                // Filter to ensure we only save valid agent data (agents have phone/rating)
                 activeAgents = parsedAgents.filter(item => item.phone || item.rating);
                 
-                if(activeAgents.length > 0) {
+                if (activeAgents.length > 0) {
                     localStorage.setItem('broker_agents', JSON.stringify(activeAgents));
-                } else {
-                    throw new Error("Empty active agents from server");
                 }
             } catch (error) {
-                console.warn("Cross-sync fallback: Loading agents from shared localStorage registry.");
+                console.warn("Using offline agents data.");
                 activeAgents = JSON.parse(localStorage.getItem('broker_agents') || '[]');
             }
         }
 
+        // Fetch Plots from Database
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.remove('hidden'); 
@@ -353,6 +416,7 @@
                 const jsonRes = await response.json();
                 let liveData = [];
                 
+                // Parse nested n8n JSON safely
                 if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
                     liveData = jsonRes[0].myField;
                 } else if (jsonRes.myField) {
@@ -362,25 +426,32 @@
                 }
 
                 if (Array.isArray(liveData) && liveData.length > 0) {
+                    // Filter to ensure we only save valid plot data
                     activePlots = liveData.filter(item => item.plotNo);
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
+                console.warn("Using offline plots data.");
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
-                if(savedLocal) activePlots = JSON.parse(savedLocal);
+                if (savedLocal) {
+                    activePlots = JSON.parse(savedLocal);
+                }
             } finally {
+                // Hide Loader smoothly
                 overlay.style.opacity = '0';
                 setTimeout(() => overlay.classList.add('hidden'), 300);
                 renderMarkers();
             }
         }
 
+        // --- 3. MAP RENDERING & DRAG LOGIC ---
+
         function renderMarkers() {
             const container = document.getElementById('markersContainer');
             container.innerHTML = ''; 
             
             activePlots.forEach(plot => {
-                if(!plot.x || !plot.y) return; 
+                if (!plot.x || !plot.y) return; 
 
                 const marker = document.createElement('div');
                 marker.style.left = `${plot.x}%`;
@@ -388,104 +459,171 @@
                 marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
                 marker.innerText = plot.plotNo;
                 
+                // Drag Start
                 marker.onpointerdown = (e) => {
                     if (!isAdmin) return;
-                    e.stopPropagation(); draggingPlot = plot; hasDragged = false;
+                    e.stopPropagation();
+                    draggingPlot = plot;
+                    hasDragged = false;
                     marker.setPointerCapture(e.pointerId);
                 };
 
+                // Drag Move
                 marker.onpointermove = (e) => {
                     if (!draggingPlot || draggingPlot.plotNo !== plot.plotNo) return;
                     hasDragged = true;
+                    
                     const rect = document.getElementById('mapWrapper').getBoundingClientRect();
                     let xPercent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
                     let yPercent = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-
-                    marker.style.left = `${xPercent}%`; marker.style.top = `${yPercent}%`;
-                    plot.x = xPercent.toFixed(2); plot.y = yPercent.toFixed(2);
+                    
+                    marker.style.left = `${xPercent}%`;
+                    marker.style.top = `${yPercent}%`;
+                    plot.x = xPercent.toFixed(2);
+                    plot.y = yPercent.toFixed(2);
                 };
 
+                // Drag End
                 marker.onpointerup = (e) => {
                     if (!isAdmin) return;
-                    e.stopPropagation(); marker.releasePointerCapture(e.pointerId);
+                    e.stopPropagation();
+                    marker.releasePointerCapture(e.pointerId);
                     
                     if (hasDragged) {
+                        // Plot was moved, save new location
                         localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                         sendDataToN8n(plot, 'update_location'); 
                     } else {
+                        // Plot was just clicked, open edit modal
                         openAdminModal(plot);
                     }
-                    draggingPlot = null; hasDragged = false;
+                    draggingPlot = null;
+                    hasDragged = false;
                 };
 
-                marker.onclick = (e) => { e.stopPropagation(); if(!isAdmin) openUserModal(plot); };
+                // Click to view (User Mode)
+                marker.onclick = (e) => {
+                    e.stopPropagation(); 
+                    if (!isAdmin) {
+                        openUserModal(plot);
+                    }
+                };
+                
                 container.appendChild(marker);
             });
         }
 
+        // Click on empty map to add new plot
         document.getElementById('mapWrapper').addEventListener('click', function(e) {
             if (!isAdmin || e.target.classList.contains('plot-marker')) return; 
+            
             const rect = this.getBoundingClientRect();
-            openAdminModal(null, (((e.clientX - rect.left) / rect.width) * 100).toFixed(2), (((e.clientY - rect.top) / rect.height) * 100).toFixed(2));
+            const xPercent = (((e.clientX - rect.left) / rect.width) * 100).toFixed(2);
+            const yPercent = (((e.clientY - rect.top) / rect.height) * 100).toFixed(2);
+            
+            openAdminModal(null, xPercent, yPercent);
         });
 
+        // --- 4. ADMIN PANEL LOGIC ---
+
+        // Hide price field if status is 'Sold'
         document.getElementById('adminStatus').addEventListener('change', function() {
             document.getElementById('priceContainer').style.display = this.value === 'Sold' ? 'none' : 'block';
         });
 
         function openAdminModal(plot = null, x = 0, y = 0) {
             document.getElementById('adminForm').reset();
-            if(plot) {
+            
+            if (plot) {
                 document.getElementById('adminModalTitle').innerText = "Edit Plot " + plot.plotNo;
-                document.getElementById('adminPlotNo').value = plot.plotNo; document.getElementById('adminPlotNo').readOnly = true; 
-                document.getElementById('adminX').value = plot.x; document.getElementById('adminY').value = plot.y;
-                document.getElementById('adminStatus').value = plot.status; document.getElementById('adminSqFt').value = plot.sqFt || "";
-                document.getElementById('adminSize').value = plot.size || ""; document.getElementById('adminPrice').value = plot.price || "";
+                document.getElementById('adminPlotNo').value = plot.plotNo;
+                document.getElementById('adminPlotNo').readOnly = true; 
+                document.getElementById('adminX').value = plot.x;
+                document.getElementById('adminY').value = plot.y;
+                document.getElementById('adminStatus').value = plot.status;
+                document.getElementById('adminSqFt').value = plot.sqFt || "";
+                document.getElementById('adminSize').value = plot.size || "";
+                document.getElementById('adminPrice').value = plot.price || "";
                 document.getElementById('adminDirection').value = plot.dir || "East";
                 document.getElementById('btnDeletePlot').classList.remove('hidden');
             } else {
-                document.getElementById('adminModalTitle').innerText = "Add New Plot"; document.getElementById('adminPlotNo').readOnly = false;
-                document.getElementById('adminX').value = x; document.getElementById('adminY').value = y;
+                document.getElementById('adminModalTitle').innerText = "Add New Plot";
+                document.getElementById('adminPlotNo').readOnly = false;
+                document.getElementById('adminX').value = x;
+                document.getElementById('adminY').value = y;
                 document.getElementById('btnDeletePlot').classList.add('hidden');
             }
+            
             document.getElementById('adminStatus').dispatchEvent(new Event('change'));
             document.getElementById('adminModal').classList.remove('hidden');
         }
 
+        // Save Plot Form
         document.getElementById('adminForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = this.querySelector('button[type="submit"]'); btn.innerText = "Saving...";
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerText = "Saving...";
+
             const plotNum = document.getElementById('adminPlotNo').value;
             const newPlot = {
-                uid: `${PROJECT_NAME}_${plotNum}`, projectName: PROJECT_NAME, plotNo: plotNum,
-                x: document.getElementById('adminX').value, y: document.getElementById('adminY').value,
-                status: document.getElementById('adminStatus').value, sqFt: document.getElementById('adminSqFt').value,
-                size: document.getElementById('adminSize').value, price: document.getElementById('adminStatus').value === 'Sold' ? "" : document.getElementById('adminPrice').value,
+                uid: `${PROJECT_NAME}_${plotNum}`,
+                projectName: PROJECT_NAME,
+                plotNo: plotNum,
+                x: document.getElementById('adminX').value,
+                y: document.getElementById('adminY').value,
+                status: document.getElementById('adminStatus').value,
+                sqFt: document.getElementById('adminSqFt').value,
+                size: document.getElementById('adminSize').value,
+                price: document.getElementById('adminStatus').value === 'Sold' ? "" : document.getElementById('adminPrice').value,
                 dir: document.getElementById('adminDirection').value
             };
 
             const existingIndex = activePlots.findIndex(p => p.plotNo === newPlot.plotNo);
-            if(existingIndex >= 0) activePlots[existingIndex] = newPlot; else activePlots.push(newPlot);
+            if (existingIndex >= 0) {
+                activePlots[existingIndex] = newPlot;
+            } else {
+                activePlots.push(newPlot);
+            }
             
             localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
             renderMarkers();
+            
             await sendDataToN8n(newPlot, 'save');
-            closeModal('adminModal'); btn.innerText = "Save Plot";
+            
+            closeModal('adminModal');
+            btn.innerText = "Save Plot";
         });
 
+        // Delete Plot
         async function deletePlot() {
             const plotNo = document.getElementById('adminPlotNo').value;
-            if(!confirm(`DELETE Plot ${plotNo}?`)) return;
+            if (!confirm(`Are you sure you want to completely DELETE Plot ${plotNo}?`)) return;
+
             activePlots = activePlots.filter(p => p.plotNo !== plotNo);
             localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
             renderMarkers();
-            await sendDataToN8n({ uid: `${PROJECT_NAME}_${plotNo}`, plotNo: plotNo }, 'delete');
+            
+            await sendDataToN8n({ 
+                uid: `${PROJECT_NAME}_${plotNo}`, 
+                plotNo: plotNo 
+            }, 'delete');
+            
             closeModal('adminModal');
         }
 
         async function sendDataToN8n(plotData, actionType) {
-            try { fetch(WEBHOOK_SAVE_PLOT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...plotData, action: actionType }) }); } catch (err) {}
+            try {
+                fetch(WEBHOOK_SAVE_PLOT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...plotData, action: actionType })
+                });
+            } catch (err) {
+                console.error("DB Sync Error:", err);
+            }
         }
+
+        // --- 5. USER INTERFACE LOGIC ---
 
         function openUserModal(plot) {
             document.getElementById('uPlotNo').innerText = "Plot " + plot.plotNo;
@@ -493,33 +631,50 @@
             document.getElementById('uSize').innerText = plot.size || "--";
             document.getElementById('uDirection').innerText = plot.dir || "--";
             
-            const statusEl = document.getElementById('uStatus'); const btn = document.getElementById('btnContactAgent'); const priceRow = document.getElementById('uPriceRow');
+            const statusEl = document.getElementById('uStatus');
+            const btn = document.getElementById('btnContactAgent');
+            const priceRow = document.getElementById('uPriceRow');
 
             if (plot.status === 'Sold') {
-                statusEl.innerText = "Sold"; statusEl.className = "font-bold text-red-500";
-                priceRow.style.display = 'none'; btn.style.display = 'none'; 
+                statusEl.innerText = "Sold";
+                statusEl.className = "font-bold text-red-500";
+                priceRow.style.display = 'none'; 
+                btn.style.display = 'none'; 
             } else {
-                statusEl.innerText = "Available"; statusEl.className = "font-bold text-green-500";
+                statusEl.innerText = "Available";
+                statusEl.className = "font-bold text-green-500";
                 document.getElementById('uPrice').innerText = plot.price || "--";
-                priceRow.style.display = 'flex'; btn.style.display = 'block';
+                priceRow.style.display = 'flex'; 
+                btn.style.display = 'block';
             }
-            document.getElementById('contactPlotLabel').innerText = plot.plotNo; document.getElementById('cPlotNo').value = plot.plotNo;
+            
+            document.getElementById('contactPlotLabel').innerText = plot.plotNo;
+            document.getElementById('cPlotNo').value = plot.plotNo;
+            
             document.getElementById('userModal').classList.remove('hidden');
         }
 
-        // GENERATE DYNAMIC AGENT CHECKBOXES FILTERED SPECIFICALLY BY PROJECT NAME
+        // --- 6. AGENT CONTACT LOGIC ---
+
         function populateDynamicAgents() {
             const list = document.getElementById('dynamicAgentList');
             
-            // Filter agents who are dynamically assigned to "Aerocity Residency"
+            // 1. Filter agents assigned to this project
             const projectAgents = activeAgents.filter(ag => {
+                if (!ag.projects) return false;
                 let agentProjects = [];
-                if (Array.isArray(ag.projects)) agentProjects = ag.projects;
-                else if (typeof ag.projects === 'string') agentProjects = ag.projects.split(',').map(p => p.trim());
+                if (Array.isArray(ag.projects)) {
+                    agentProjects = ag.projects;
+                } else if (typeof ag.projects === 'string') {
+                    // Clean array-like strings coming from Google Sheets
+                    let cleanString = ag.projects.replace(/[\[\]"]/g, '');
+                    agentProjects = cleanString.split(',').map(p => p.trim());
+                }
                 return agentProjects.includes(PROJECT_NAME);
             });
             
-            if(!projectAgents || projectAgents.length === 0) {
+            // 2. Render Checkboxes
+            if (!projectAgents || projectAgents.length === 0) {
                 list.innerHTML = `<span class="text-sm text-red-500 font-bold p-2 block text-center">अभी इस प्रोजेक्ट के लिए कोई एजेंट असाइन नहीं है।</span>`;
                 return;
             }
@@ -527,7 +682,9 @@
             list.innerHTML = projectAgents.map((ag, i) => {
                 let stars = '';
                 let rating = parseInt(ag.rating || 5);
-                for(let j=0; j<5; j++) { if(j < rating) stars += '⭐'; }
+                for(let j=0; j<5; j++) {
+                    if(j < rating) stars += '⭐'; 
+                }
 
                 return `
                 <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl cursor-pointer transition-all shadow-sm">
@@ -542,47 +699,174 @@
         }
 
         function openContactModal() {
-            closeModal('userModal'); populateDynamicAgents();
+            closeModal('userModal');
+            populateDynamicAgents();
             document.getElementById('contactModal').classList.remove('hidden');
         }
 
+        // Contact WhatsApp Form Submit
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const btn = this.querySelector('button[type="submit"]'); btn.innerText = "Sending...";
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerText = "Sending...";
+
             const checkboxes = document.querySelectorAll('.agent-checkbox:checked');
             const selectedAgents = Array.from(checkboxes).map(cb => cb.value);
 
-            if(selectedAgents.length === 0) { alert("कृपया कम से कम एक एजेंट चुनें।"); btn.innerText = "Send Inquiry on WhatsApp"; return; }
-            const payload = { source: "Live Map Direct Inquiry", projectName: PROJECT_NAME, plotNo: document.getElementById('cPlotNo').value, name: document.getElementById('cName').value, phone: document.getElementById('cPhone').value, assignedAgents: selectedAgents };
+            if (selectedAgents.length === 0) {
+                alert("कृपया कम से कम एक एजेंट चुनें।");
+                btn.innerText = "Send Inquiry on WhatsApp";
+                return;
+            }
+            
+            const payload = {
+                source: "Live Map Direct Inquiry",
+                projectName: PROJECT_NAME,
+                plotNo: document.getElementById('cPlotNo').value,
+                name: document.getElementById('cName').value,
+                phone: document.getElementById('cPhone').value,
+                assignedAgents: selectedAgents
+            };
 
             try {
-                const response = await fetch(WEBHOOK_INQUIRY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const response = await fetch(WEBHOOK_INQUIRY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
                 if (response.ok) {
                     document.getElementById('formSuccess').classList.remove('hidden');
-                    setTimeout(() => { document.getElementById('formSuccess').classList.add('hidden'); closeModal('contactModal'); btn.innerText = "Send Inquiry on WhatsApp"; this.reset(); }, 3000);
+                    setTimeout(() => {
+                        document.getElementById('formSuccess').classList.add('hidden');
+                        closeModal('contactModal');
+                        btn.innerText = "Send Inquiry on WhatsApp";
+                        this.reset();
+                    }, 3000);
                 }
-            } catch (error) { alert('त्रुटि। दोबारा प्रयास करें।'); btn.innerText = "Send Inquiry on WhatsApp"; }
+            } catch (error) {
+                alert('त्रुटि। दोबारा प्रयास करें।');
+                btn.innerText = "Send Inquiry on WhatsApp";
+            }
         });
 
-        function openPasswordModal() { document.getElementById('adminPwdInput').value = ''; document.getElementById('passwordModal').classList.remove('hidden'); }
-        function verifyPassword() {
-            if (document.getElementById('adminPwdInput').value === ADMIN_PASSWORD) {
-                isAdmin = true; document.getElementById('app-container').classList.add('admin-active');
-                document.getElementById('btnAdminLogin').classList.add('hidden'); document.getElementById('btnAdminExit').classList.remove('hidden');
-                document.getElementById('modeIndicator').innerText = "ADMIN MODE: Add, Edit, Drag, or Delete plots."; document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-600";
-                closeModal('passwordModal');
-            } else alert("गलत पासवर्ड!");
+        // --- 7. ADMIN SECURITY ---
+
+        function openPasswordModal() {
+            document.getElementById('adminPwdInput').value = '';
+            document.getElementById('passwordModal').classList.remove('hidden');
         }
+
+        function verifyPassword() {
+            const pwd = document.getElementById('adminPwdInput').value;
+            if (pwd === ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('app-container').classList.add('admin-active');
+                document.getElementById('btnAdminLogin').classList.add('hidden');
+                document.getElementById('btnAdminExit').classList.remove('hidden');
+                document.getElementById('modeIndicator').innerText = "ADMIN MODE: Add, Edit, Drag, or Delete plots.";
+                document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-600";
+                closeModal('passwordModal');
+            } else {
+                alert("गलत पासवर्ड!");
+            }
+        }
+
         function exitAdminMode() {
-            isAdmin = false; document.getElementById('app-container').classList.remove('admin-active');
-            document.getElementById('btnAdminExit').classList.add('hidden'); document.getElementById('btnAdminLogin').classList.remove('hidden');
-            document.getElementById('modeIndicator').innerHTML = "प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।"; document.getElementById('modeIndicator').className = "text-sm mt-1 text-slate-500";
+            isAdmin = false;
+            document.getElementById('app-container').classList.remove('admin-active');
+            document.getElementById('btnAdminExit').classList.add('hidden');
+            document.getElementById('btnAdminLogin').classList.remove('hidden');
+            
+            document.getElementById('modeIndicator').innerHTML = "प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।";
+            document.getElementById('modeIndicator').className = "text-sm mt-1 text-slate-500";
+            
             loadPlots(); 
         }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // --- 8. CHAT WIDGET LOGIC ---
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatClose = document.getElementById('chat-close');
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatMessages = document.getElementById('chat-messages');
+
+        chatToggle.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
+        chatClose.addEventListener('click', () => chatWindow.classList.add('hidden'));
+
+        function appendMessage(text, isUser = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex items-start ${isUser ? 'justify-end' : ''}`;
+            
+            const innerDiv = document.createElement('div');
+            if (isUser) {
+                innerDiv.className = 'bg-blue-600 text-white text-sm p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]';
+            } else {
+                innerDiv.className = 'bg-white border border-slate-200 text-slate-700 text-sm p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]';
+            }
+            innerDiv.textContent = text;
+            
+            msgDiv.appendChild(innerDiv);
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendChatMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, true);
+            chatInput.value = '';
+
+            const typingId = 'typing-' + Date.now();
+            const typingDiv = document.createElement('div');
+            typingDiv.id = typingId;
+            typingDiv.className = 'flex items-start text-xs text-slate-400 ml-2 mt-1';
+            typingDiv.textContent = 'typing...';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch(N8N_CHAT_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        source: 'Aerocity Map Chat',
+                        message: text,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                document.getElementById(typingId).remove();
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const replyText = data.reply || 'Thanks for reaching out! We received your message.';
+                    appendMessage(replyText, false);
+                } else {
+                    appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
+                }
+            } catch (error) {
+                document.getElementById(typingId).remove();
+                appendMessage('Network error. Please try again later.', false);
+            }
+        }
+
+        chatSend.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        // --- 9. INITIALIZE ON LOAD ---
         window.onload = async () => {
+            // First fetch the agents list in the background
             await loadAgents(); 
+            // Then fetch and render the map plots
             loadPlots();        
         };
     </script>
