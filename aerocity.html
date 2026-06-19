@@ -268,19 +268,15 @@
                 <div>
                     <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
+                
+                <!-- DYNAMIC AGENT LIST CONTAINER -->
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-2">Select Agents to Notify:</label>
-                    <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" value="Suresh Parmar" checked class="agent-checkbox w-4 h-4 text-indigo-600">
-                            <span class="text-sm font-medium">Suresh Parmar</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" value="Sales Team" class="agent-checkbox w-4 h-4 text-indigo-600">
-                            <span class="text-sm font-medium">Sales Team</span>
-                        </label>
+                    <div id="dynamicAgentList" class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-48 overflow-y-auto">
+                        <span class="text-sm text-slate-500">Loading agents...</span>
                     </div>
                 </div>
+
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors mt-2">
                     Send Inquiry on WhatsApp
                 </button>
@@ -300,12 +296,41 @@
         const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
         const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
         const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
+        
+        // NEW WEBHOOK FOR FETCHING AGENTS
+        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
 
         // State
         let isAdmin = false;
         let activePlots = []; 
+        let activeAgents = []; // To store fetched agents
         let draggingPlot = null;
         let hasDragged = false;
+
+        // FETCH AGENTS FUNCTION
+        async function loadAgents() {
+            try {
+                const cacheBuster = new Date().getTime();
+                const response = await fetch(`${WEBHOOK_GET_AGENTS}?t=${cacheBuster}`, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
+                
+                const jsonRes = await response.json();
+                
+                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
+                    activeAgents = jsonRes[0].myField;
+                } else if (jsonRes.myField) {
+                    activeAgents = jsonRes.myField;
+                } else if (Array.isArray(jsonRes)) {
+                    activeAgents = jsonRes;
+                } else {
+                    activeAgents = [];
+                }
+            } catch (error) {
+                console.warn("Failed to load agents. Silently failing to let user continue.");
+            }
+        }
 
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
@@ -554,8 +579,37 @@
             document.getElementById('userModal').classList.remove('hidden');
         }
 
+        // GENERATE DYNAMIC AGENT CHECKBOXES
+        function populateDynamicAgents() {
+            const list = document.getElementById('dynamicAgentList');
+            
+            if(!activeAgents || activeAgents.length === 0) {
+                list.innerHTML = `<span class="text-sm text-red-500 font-bold p-2">कोई एजेंट उपलब्ध नहीं है।</span>`;
+                return;
+            }
+
+            list.innerHTML = activeAgents.map((ag, i) => {
+                let stars = '';
+                let rating = parseInt(ag.rating || 5);
+                for(let j=0; j<5; j++) {
+                    if(j < rating) stars += '⭐'; 
+                }
+
+                return `
+                <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 hover:border-indigo-400 rounded-xl cursor-pointer transition-all shadow-sm">
+                    <input type="checkbox" value="${ag.name} (${ag.phone})" ${i===0?'checked':''} class="agent-checkbox w-5 h-5 text-indigo-600 mt-0.5 accent-indigo-600">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-black text-slate-800 leading-tight">${ag.name}</span>
+                        <span class="text-xs text-slate-600 mt-1">${stars} Real Estate Expert</span>
+                    </div>
+                </label>
+                `;
+            }).join('');
+        }
+
         function openContactModal() {
             closeModal('userModal');
+            populateDynamicAgents(); // Load the fresh agent list UI
             document.getElementById('contactModal').classList.remove('hidden');
         }
 
@@ -640,7 +694,11 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        window.onload = loadPlots;
+        // INITIALIZE BOTH PLOTS AND AGENTS ON LOAD
+        window.onload = async () => {
+            await loadAgents(); // First fetch the agents
+            loadPlots();        // Then fetch the map plots
+        };
     </script>
 </body>
 </html>
