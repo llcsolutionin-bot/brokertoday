@@ -31,7 +31,6 @@
             pointer-events: none;
         }
         
-        /* Interactive Circles */
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
@@ -56,7 +55,7 @@
         .marker-available { background-color: #22c55e; color: #000; border: 2px solid #fff; }
         .marker-sold { background-color: #ef4444; color: #fff; border: 2px solid #fff; }
         
-        /* Admin Mode */
+        /* Admin Mode Active Styling */
         .admin-active .map-wrapper { cursor: crosshair; }
         .admin-active .map-wrapper::after {
             content: "ADMIN MODE ACTIVE - MAP IS EDITABLE";
@@ -81,8 +80,8 @@
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4f46e5;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -92,8 +91,17 @@
 
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="loader mb-4"></div>
-        <h2 class="text-lg font-bold text-slate-800">डेटा लोड हो रहा है...</h2>
-        <p class="text-sm text-slate-500">Fetching live updates from server</p>
+        <h2 class="text-xl font-bold text-slate-800">डेटा लोड हो रहा है...</h2>
+        <p class="text-sm text-slate-500 mt-2">Fetching live updates from server</p>
+    </div>
+
+    <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative">
+            <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="font-bold text-lg mb-4 text-slate-800">Admin Login</h3>
+            <input type="password" id="adminPwdInput" placeholder="Enter Password" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500">
+            <button onclick="verifyPassword()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full py-3 rounded-lg transition-colors">Login</button>
+        </div>
     </div>
 
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
@@ -128,8 +136,8 @@
                 <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 bg-green-500 rounded-full border border-slate-300"></div><span class="text-xs font-bold">Available</span></div>
                 <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 bg-red-500 rounded-full border border-slate-300"></div><span class="text-xs font-bold">Sold</span></div>
                 
-                <button id="btnAdminLogin" onclick="enterAdminMode()" class="ml-2 text-slate-300 hover:text-slate-500" title="Admin Login">🔒</button>
-                <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-4 rounded-full shadow-md transition-all">
+                <button id="btnAdminLogin" onclick="openPasswordModal()" class="ml-2 text-slate-300 hover:text-slate-500" title="Admin Login">🔒</button>
+                <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow-md transition-all">
                     Save & Exit Admin
                 </button>
             </div>
@@ -143,9 +151,7 @@
 
     <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative">
-            <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+            <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             <h3 class="text-xl font-bold text-indigo-700 mb-4" id="adminModalTitle">Add New Plot</h3>
             
             <form id="adminForm" class="space-y-3">
@@ -201,9 +207,7 @@
 
     <div id="userModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative">
-            <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+            <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             
             <div class="flex items-center gap-3 mb-6">
                 <div id="uBadge" class="w-4 h-4 rounded-full"></div>
@@ -241,19 +245,17 @@
 
     <div id="contactModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full relative">
-            <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+            <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             <h3 class="text-xl font-bold text-slate-800 mb-4">Inquiry for Plot <span id="contactPlotLabel" class="text-indigo-600"></span></h3>
             
             <form id="contactForm" class="space-y-4">
                 <input type="hidden" id="cPlotNo">
                 
                 <div>
-                    <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
                 </div>
                 <div>
-                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-2">Select Agents to Notify:</label>
@@ -272,8 +274,8 @@
                     Send Inquiry on WhatsApp
                 </button>
             </form>
-            <div id="formSuccess" class="hidden mt-4 text-sm text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200 font-bold">
-                मैसेज भेज दिया गया है!
+            <div id="formSuccess" class="hidden mt-4 text-sm text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200">
+                मैसेज भेज दिया गया है! एजेंट जल्द संपर्क करेंगे।
             </div>
         </div>
     </div>
@@ -294,27 +296,33 @@
         let draggingPlot = null;
         let hasDragged = false;
 
-        // 1. Load Plots (Fixing the Cross-Device Sync Issue)
+        // 1. Load Plots (Fixing Cross-Device Sync & n8n JSON Structure)
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
-            overlay.classList.remove('hidden'); // Show loading screen
+            overlay.classList.remove('hidden'); 
             
             try {
-                // Add a timestamp to bypass browser cache (THIS FIXES MULTI-DEVICE SYNC)
-                const cacheBuster = new Date().getTime(); 
-                const response = await fetch(`${WEBHOOK_GET_PLOTS}?t=${cacheBuster}`, {
+                // cache: 'no-store' forces browser to fetch fresh data every time
+                const response = await fetch(`${WEBHOOK_GET_PLOTS}?t=${new Date().getTime()}`, {
                     method: 'GET',
-                    headers: { 'Cache-Control': 'no-cache' }
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+                    cache: 'no-store'
                 });
                 
-                const liveData = await response.json();
+                const jsonRes = await response.json();
+                
+                // IMPORTANT FIX: Checking if n8n wrapped the array in "myField" based on your screenshot
+                let liveData = jsonRes;
+                if (jsonRes.myField) {
+                    liveData = jsonRes.myField;
+                }
                 
                 if (Array.isArray(liveData)) {
                     activePlots = liveData;
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
-                console.warn("Could not reach n8n, loading from local cache.", error);
+                console.warn("Falling back to local storage.", error);
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
                 if(savedLocal) {
                     activePlots = JSON.parse(savedLocal);
@@ -371,7 +379,7 @@
                     
                     if (hasDragged) {
                         localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
-                        sendDataToN8n(plot, 'save'); 
+                        sendDataToN8n(plot, 'update_location'); 
                     } else {
                         openAdminModal(plot);
                     }
@@ -592,9 +600,14 @@
             }
         });
 
-        // --- ADMIN CONTROLS ---
-        function enterAdminMode() {
-            const pwd = prompt("Enter Admin Password:");
+        // --- ADMIN CONTROLS (Hidden Password Form) ---
+        function openPasswordModal() {
+            document.getElementById('adminPwdInput').value = ''; // Reset input
+            document.getElementById('passwordModal').classList.remove('hidden');
+        }
+
+        function verifyPassword() {
+            const pwd = document.getElementById('adminPwdInput').value;
             if (pwd === ADMIN_PASSWORD) {
                 isAdmin = true;
                 document.getElementById('app-container').classList.add('admin-active');
@@ -602,8 +615,9 @@
                 document.getElementById('btnAdminExit').classList.remove('hidden');
                 document.getElementById('modeIndicator').innerText = "ADMIN MODE: Add, Edit, Drag, or Delete plots.";
                 document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-600";
-            } else if (pwd !== null) {
-                alert("Incorrect Password");
+                closeModal('passwordModal');
+            } else {
+                alert("Incorrect Password!");
             }
         }
 
@@ -614,7 +628,8 @@
             document.getElementById('btnAdminLogin').classList.remove('hidden');
             document.getElementById('modeIndicator').innerText = "प्लॉट की जानकारी देखने के लिए सर्कल पर क्लिक करें।";
             document.getElementById('modeIndicator').className = "text-sm mt-1 text-slate-500";
-            // Re-fetch to ensure we match the server exactly after making edits
+            
+            // Re-fetch to ensure sync after admin exits
             loadPlots(); 
         }
 
