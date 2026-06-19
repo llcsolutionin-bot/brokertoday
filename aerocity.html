@@ -302,8 +302,11 @@
             overlay.classList.remove('hidden'); 
             
             try {
-                // cache: 'no-store' forces browser to fetch fresh data every time
-                const response = await fetch(`${WEBHOOK_GET_PLOTS}?t=${new Date().getTime()}`, {
+                // ADDED projectName TO THE QUERY STRING
+                const cacheBuster = new Date().getTime();
+                const url = `${WEBHOOK_GET_PLOTS}?projectName=${encodeURIComponent(PROJECT_NAME)}&t=${cacheBuster}`;
+                
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
                     cache: 'no-store'
@@ -311,7 +314,6 @@
                 
                 const jsonRes = await response.json();
                 
-                // IMPORTANT FIX: Checking if n8n wrapped the array in "myField" based on your screenshot
                 let liveData = jsonRes;
                 if (jsonRes.myField) {
                     liveData = jsonRes.myField;
@@ -322,6 +324,7 @@
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
+                // ... rest of the catch block remains the same
                 console.warn("Falling back to local storage.", error);
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
                 if(savedLocal) {
