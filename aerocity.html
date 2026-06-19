@@ -7,8 +7,8 @@
     
     <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
@@ -22,7 +22,6 @@
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             user-select: none;
-            /* touch-action: none; यहाँ से हटा दिया गया है ताकि मोबाइल में ज़ूम हो सके */
         }
         .map-image {
             width: 100%;
@@ -31,36 +30,37 @@
             pointer-events: none;
         }
         
-                .plot-marker {
+        /* NEW DESIGN: Sirf Numbers, Black Outline Ke Sath */
+        .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            /* मोबाइल पर इसे और भी छोटा (14px) कर दिया गया है */
-            width: clamp(14px, 2.5vw, 30px);
-            height: clamp(14px, 2.5vw, 30px);
-            /* नंबर का साइज़ भी सर्कल के हिसाब से फिट होगा */
-            font-size: clamp(7px, 1.2vw, 12px);
-            font-weight: bold;
+            /* Mobile me chota, laptop me bada dikhega, padhne me aasan hoga */
+            font-size: clamp(14px, 2.5vw, 22px);
+            font-weight: 900; /* Extra Bold */
             cursor: pointer;
-            /* बॉर्डर और शैडो को भी थोड़ा हल्का किया है ताकि छोटे साइज़ में क्लीन दिखे */
-            border: 1.5px solid #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
             z-index: 10;
             line-height: 1;
-                }
-        
+            /* Ye property numbers ke charo taraf black outline banati h */
+            text-shadow: 
+                -1px -1px 0 #000,  
+                 1px -1px 0 #000,
+                -1px  1px 0 #000,
+                 1px  1px 0 #000,
+                 0px  2px 5px rgba(0,0,0,0.6); /* 3D effect ke liye shadow */
+            transition: transform 0.2s;
+        }
         .plot-marker:hover {
-            transform: translate(-50%, -50%) scale(1.15);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            transform: translate(-50%, -50%) scale(1.4);
             z-index: 20;
         }
-        .marker-available { background-color: #22c55e; color: #000; border: 2px solid #fff; }
-        .marker-sold { background-color: #ef4444; color: #fff; border: 2px solid #fff; }
+        
+        /* Red and Green Text Colors */
+        .marker-available { color: #22c55e; } /* Hara Rang */
+        .marker-sold { color: #ef4444; } /* Laal Rang */
         
         /* Admin Mode */
         .admin-active .map-wrapper { 
             cursor: crosshair; 
-            /* ज़ूम/पैन सिर्फ तब बंद होगा जब एडमिन प्लॉट को ड्रैग कर रहा हो */
             touch-action: none; 
         }
         .admin-active .map-wrapper::after {
@@ -86,14 +86,12 @@
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4f46e5;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            </style>
-    
-    
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
@@ -119,6 +117,9 @@
                 <span class="font-medium text-sm">वापस होम (Home)</span>
             </a>
             <div class="flex items-center gap-2">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
                 <h1 class="text-xl font-extrabold tracking-tight">Broker Today</h1>
             </div>
         </div>
@@ -135,11 +136,17 @@
         <div class="mb-6 flex justify-between items-end">
             <div>
                 <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टर प्लान</h2>
-                <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए सर्कल पर क्लिक करें।</p>
+                <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।</p>
             </div>
-            <div class="flex gap-3 items-center">
-                <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 bg-green-500 rounded-full border border-slate-300"></div><span class="text-xs font-bold">Available</span></div>
-                <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 bg-red-500 rounded-full border border-slate-300"></div><span class="text-xs font-bold">Sold</span></div>
+            <div class="flex gap-4 items-center">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[#22c55e] font-black text-lg" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">49</span>
+                    <span class="text-xs font-bold text-slate-600">Available</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[#ef4444] font-black text-lg" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">50</span>
+                    <span class="text-xs font-bold text-slate-600">Sold</span>
+                </div>
                 
                 <button id="btnAdminLogin" onclick="openPasswordModal()" class="ml-2 text-slate-300 hover:text-slate-500" title="Admin Login">🔒</button>
                 <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow-md transition-all">
@@ -215,8 +222,7 @@
             <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
             
             <div class="flex items-center gap-3 mb-6">
-                <div id="uBadge" class="w-4 h-4 rounded-full"></div>
-                <h3 id="uPlotNo" class="text-2xl font-extrabold text-slate-800">Plot --</h3>
+                <h3 id="uPlotNo" class="text-3xl font-black text-slate-800">Plot --</h3>
             </div>
             
             <div class="space-y-3 mb-6 text-sm">
@@ -301,7 +307,6 @@
         let draggingPlot = null;
         let hasDragged = false;
 
-        // 1. Load Plots (CLEAN ARRAY EXPECTED & CORS SUPPORT)
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.remove('hidden'); 
@@ -316,34 +321,40 @@
                     cache: 'no-store'
                 });
                 
-                const liveData = await response.json();
-                console.log("n8n Live Data Received:", liveData); // Debug log
+                const jsonRes = await response.json();
                 
-                if (Array.isArray(liveData)) {
+                let liveData = [];
+                
+                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
+                    liveData = jsonRes[0].myField;
+                } else if (jsonRes.myField) {
+                    liveData = jsonRes.myField;
+                } else if (Array.isArray(jsonRes)) {
+                    liveData = jsonRes;
+                }
+
+                if (Array.isArray(liveData) && liveData.length > 0) {
                     activePlots = liveData;
                     localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
                 }
             } catch (error) {
-                console.error("Fetch Error (Check CORS or n8n Connection):", error);
+                console.warn("Falling back to local storage.", error);
                 const savedLocal = localStorage.getItem('aerocity_live_plots');
                 if(savedLocal) {
                     activePlots = JSON.parse(savedLocal);
                 }
             } finally {
-                // Hide Loader smoothly
                 overlay.style.opacity = '0';
                 setTimeout(() => overlay.classList.add('hidden'), 300);
                 renderMarkers();
             }
         }
 
-        // 2. Render Draggable Markers
         function renderMarkers() {
             const container = document.getElementById('markersContainer');
             container.innerHTML = ''; 
             
             activePlots.forEach(plot => {
-                // Failsafe validation
                 if(!plot.x || !plot.y) return; 
 
                 const marker = document.createElement('div');
@@ -352,7 +363,6 @@
                 marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
                 marker.innerText = plot.plotNo;
                 
-                // DRAG & DROP LOGIC
                 marker.onpointerdown = (e) => {
                     if (!isAdmin) return;
                     e.stopPropagation();
@@ -392,7 +402,6 @@
                     hasDragged = false;
                 };
 
-                // User Click Logic
                 marker.onclick = (e) => {
                     e.stopPropagation(); 
                     if(!isAdmin) openUserModal(plot);
@@ -402,7 +411,6 @@
             });
         }
 
-        // 3. Admin Click on Empty Map (Add New)
         document.getElementById('mapWrapper').addEventListener('click', function(e) {
             if (!isAdmin) return;
             if (e.target.classList.contains('plot-marker')) return; 
@@ -414,7 +422,6 @@
             openAdminModal(null, xPercent.toFixed(2), yPercent.toFixed(2));
         });
 
-        // 4. Handle Status Change (Hide/Show Price logic)
         document.getElementById('adminStatus').addEventListener('change', function() {
             const priceContainer = document.getElementById('priceContainer');
             const priceInput = document.getElementById('adminPrice');
@@ -426,7 +433,6 @@
             }
         });
 
-        // 5. Open Admin Add/Edit Modal
         function openAdminModal(plot = null, x = 0, y = 0) {
             document.getElementById('adminForm').reset();
             
@@ -455,7 +461,6 @@
             document.getElementById('adminModal').classList.remove('hidden');
         }
 
-        // 6. Save Plot to DB & Local Memory
         document.getElementById('adminForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button[type="submit"]');
@@ -463,7 +468,7 @@
 
             const plotNum = document.getElementById('adminPlotNo').value;
             const newPlot = {
-                uid: `${PROJECT_NAME}_${plotNum}`, // KEY COLUMN
+                uid: `${PROJECT_NAME}_${plotNum}`,
                 projectName: PROJECT_NAME,
                 plotNo: plotNum,
                 x: document.getElementById('adminX').value,
@@ -491,7 +496,6 @@
             btn.innerText = "Save Plot";
         });
 
-        // 7. Delete Plot
         async function deletePlot() {
             const plotNo = document.getElementById('adminPlotNo').value;
             if(!confirm(`Are you sure you want to completely DELETE Plot ${plotNo}?`)) return;
@@ -508,7 +512,6 @@
             closeModal('adminModal');
         }
 
-        // Helper: Send Data to n8n
         async function sendDataToN8n(plotData, actionType) {
             const payload = { ...plotData, action: actionType };
             try {
@@ -522,7 +525,6 @@
             }
         }
 
-        // 8. Open User Details
         function openUserModal(plot) {
             document.getElementById('uPlotNo').innerText = "Plot " + plot.plotNo;
             document.getElementById('uSqFt').innerText = plot.sqFt || "--";
@@ -530,20 +532,17 @@
             document.getElementById('uDirection').innerText = plot.dir || "--";
             
             const statusEl = document.getElementById('uStatus');
-            const badge = document.getElementById('uBadge');
             const btn = document.getElementById('btnContactAgent');
             const priceRow = document.getElementById('uPriceRow');
 
             if (plot.status === 'Sold') {
                 statusEl.innerText = "Sold";
                 statusEl.className = "font-bold text-red-500";
-                badge.className = "w-4 h-4 rounded-full bg-red-500";
                 priceRow.style.display = 'none'; 
                 btn.style.display = 'none'; 
             } else {
                 statusEl.innerText = "Available";
                 statusEl.className = "font-bold text-green-500";
-                badge.className = "w-4 h-4 rounded-full bg-green-500";
                 document.getElementById('uPrice').innerText = plot.price || "--";
                 priceRow.style.display = 'flex'; 
                 btn.style.display = 'block';
@@ -555,7 +554,6 @@
             document.getElementById('userModal').classList.remove('hidden');
         }
 
-        // 9. Contact Inquiry Submission
         function openContactModal() {
             closeModal('userModal');
             document.getElementById('contactModal').classList.remove('hidden');
@@ -605,7 +603,6 @@
             }
         });
 
-        // --- ADMIN CONTROLS (Hidden Password Form) ---
         function openPasswordModal() {
             document.getElementById('adminPwdInput').value = ''; 
             document.getElementById('passwordModal').classList.remove('hidden');
@@ -631,10 +628,11 @@
             document.getElementById('app-container').classList.remove('admin-active');
             document.getElementById('btnAdminExit').classList.add('hidden');
             document.getElementById('btnAdminLogin').classList.remove('hidden');
-            document.getElementById('modeIndicator').innerText = "प्लॉट की जानकारी देखने के लिए सर्कल पर क्लिक करें।";
+            
+            // Revert instructions text
+            document.getElementById('modeIndicator').innerHTML = "प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।";
             document.getElementById('modeIndicator').className = "text-sm mt-1 text-slate-500";
             
-            // Re-fetch to ensure sync after admin exits
             loadPlots(); 
         }
 
@@ -642,7 +640,6 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        // Initialize App
         window.onload = loadPlots;
     </script>
 </body>
