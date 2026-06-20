@@ -23,9 +23,11 @@
             max-width: 1200px; 
             margin: 0 auto; 
             border-radius: 12px; 
-            overflow: hidden; 
+            overflow: visible; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            user-select: none; 
+            user-select: none;
+            transform-origin: top left;
+            transition: transform 0.3s ease;
         }
         .map-image { 
             width: 100%; 
@@ -34,25 +36,60 @@
             pointer-events: none; 
         }
         
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .zoom-btn {
+            background: white;
+            border: 2px solid #cbd5e1;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            color: #475569;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+        .zoom-btn:hover {
+            background: #f1f5f9;
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+        
         /* NUMBER MARKERS DESIGN (No Background Circle) */
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            font-size: clamp(9px, 1.8vw, 20px);
             font-weight: 900; 
             cursor: pointer;
             z-index: 10;
             line-height: 1;
             text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000,
-                 0px  1.5px 3px rgba(0,0,0,0.8); 
-            transition: transform 0.2s;
+                -0.5px -0.5px 0 #000,  
+                 0.5px -0.5px 0 #000,
+                -0.5px  0.5px 0 #000,
+                 0.5px  0.5px 0 #000,
+                 0px  1px 2px rgba(0,0,0,0.8); 
+            transition: all 0.2s;
+            pointer-events: auto;
         }
         .plot-marker:hover { 
-            transform: translate(-50%, -50%) scale(1.4); 
+            transform: translate(-50%, -50%) scale(1.3); 
             z-index: 20; 
         }
         
@@ -123,35 +160,58 @@
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative zoom-fixed-content">
             <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
-            <h3 class="font-bold text-lg mb-4 text-slate-800">Admin Login</h3>
-            <input type="password" id="adminPwdInput" placeholder="Enter Password" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500">
-            <button onclick="verifyPassword()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full py-3 rounded-lg transition-colors">Login</button>
+            <h3 class="font-bold text-lg mb-4 text-slate-800">एडमिन लॉगिन (Admin Login)</h3>
+            <div class="relative">
+                <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500 pr-12">
+                <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-slate-500 hover:text-indigo-600 text-xl">
+                    <span id="eyeIcon">👁️</span>
+                </button>
+            </div>
+            <button onclick="verifyPassword()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full py-3 rounded-lg transition-colors">लॉगिन करें (Login)</button>
         </div>
     </div>
 
     <!-- Navigation Bar -->
-    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                        <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            <div class="flex flex-col w-full">
+                <div class="flex justify-between items-center w-full">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                            <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+                    </div>
+                    <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+                        <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span class="font-medium text-sm">वापस होम</span>
+                    </a>
                 </div>
-                <a href="agents.html" class="mt-2 ml-10 inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-slate-300 hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
-                    हमारे प्रॉपर्टी एक्सपर्ट्स
-                </a>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group mr-4">
-                    <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    <span class="font-medium text-sm">वापस होम (Home)</span>
-                </a>
-                <span class="hidden md:inline-block bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs px-3 py-1.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
-                    Sirohi Hub
-                </span>
+                
+                <div class="flex justify-between items-center w-full mt-2 sm:pl-10 flex-wrap gap-4">
+                    <div class="flex flex-wrap gap-2">
+                        <a href="agents.html" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            प्रॉपर्टी एक्सपर्ट्स
+                        </a>
+                        <a href="#" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            लीगल एक्सपर्ट्स
+                        </a>
+                        <a href="#" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            बैंकिंग एक्सपर्ट्स
+                        </a>
+                    </div>
+                    
+                    <!-- Location Selector -->
+                    <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-md px-2.5 py-1.5 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-[#FF6D5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <select class="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer pr-1">
+                            <option value="Sirohi" selected class="bg-slate-800">Sirohi</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -160,7 +220,7 @@
     <header class="bg-slate-900 text-white py-10">
         <div class="container mx-auto px-4 max-w-6xl text-center">
             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200" id="projectTitle">Aerocity Residency</h1>
-            <p class="text-lg text-indigo-100 mt-2">YOUR OWN EARTH, YOUR OWN SKY. Premium Gated Development.</p>
+            <p class="text-lg text-indigo-100 mt-2">प्रीमियम गेटेड कम्युनिटी @ Sirohi Airstrip के पास। Modern Amenities के साथ।</p>
         </div>
     </header>
 
@@ -188,9 +248,111 @@
             </div>
         </div>
 
-        <div class="map-wrapper" id="mapWrapper">
-            <img src="aerocity-map.jpg" alt="Aerocity Map" class="map-image" id="mapImage">
-            <div id="markersContainer"></div>
+        <div style="position: relative; overflow: hidden; border-radius: 12px;">
+            <div class="map-wrapper" id="mapWrapper">
+                <img src="aerocity-map.jpg" alt="Aerocity Map" class="map-image" id="mapImage">
+                <div id="markersContainer"></div>
+            </div>
+            
+            <!-- Zoom Controls -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
+                <div id="adminMarkerControls" class="hidden mt-2 bg-white border-2 border-indigo-500 rounded-lg p-2 shadow-lg">
+                    <label class="block text-[10px] font-bold text-slate-700 mb-1">Marker Size</label>
+                    <input type="range" id="markerSizeSlider" min="6" max="16" value="9" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="text-[9px] text-center text-slate-600 mt-1"><span id="markerSizeValue">9</span>px</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Details Section -->
+        <div class="mt-12 grid md:grid-cols-2 gap-8">
+            <!-- Location & Details -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    प्रोजेक्ट विवरण
+                </h3>
+                <div class="space-y-4 text-slate-700">
+                    <div>
+                        <p class="font-bold text-sm text-slate-500">साइट पता (Site Address):</p>
+                        <p class="text-base">Sirohi Airstrip के पास, Khasra No. 2572/449 & 440, सिरोही, राजस्थान - 307001</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-slate-500">आस-पास के स्थल (Nearby Landmarks):</p>
+                        <ul class="list-disc list-inside text-sm space-y-1 ml-2">
+                            <li>Sirohi Airstrip</li>
+                            <li>National Highway 168</li>
+                            <li>Sirohi City Center (5 km)</li>
+                            <li>Proposed Industrial Area</li>
+                            <li>Government Hospital</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-slate-500">प्लॉट साइज (Plot Size):</p>
+                        <p class="text-base">800 Sq. Ft. से 2500 Sq. Ft. तक</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-slate-500">कुल क्षेत्रफल (Total Area):</p>
+                        <p class="text-sm">14750 Square Meters (लगभग 3.64 एकड़)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+                <h3 class="text-2xl font-bold text-indigo-700 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    सुविधाएं (Amenities)
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">📜</span>
+                        <span class="font-bold text-sm text-slate-700">Patte Shuda Plots</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">🛣️</span>
+                        <span class="font-bold text-sm text-slate-700">40' & 30' CC Roads</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">🔒</span>
+                        <span class="font-bold text-sm text-slate-700">24x7 Security</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">📹</span>
+                        <span class="font-bold text-sm text-slate-700">CCTV Cameras</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">🌳</span>
+                        <span class="font-bold text-sm text-slate-700">Green Spaces</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">💡</span>
+                        <span class="font-bold text-sm text-slate-700">Street Lights</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">🚧</span>
+                        <span class="font-bold text-sm text-slate-700">Boundary Wall</span>
+                    </div>
+                    <div class="flex items-center gap-3 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <span class="text-2xl">🏘️</span>
+                        <span class="font-bold text-sm text-slate-700">Gated Community</span>
+                    </div>
+                </div>
+
+                <!-- Contact Numbers -->
+                <div class="mt-8 pt-6 border-t border-slate-200">
+                    <h4 class="font-bold text-slate-700 mb-3">📞 बुकिंग संपर्क (Booking Contacts):</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <a href="tel:8824059928" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">8824059928</a>
+                        <a href="tel:9629053919" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">9629053919</a>
+                        <a href="tel:9840173092" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">9840173092</a>
+                        <a href="tel:9840416260" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">9840416260</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -206,45 +368,45 @@
                 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Plot Number</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">प्लॉट नंबर (Plot Number)</label>
                         <input type="text" id="adminPlotNo" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold text-indigo-700">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">स्थिति (Status)</label>
                         <select id="adminStatus" class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold">
-                            <option value="Available" class="text-green-600">Available</option>
-                            <option value="Sold" class="text-red-600">Sold</option>
+                            <option value="Available" class="text-green-600">उपलब्ध (Available)</option>
+                            <option value="Sold" class="text-red-600">बिक गया (Sold)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Total Sq. Feet</label>
-                        <input type="text" id="adminSqFt" placeholder="e.g. 1000" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">कुल वर्ग फुट (Total Sq. Feet)</label>
+                        <input type="text" id="adminSqFt" placeholder="उदा. 800" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Dimensions (L x W)</label>
-                        <input type="text" id="adminSize" placeholder="e.g. 25x40" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">आयाम (L x W)</label>
+                        <input type="text" id="adminSize" placeholder="उदा. 20x40" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div id="priceContainer">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Price / Sq.Ft (₹)</label>
-                        <input type="text" id="adminPrice" placeholder="e.g. 1500" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">मूल्य / वर्ग फुट (₹)</label>
+                        <input type="text" id="adminPrice" placeholder="उदा. 1500" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Facing Direction</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">दिशा (Facing Direction)</label>
                         <select id="adminDirection" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
-                            <option value="East">East</option>
-                            <option value="West">West</option>
-                            <option value="North">North</option>
-                            <option value="South">South</option>
+                            <option value="East">पूर्व (East)</option>
+                            <option value="West">पश्चिम (West)</option>
+                            <option value="North">उत्तर (North)</option>
+                            <option value="South">दक्षिण (South)</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="flex gap-3 mt-4 pt-2">
                     <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded transition-colors">
-                        Save Plot
+                        सेव करें (Save)
                     </button>
                     <button type="button" id="btnDeletePlot" onclick="deletePlot()" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded transition-colors">
-                        Delete
+                        हटाएं (Delete)
                     </button>
                 </div>
             </form>
@@ -376,6 +538,133 @@
         let activeAgents = []; 
         let draggingPlot = null;
         let hasDragged = false;
+        let currentZoom = 1;
+        let isPanning = false;
+        let startX = 0;
+        let startY = 0;
+        let translateX = 0;
+        let translateY = 0;
+        let currentMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || 9;
+
+        // Toggle Password Visibility
+        function togglePassword() {
+            const pwdInput = document.getElementById('adminPwdInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.textContent = '🙈';
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.textContent = '👁️';
+            }
+        }
+
+        // Zoom Functions
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.2, 3);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.2, 1);
+            if (currentZoom === 1) {
+                translateX = 0;
+                translateY = 0;
+            }
+            applyZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            translateX = 0;
+            translateY = 0;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const mapWrapper = document.getElementById('mapWrapper');
+            mapWrapper.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
+        }
+
+        // Pan functionality for zoomed map
+        const mapWrapper = document.getElementById('mapWrapper');
+        
+        // Mouse Wheel Zoom
+        mapWrapper.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
+        }, { passive: false });
+
+        // Marker Size Control
+        const markerSizeSlider = document.getElementById('markerSizeSlider');
+        const markerSizeValue = document.getElementById('markerSizeValue');
+        
+        markerSizeSlider.addEventListener('input', function() {
+            currentMarkerSize = parseFloat(this.value);
+            markerSizeValue.textContent = currentMarkerSize;
+            localStorage.setItem('aerocity_marker_size', currentMarkerSize);
+            updateMarkerSizes();
+        });
+        
+        // Set slider to saved value on load
+        markerSizeSlider.value = currentMarkerSize;
+        markerSizeValue.textContent = currentMarkerSize;
+
+        function updateMarkerSizes() {
+            document.querySelectorAll('.plot-marker').forEach(marker => {
+                marker.style.fontSize = `${currentMarkerSize}px`;
+            });
+        }
+        
+        mapWrapper.addEventListener('mousedown', (e) => {
+            if (currentZoom > 1 && !e.target.classList.contains('plot-marker')) {
+                isPanning = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                mapWrapper.style.cursor = 'grabbing';
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                applyZoom();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                mapWrapper.style.cursor = currentZoom > 1 ? 'grab' : 'default';
+            }
+        });
+
+        // Touch support for mobile
+        mapWrapper.addEventListener('touchstart', (e) => {
+            if (currentZoom > 1 && e.touches.length === 1) {
+                isPanning = true;
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            }
+        });
+
+        mapWrapper.addEventListener('touchmove', (e) => {
+            if (isPanning && e.touches.length === 1) {
+                e.preventDefault();
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                applyZoom();
+            }
+        });
+
+        mapWrapper.addEventListener('touchend', () => {
+            isPanning = false;
+        });
 
         // ==========================================
         // SMART MOBILE ZOOM FIX LOGIC (ANTI-SQUASH)
@@ -390,22 +679,16 @@
                 const vv = window.visualViewport;
 
                 if (vv.scale > 1.05) {
-                    // 1. Lock the dark background to the exact zoomed coordinates
                     modal.style.position = 'absolute';
                     modal.style.left = `${vv.pageLeft}px`;
                     modal.style.top = `${vv.pageTop}px`;
                     modal.style.width = `${vv.width}px`;
                     modal.style.height = `${vv.height}px`;
 
-                    // 2. FORCE a fixed width so it doesn't squash (overrides Tailwind w-full)
-                    // 340px ensures a normal readable box width before scaling.
                     content.style.width = '340px';
                     content.style.flexShrink = '0';
-
-                    // 3. Counter-scale the content box to fit inside the zoomed screen
                     content.style.transform = `scale(${1 / vv.scale})`;
                 } else {
-                    // Reset to normal layout
                     modal.style.position = '';
                     modal.style.left = '';
                     modal.style.top = '';
@@ -418,7 +701,6 @@
                 }
             }
 
-            // Apply immediately and listen for changes
             updatePosition();
             window.visualViewport.addEventListener('resize', updatePosition);
             window.visualViewport.addEventListener('scroll', updatePosition);
@@ -434,7 +716,6 @@
                 window.visualViewport.removeEventListener('scroll', modal._zoomHandler);
             }
             
-            // Cleanup all inline styles
             modal.style.position = ''; 
             modal.style.left = ''; 
             modal.style.top = ''; 
@@ -537,6 +818,7 @@
                 const marker = document.createElement('div');
                 marker.style.left = `${plot.x}%`;
                 marker.style.top = `${plot.y}%`;
+                marker.style.fontSize = `${currentMarkerSize}px`;
                 marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
                 marker.innerText = plot.plotNo;
                 
@@ -669,15 +951,20 @@
 
         async function deletePlot() {
             const plotNo = document.getElementById('adminPlotNo').value;
-            if (!confirm(`Are you sure you want to completely DELETE Plot ${plotNo}?`)) return;
+            if (!confirm(`क्या आप वाकई प्लॉट ${plotNo} को पूरी तरह से हटाना चाहते हैं?\n\nAre you sure you want to completely DELETE Plot ${plotNo}?`)) return;
 
-            activePlots = activePlots.filter(p => p.plotNo !== plotNo);
+            const plotIndex = activePlots.findIndex(p => p.plotNo === plotNo);
+            if (plotIndex > -1) {
+                activePlots.splice(plotIndex, 1);
+            }
+            
             localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
             renderMarkers();
             
             await sendDataToN8n({ 
                 uid: `${PROJECT_NAME}_${plotNo}`, 
-                plotNo: plotNo 
+                plotNo: plotNo,
+                projectName: PROJECT_NAME
             }, 'delete');
             
             closeModal('adminModal');
@@ -835,7 +1122,8 @@
                 document.getElementById('app-container').classList.add('admin-active');
                 document.getElementById('btnAdminLogin').classList.add('hidden');
                 document.getElementById('btnAdminExit').classList.remove('hidden');
-                document.getElementById('modeIndicator').innerText = "ADMIN MODE: Add, Edit, Drag, or Delete plots.";
+                document.getElementById('adminMarkerControls').classList.remove('hidden');
+                document.getElementById('modeIndicator').innerText = "एडमिन मोड: प्लॉट जोड़ें, संपादित करें, ड्रैग करें या हटाएं।";
                 document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-600";
                 closeModal('passwordModal');
             } else {
@@ -848,6 +1136,7 @@
             document.getElementById('app-container').classList.remove('admin-active');
             document.getElementById('btnAdminExit').classList.add('hidden');
             document.getElementById('btnAdminLogin').classList.remove('hidden');
+            document.getElementById('adminMarkerControls').classList.add('hidden');
             
             document.getElementById('modeIndicator').innerHTML = "प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।";
             document.getElementById('modeIndicator').className = "text-sm mt-1 text-slate-500";
