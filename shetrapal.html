@@ -569,6 +569,9 @@
             mapWrapper.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
         }
 
+        // Pan functionality for zoomed map
+        const mapWrapper = document.getElementById('mapWrapper');
+        
         // Mouse Wheel Zoom
         mapWrapper.addEventListener('wheel', (e) => {
             e.preventDefault();
@@ -594,9 +597,6 @@
                 marker.style.fontSize = `${currentMarkerSize}px`;
             });
         }
-
-        // Pan functionality for zoomed map
-        const mapWrapper = document.getElementById('mapWrapper');
         mapWrapper.addEventListener('mousedown', (e) => {
             if (currentZoom > 1 && !e.target.classList.contains('plot-marker')) {
                 isPanning = true;
