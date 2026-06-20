@@ -75,22 +75,22 @@
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            font-size: 16px;
+            font-size: 11px;
             font-weight: 900; 
             cursor: pointer;
             z-index: 10;
             line-height: 1;
             text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000,
-                 0px  1.5px 3px rgba(0,0,0,0.8); 
+                -0.5px -0.5px 0 #000,  
+                 0.5px -0.5px 0 #000,
+                -0.5px  0.5px 0 #000,
+                 0.5px  0.5px 0 #000,
+                 0px  1px 2px rgba(0,0,0,0.8); 
             transition: transform 0.2s;
             pointer-events: auto;
         }
         .plot-marker:hover { 
-            transform: translate(-50%, -50%) scale(1.3); 
+            transform: translate(-50%, -50%) scale(1.5); 
             z-index: 20; 
         }
         
@@ -255,26 +255,26 @@
                 </h3>
                 <div class="space-y-4 text-slate-700">
                     <div>
-                        <p class="font-bold text-sm text-slate-500">Site Address:</p>
-                        <p class="text-base">Sirohi to Mandar Main Road, Near Veer Bavaji Mandir, Sirohi, Rajasthan - 307001</p>
+                        <p class="font-bold text-sm text-slate-500">साइट पता (Site Address):</p>
+                        <p class="text-base">सिरोही से मंदार मुख्य मार्ग, वीर बावजी मंदिर के पास, सिरोही, राजस्थान - 307001</p>
                     </div>
                     <div>
-                        <p class="font-bold text-sm text-slate-500">Nearby Landmarks:</p>
+                        <p class="font-bold text-sm text-slate-500">आस-पास के स्थल (Nearby Landmarks):</p>
                         <ul class="list-disc list-inside text-sm space-y-1 ml-2">
-                            <li>National Highway 168 (Sirohi to Mandar)</li>
-                            <li>Anadara Circle</li>
-                            <li>RTO Office</li>
-                            <li>Sant Kriparam Ji Ashram</li>
-                            <li>Sunrise Residency</li>
-                            <li>Proposed 80 Ft. Road</li>
+                            <li>राष्ट्रीय राजमार्ग 168 (सिरोही से मंदार)</li>
+                            <li>अनादरा सर्कल</li>
+                            <li>आरटीओ कार्यालय</li>
+                            <li>संत कृपाराम जी आश्रम</li>
+                            <li>सनराइज रेजिडेंसी</li>
+                            <li>प्रस्तावित 80 फुट रोड</li>
                         </ul>
                     </div>
                     <div>
-                        <p class="font-bold text-sm text-slate-500">Plot Size:</p>
-                        <p class="text-base">Standard Plots: <span class="font-bold text-amber-700">600 Sq. Ft.</span></p>
+                        <p class="font-bold text-sm text-slate-500">प्लॉट साइज (Plot Size):</p>
+                        <p class="text-base">मानक प्लॉट: <span class="font-bold text-amber-700">600 वर्ग फुट</span></p>
                     </div>
                     <div>
-                        <p class="font-bold text-sm text-slate-500">Khasra Numbers:</p>
+                        <p class="font-bold text-sm text-slate-500">खसरा नंबर (Khasra Numbers):</p>
                         <p class="text-sm">1593/233, 1451/374, 374, 1591/1450, 1595/373</p>
                     </div>
                 </div>
@@ -323,7 +323,7 @@
 
                 <!-- Contact Numbers -->
                 <div class="mt-8 pt-6 border-t border-slate-200">
-                    <h4 class="font-bold text-slate-700 mb-3">📞 Booking Contacts:</h4>
+                    <h4 class="font-bold text-slate-700 mb-3">📞 बुकिंग संपर्क (Booking Contacts):</h4>
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <a href="tel:8824059928" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">8824059928</a>
                         <a href="tel:9629053919" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">9629053919</a>
@@ -898,13 +898,18 @@
             const plotNo = document.getElementById('adminPlotNo').value;
             if (!confirm(`क्या आप वाकई प्लॉट ${plotNo} को पूरी तरह से हटाना चाहते हैं?\n\nAre you sure you want to completely DELETE Plot ${plotNo}?`)) return;
 
-            activePlots = activePlots.filter(p => p.plotNo !== plotNo);
+            const plotIndex = activePlots.findIndex(p => p.plotNo === plotNo);
+            if (plotIndex > -1) {
+                activePlots.splice(plotIndex, 1);
+            }
+            
             localStorage.setItem('shetrapal_live_plots', JSON.stringify(activePlots));
             renderMarkers();
             
             await sendDataToN8n({ 
                 uid: `${PROJECT_NAME}_${plotNo}`, 
-                plotNo: plotNo 
+                plotNo: plotNo,
+                projectName: PROJECT_NAME
             }, 'delete');
             
             closeModal('adminModal');
