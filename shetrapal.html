@@ -23,9 +23,11 @@
             max-width: 1200px; 
             margin: 0 auto; 
             border-radius: 12px; 
-            overflow: hidden; 
+            overflow: visible; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            user-select: none; 
+            user-select: none;
+            transform-origin: top left;
+            transition: transform 0.3s ease;
         }
         .map-image { 
             width: 100%; 
@@ -34,11 +36,46 @@
             pointer-events: none; 
         }
         
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .zoom-btn {
+            background: white;
+            border: 2px solid #cbd5e1;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            color: #475569;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+        .zoom-btn:hover {
+            background: #f1f5f9;
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+        
         /* NUMBER MARKERS DESIGN (No Background Circle) */
         .plot-marker {
             position: absolute;
             transform: translate(-50%, -50%);
-            font-size: clamp(9px, 1.8vw, 20px);
+            font-size: 16px;
             font-weight: 900; 
             cursor: pointer;
             z-index: 10;
@@ -50,9 +87,10 @@
                  1px  1px 0 #000,
                  0px  1.5px 3px rgba(0,0,0,0.8); 
             transition: transform 0.2s;
+            pointer-events: auto;
         }
         .plot-marker:hover { 
-            transform: translate(-50%, -50%) scale(1.4); 
+            transform: translate(-50%, -50%) scale(1.3); 
             z-index: 20; 
         }
         
@@ -123,9 +161,14 @@
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative zoom-fixed-content">
             <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
-            <h3 class="font-bold text-lg mb-4 text-slate-800">Admin Login</h3>
-            <input type="password" id="adminPwdInput" placeholder="Enter Password" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-amber-500">
-            <button onclick="verifyPassword()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold w-full py-3 rounded-lg transition-colors">Login</button>
+            <h3 class="font-bold text-lg mb-4 text-slate-800">एडमिन लॉगिन (Admin Login)</h3>
+            <div class="relative">
+                <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-amber-500 pr-12">
+                <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-slate-500 hover:text-amber-600 text-xl">
+                    <span id="eyeIcon">👁️</span>
+                </button>
+            </div>
+            <button onclick="verifyPassword()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold w-full py-3 rounded-lg transition-colors">लॉगिन करें (Login)</button>
         </div>
     </div>
 
@@ -188,9 +231,18 @@
             </div>
         </div>
 
-        <div class="map-wrapper" id="mapWrapper">
-            <img src="shetrapal-map.jpg" alt="Shetrapal Map" class="map-image" id="mapImage">
-            <div id="markersContainer"></div>
+        <div style="position: relative; overflow: hidden; border-radius: 12px;">
+            <div class="map-wrapper" id="mapWrapper">
+                <img src="shetrapal-map.jpg" alt="Shetrapal Map" class="map-image" id="mapImage">
+                <div id="markersContainer"></div>
+            </div>
+            
+            <!-- Zoom Controls -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
+            </div>
         </div>
 
         <!-- Project Details Section -->
@@ -295,45 +347,45 @@
                 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Plot Number</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">प्लॉट नंबर (Plot Number)</label>
                         <input type="text" id="adminPlotNo" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold text-amber-700">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">स्थिति (Status)</label>
                         <select id="adminStatus" class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold">
-                            <option value="Available" class="text-green-600">Available</option>
-                            <option value="Sold" class="text-red-600">Sold</option>
+                            <option value="Available" class="text-green-600">उपलब्ध (Available)</option>
+                            <option value="Sold" class="text-red-600">बिक गया (Sold)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Total Sq. Feet</label>
-                        <input type="text" id="adminSqFt" placeholder="e.g. 600" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">कुल वर्ग फुट (Total Sq. Feet)</label>
+                        <input type="text" id="adminSqFt" placeholder="उदा. 600" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Dimensions (L x W)</label>
-                        <input type="text" id="adminSize" placeholder="e.g. 20x30" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">आयाम (L x W)</label>
+                        <input type="text" id="adminSize" placeholder="उदा. 20x30" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div id="priceContainer">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Price / Sq.Ft (₹)</label>
-                        <input type="text" id="adminPrice" placeholder="e.g. 1200" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">मूल्य / वर्ग फुट (₹)</label>
+                        <input type="text" id="adminPrice" placeholder="उदा. 1200" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Facing Direction</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">दिशा (Facing Direction)</label>
                         <select id="adminDirection" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
-                            <option value="East">East</option>
-                            <option value="West">West</option>
-                            <option value="North">North</option>
-                            <option value="South">South</option>
+                            <option value="East">पूर्व (East)</option>
+                            <option value="West">पश्चिम (West)</option>
+                            <option value="North">उत्तर (North)</option>
+                            <option value="South">दक्षिण (South)</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="flex gap-3 mt-4 pt-2">
                     <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded transition-colors">
-                        Save Plot
+                        सेव करें (Save)
                     </button>
                     <button type="button" id="btnDeletePlot" onclick="deletePlot()" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded transition-colors">
-                        Delete
+                        हटाएं (Delete)
                     </button>
                 </div>
             </form>
@@ -465,6 +517,100 @@
         let activeAgents = []; 
         let draggingPlot = null;
         let hasDragged = false;
+        let currentZoom = 1;
+        let isPanning = false;
+        let startX = 0;
+        let startY = 0;
+        let translateX = 0;
+        let translateY = 0;
+
+        // Toggle Password Visibility
+        function togglePassword() {
+            const pwdInput = document.getElementById('adminPwdInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.textContent = '🙈';
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.textContent = '👁️';
+            }
+        }
+
+        // Zoom Functions
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.2, 3);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.2, 1);
+            if (currentZoom === 1) {
+                translateX = 0;
+                translateY = 0;
+            }
+            applyZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            translateX = 0;
+            translateY = 0;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const mapWrapper = document.getElementById('mapWrapper');
+            mapWrapper.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
+        }
+
+        // Pan functionality for zoomed map
+        const mapWrapper = document.getElementById('mapWrapper');
+        mapWrapper.addEventListener('mousedown', (e) => {
+            if (currentZoom > 1 && !e.target.classList.contains('plot-marker')) {
+                isPanning = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                mapWrapper.style.cursor = 'grabbing';
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                applyZoom();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                mapWrapper.style.cursor = currentZoom > 1 ? 'grab' : 'default';
+            }
+        });
+
+        // Touch support for mobile
+        mapWrapper.addEventListener('touchstart', (e) => {
+            if (currentZoom > 1 && e.touches.length === 1) {
+                isPanning = true;
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            }
+        });
+
+        mapWrapper.addEventListener('touchmove', (e) => {
+            if (isPanning && e.touches.length === 1) {
+                e.preventDefault();
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                applyZoom();
+            }
+        });
+
+        mapWrapper.addEventListener('touchend', () => {
+            isPanning = false;
+        });
 
         // ==========================================
         // SMART MOBILE ZOOM FIX LOGIC (ANTI-SQUASH)
@@ -750,7 +896,7 @@
 
         async function deletePlot() {
             const plotNo = document.getElementById('adminPlotNo').value;
-            if (!confirm(`Are you sure you want to completely DELETE Plot ${plotNo}?`)) return;
+            if (!confirm(`क्या आप वाकई प्लॉट ${plotNo} को पूरी तरह से हटाना चाहते हैं?\n\nAre you sure you want to completely DELETE Plot ${plotNo}?`)) return;
 
             activePlots = activePlots.filter(p => p.plotNo !== plotNo);
             localStorage.setItem('shetrapal_live_plots', JSON.stringify(activePlots));
@@ -916,7 +1062,7 @@
                 document.getElementById('app-container').classList.add('admin-active');
                 document.getElementById('btnAdminLogin').classList.add('hidden');
                 document.getElementById('btnAdminExit').classList.remove('hidden');
-                document.getElementById('modeIndicator').innerText = "ADMIN MODE: Add, Edit, Drag, or Delete plots.";
+                document.getElementById('modeIndicator').innerText = "एडमिन मोड: प्लॉट जोड़ें, संपादित करें, ड्रैग करें या हटाएं।";
                 document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-600";
                 closeModal('passwordModal');
             } else {
