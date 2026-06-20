@@ -545,7 +545,7 @@
         let startY = 0;
         let translateX = 0;
         let translateY = 0;
-        let currentMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 9;
+        let currentMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || (window.innerWidth < 768 ? 7 : 9);
 
         // Toggle Password Visibility
         function togglePassword() {
@@ -614,6 +614,16 @@
         // Set slider to saved value on load
         markerSizeSlider.value = currentMarkerSize;
         markerSizeValue.textContent = currentMarkerSize;
+        
+        // Adjust marker size on window resize
+        window.addEventListener('resize', () => {
+            if (!localStorage.getItem('shetrapal_marker_size')) {
+                currentMarkerSize = window.innerWidth < 768 ? 7 : 9;
+                markerSizeSlider.value = currentMarkerSize;
+                markerSizeValue.textContent = currentMarkerSize;
+                updateMarkerSizes();
+            }
+        });
 
         function updateMarkerSizes() {
             document.querySelectorAll('.plot-marker').forEach(marker => {
