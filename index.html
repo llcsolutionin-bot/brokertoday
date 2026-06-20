@@ -22,22 +22,42 @@
     <!-- Navigation Bar -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                        <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            <div class="flex flex-col w-full">
+                <div class="flex justify-between items-center w-full">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                            <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+                    </div>
                 </div>
-                <!-- Aligned Button Style for Agents Page -->
-                <a href="agents.html" class="mt-2 ml-10 inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
-                    हमारे प्रॉपर्टी एक्सपर्ट्स
-                </a>
+                
+                <div class="flex justify-between items-center w-full mt-2 sm:pl-10 flex-wrap gap-4">
+                    <div class="flex flex-wrap gap-2">
+                        <!-- Aligned Button Style for Agents Page -->
+                        <a href="agents.html" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            प्रॉपर्टी एक्सपर्ट्स
+                        </a>
+                        <a href="#" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            लीगल एक्सपर्ट्स
+                        </a>
+                        <a href="#" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            बैंकिंग एक्सपर्ट्स
+                        </a>
+                    </div>
+                    
+                    <!-- Location Selector -->
+                    <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-md px-2.5 py-1.5 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-[#FF6D5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <select class="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer pr-1">
+                            <option value="Sirohi" selected class="bg-slate-800">Sirohi</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-
-            <span class="bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs px-3 py-1.5 rounded-full uppercase tracking-wider font-bold shadow-sm">
-                Sirohi Hub
-            </span>
         </div>
     </nav>
 
