@@ -91,17 +91,19 @@
         
         /* Yellow Circle Background for Markers */
         .marker-circle {
-            /* Remove width 100% and height 100% */
             position: absolute;
             top: 50%;
             left: 50%;
-            /* Scale outwards from the absolute center of the 30x30 hitbox */
             transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
             
-            /* Revert to the perfect fit-to-fit content sizing */
+            /* THE GOLDEN FIX: Responsive font size that never gets too massive */
+            font-size: clamp(10px, 3vw, 16px); 
+            
+            /* Perfect circle sizing based on the clamped font */
             min-width: 2.2em;
             min-height: 2.2em;
             padding: 0.2em;
+            
             background-color: #FFEB3B;
             border-radius: 50%;
             display: flex;
@@ -110,7 +112,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
             color: #000;
             font-weight: bold;
-            font-size: var(--admin-base-size, 10px);
+            line-height: 1;
             cursor: grab;
             pointer-events: auto;
             transition: none;
@@ -671,7 +673,9 @@
             const minZoom = map.getMinZoom();
             
             // Calculate scale multiplier using Math.pow for exponential scaling
-            const scale = Math.pow(2, currentZoom - minZoom);
+            const rawScale = Math.pow(2, currentZoom - minZoom);
+            // Clamp the multiplier between 0.5x (zoomed out) and 2.5x (zoomed in)
+            const safeScale = Math.min(Math.max(rawScale, 0.5), 2.5);
             
             // Update all markers with CSS variable on the marker-circle
             Object.values(markerObjects).forEach(markerObj => {
@@ -680,7 +684,7 @@
                     const markerCircle = markerElement.querySelector('.marker-circle');
                     if (markerCircle) {
                         // Set CSS variable for scale on the circle container
-                        markerCircle.style.setProperty('--marker-scale', scale);
+                        markerCircle.style.setProperty('--marker-scale', safeScale);
                     }
                 }
             });
