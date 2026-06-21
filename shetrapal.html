@@ -866,12 +866,11 @@
                     const lng = (parseFloat(plot.x) / 100) * w;
                     
                     // Create custom div icon with plot number wrapped in yellow circle
-                    // iconSize and iconAnchor set to [0, 0] to prevent drift
                     const colorClass = plot.status === 'Sold' ? 'marker-sold' : 'marker-available';
-                    const baseSize = desktopMarkerSize; // Use admin-set base size
+                    const baseSize = currentMarkerSize; // Use responsive marker size
                     const icon = L.divIcon({
                         className: 'custom-marker',
-                        html: `<div class="marker-circle" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;"><span class="plot-number ${colorClass}">${plot.plotNo}</span></div>`,
+                        html: `<div class="marker-circle" style="font-size: ${baseSize}px; --marker-scale: 1;"><span class="plot-number ${colorClass}">${plot.plotNo}</span></div>`,
                         iconSize: [30, 30],
                         iconAnchor: [15, 15]
                     });
