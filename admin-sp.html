@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Broker Today</title>
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+            <!-- Logo/Header -->
+            <div class="text-center mb-8">
+                <div class="flex justify-center mb-4">
+                    <svg class="w-16 h-16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                        <path d="M14 44 L32 22 L50 44" fill="none" stroke="#4f46e5" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Broker Today</h1>
+                <p class="text-slate-500 text-sm">Admin Access Panel</p>
+            </div>
+
+            <!-- Password Form -->
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Admin Password</label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="passwordInput" 
+                            placeholder="Enter admin password" 
+                            required
+                            class="w-full border-2 border-slate-300 p-3 pr-12 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
+                        >
+                        <button 
+                            type="button" 
+                            onclick="togglePassword()" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-600 text-xl transition-colors"
+                        >
+                            <span id="eyeIcon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+                >
+                    <span id="btnText">Access Admin Panel</span>
+                    <span id="btnLoader" class="hidden">
+                        <div class="loader mx-auto"></div>
+                    </span>
+                </button>
+            </form>
+
+            <div id="errorMessage" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center font-semibold">
+                ❌ Incorrect password. Access denied.
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (Hidden by default) -->
+    <div id="adminDashboard" class="hidden w-full max-w-6xl">
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8 pb-6 border-b border-slate-200">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-slate-800 mb-2">Admin Dashboard</h1>
+                    <p class="text-slate-500">Welcome to Broker Today Admin Panel</p>
+                </div>
+                <button 
+                    onclick="logout()" 
+                    class="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2 rounded-lg transition-colors"
+                >
+                    Logout
+                </button>
+            </div>
+
+            <!-- Banner -->
+            <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-8 mb-8 text-white">
+                <h2 class="text-2xl font-bold mb-2">🎯 Admin Control Center</h2>
+                <p class="text-indigo-100">Manage your projects, plots, and agents from this central dashboard</p>
+            </div>
+
+            <!-- Quick Actions Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Aerocity Project -->
+                <a href="aerocity.html" class="group block bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 rounded-xl p-6 border-2 border-indigo-200 hover:border-indigo-400 transition-all shadow-md hover:shadow-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-indigo-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            🏢
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Aerocity Residency</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">Manage plots, pricing, and availability</p>
+                    <div class="flex items-center text-indigo-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                        Open Project →
+                    </div>
+                </a>
+
+                <!-- Shetrapal Project -->
+                <a href="shetrapal.html" class="group block bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 rounded-xl p-6 border-2 border-amber-200 hover:border-amber-400 transition-all shadow-md hover:shadow-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-amber-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            🏘️
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Shetrapal Residency</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">Manage plots, pricing, and availability</p>
+                    <div class="flex items-center text-amber-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                        Open Project →
+                    </div>
+                </a>
+
+                <!-- Agents Management -->
+                <a href="agents.html" class="group block bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl p-6 border-2 border-green-200 hover:border-green-400 transition-all shadow-md hover:shadow-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-green-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            👥
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Agents Management</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">View and manage property agents</p>
+                    <div class="flex items-center text-green-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                        Manage Agents →
+                    </div>
+                </a>
+
+                <!-- Home Page -->
+                <a href="index.html" class="group block bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl p-6 border-2 border-blue-200 hover:border-blue-400 transition-all shadow-md hover:shadow-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-blue-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            🏠
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Home Page</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">View public homepage</p>
+                    <div class="flex items-center text-blue-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                        Go to Home →
+                    </div>
+                </a>
+
+                <!-- Analytics (Placeholder) -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border-2 border-purple-200 opacity-60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-purple-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            📊
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Analytics</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">Coming Soon</p>
+                    <div class="text-purple-400 font-semibold text-sm">
+                        Under Development
+                    </div>
+                </div>
+
+                <!-- Settings (Placeholder) -->
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border-2 border-slate-200 opacity-60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-slate-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            ⚙️
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Settings</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">Coming Soon</p>
+                    <div class="text-slate-400 font-semibold text-sm">
+                        Under Development
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="mt-8 pt-6 border-t border-slate-200 text-center text-slate-500 text-sm">
+                <p>🔒 Secure Admin Access • Broker Today © 2026</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "Goal@2030";
+        
+        // Toggle password visibility
+        function togglePassword() {
+            const pwdInput = document.getElementById('passwordInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.textContent = '🙈';
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.textContent = '👁️';
+            }
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('passwordInput').value;
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Show loader
+            btnText.classList.add('hidden');
+            btnLoader.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            
+            // Simulate authentication delay
+            setTimeout(() => {
+                if (password === ADMIN_PASSWORD) {
+                    // Success - show dashboard
+                    document.getElementById('passwordModal').classList.add('hidden');
+                    document.getElementById('adminDashboard').classList.remove('hidden');
+                    
+                    // Store session
+                    sessionStorage.setItem('admin_authenticated', 'true');
+                } else {
+                    // Failed - show error
+                    errorMessage.classList.remove('hidden');
+                    btnText.classList.remove('hidden');
+                    btnLoader.classList.add('hidden');
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('passwordInput').focus();
+                }
+            }, 800);
+        });
+
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('admin_authenticated');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('passwordModal').classList.remove('hidden');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        // Check if already authenticated
+        window.onload = function() {
+            if (sessionStorage.getItem('admin_authenticated') === 'true') {
+                document.getElementById('passwordModal').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+            }
+        };
+    </script>
+</body>
+</html>
