@@ -544,7 +544,7 @@
         let startY = 0;
         let translateX = 0;
         let translateY = 0;
-        let currentMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || (window.innerWidth < 768 ? 7 : 9);
+        let currentMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || (window.innerWidth < 768 ? 6 : 9);
 
         // Toggle Password Visibility
         function togglePassword() {
@@ -617,7 +617,7 @@
         // Adjust marker size on window resize
         window.addEventListener('resize', () => {
             if (!localStorage.getItem('aerocity_marker_size')) {
-                currentMarkerSize = window.innerWidth < 768 ? 7 : 9;
+                currentMarkerSize = window.innerWidth < 768 ? 6 : 9;
                 markerSizeSlider.value = currentMarkerSize;
                 markerSizeValue.textContent = currentMarkerSize;
                 updateMarkerSizes();
@@ -1231,7 +1231,15 @@
         // --- 9. INITIALIZE ON LOAD ---
         window.onload = async () => {
             await loadAgents(); 
-            loadPlots();        
+            loadPlots();
+            
+            // Auto-zoom for mobile devices on initial load
+            if (window.innerWidth < 768) {
+                setTimeout(() => {
+                    currentZoom = 1.5;
+                    applyZoom();
+                }, 500);
+            }
         };
     </script>
 </body>
