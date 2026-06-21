@@ -38,20 +38,12 @@
         
         /* Zoom Controls */
         .zoom-controls {
-            position: fixed;
-            top: 180px;
-            right: 10px;
-            z-index: 50;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 8px;
-        }
-        
-        @media (min-width: 769px) {
-            .zoom-controls {
-                position: absolute;
-                top: 10px;
-            }
+            justify-content: center;
+            margin-top: 16px;
+            flex-wrap: wrap;
         }
         .zoom-btn {
             background: white;
@@ -252,16 +244,7 @@
                 <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।</p>
             </div>
             <div class="flex gap-4 items-center">
-                <div class="flex items-center gap-1.5">
-                    <span class="text-[#22c55e] font-black text-lg" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">49</span>
-                    <span class="text-xs font-bold text-slate-600">Available</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="text-[#ef4444] font-black text-lg" style="text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">50</span>
-                    <span class="text-xs font-bold text-slate-600">Sold</span>
-                </div>
-                
-                <button id="btnAdminLogin" onclick="openPasswordModal()" class="ml-2 text-slate-300 hover:text-slate-500 text-xl" title="Admin Login">🔒</button>
+                <button id="btnAdminLogin" onclick="openPasswordModal()" class="text-slate-300 hover:text-slate-500 text-xl" title="Admin Login">🔒</button>
                 <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow-md transition-all">
                     Save & Exit Admin
                 </button>
@@ -273,17 +256,17 @@
                 <img src="aerocity-map.jpg" alt="Aerocity Map" class="map-image" id="mapImage">
                 <div id="markersContainer"></div>
             </div>
-            
-            <!-- Zoom Controls -->
-            <div class="zoom-controls">
-                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
-                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
-                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
-                <div id="adminMarkerControls" class="hidden mt-2 bg-white border-2 border-indigo-500 rounded-lg p-2 shadow-lg">
-                    <label class="block text-[10px] font-bold text-slate-700 mb-1">Marker Size</label>
-                    <input type="range" id="markerSizeSlider" min="6" max="16" value="9" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                    <div class="text-[9px] text-center text-slate-600 mt-1"><span id="markerSizeValue">9</span>px</div>
-                </div>
+        </div>
+        
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+            <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+            <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
+            <div id="adminMarkerControls" class="hidden bg-white border-2 border-indigo-500 rounded-lg p-2 shadow-lg">
+                <label class="block text-[10px] font-bold text-slate-700 mb-1">Marker Size (Desktop)</label>
+                <input type="range" id="markerSizeSlider" min="6" max="16" value="9" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <div class="text-[9px] text-center text-slate-600 mt-1"><span id="markerSizeValue">9</span>px</div>
             </div>
         </div>
 
@@ -362,16 +345,6 @@
                     </div>
                 </div>
 
-                <!-- Contact Numbers -->
-                <div class="mt-8 pt-6 border-t border-slate-200">
-                    <h4 class="font-bold text-slate-700 mb-3">📞 बुकिंग संपर्क (Booking Contacts):</h4>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <a href="tel:8824059928" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">8824059928</a>
-                        <a href="tel:9629053919" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">9629053919</a>
-                        <a href="tel:9840173092" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">9840173092</a>
-                        <a href="tel:9840416260" class="bg-green-50 text-green-700 font-bold py-2 px-3 rounded-lg border border-green-200 hover:bg-green-600 hover:text-white transition-colors text-center">9840416260</a>
-                    </div>
-                </div>
             </div>
         </div>
     </main>
@@ -564,7 +537,8 @@
         let startY = 0;
         let translateX = 0;
         let translateY = 0;
-        let currentMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || (window.innerWidth < 768 ? 3.5 : 9);
+        let desktopMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || 9;
+        let currentMarkerSize = window.innerWidth < 768 ? desktopMarkerSize / 2 : desktopMarkerSize;
 
         // Toggle Password Visibility
         function togglePassword() {
@@ -624,24 +598,22 @@
         const markerSizeValue = document.getElementById('markerSizeValue');
         
         markerSizeSlider.addEventListener('input', function() {
-            currentMarkerSize = parseFloat(this.value);
-            markerSizeValue.textContent = currentMarkerSize;
-            localStorage.setItem('aerocity_marker_size', currentMarkerSize);
+            desktopMarkerSize = parseFloat(this.value);
+            markerSizeValue.textContent = desktopMarkerSize;
+            localStorage.setItem('aerocity_marker_size', desktopMarkerSize);
+            currentMarkerSize = window.innerWidth < 768 ? desktopMarkerSize / 2 : desktopMarkerSize;
             updateMarkerSizes();
         });
         
         // Set slider to saved value on load
-        markerSizeSlider.value = currentMarkerSize;
-        markerSizeValue.textContent = currentMarkerSize;
+        markerSizeSlider.value = desktopMarkerSize;
+        markerSizeValue.textContent = desktopMarkerSize;
         
         // Adjust marker size on window resize
         window.addEventListener('resize', () => {
-            if (!localStorage.getItem('aerocity_marker_size')) {
-                currentMarkerSize = window.innerWidth < 768 ? 3.5 : 9;
-                markerSizeSlider.value = currentMarkerSize;
-                markerSizeValue.textContent = currentMarkerSize;
-                updateMarkerSizes();
-            }
+            const newDesktopSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || 9;
+            currentMarkerSize = window.innerWidth < 768 ? newDesktopSize / 2 : newDesktopSize;
+            updateMarkerSizes();
         });
 
         function updateMarkerSizes() {
