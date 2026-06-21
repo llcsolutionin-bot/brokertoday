@@ -87,30 +87,31 @@
         .leaflet-div-icon {
             background: transparent !important;
             border: none !important;
-            /* Let Leaflet handle width/height/margin via iconSize/iconAnchor */
+            /* Apply zoom scaling to the outer container */
+            transform: scale(var(--marker-scale, 1));
+            transform-origin: center center;
+            transition: transform 0.2s;
         }
         
-        /* Inner marker circle with CSS Variable Scaling */
+        /* Inner marker circle with perfect centering */
         .marker-circle {
-            width: 100%;
-            height: 100%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            background-color: #FFEB3B;
+            border-radius: 50%;
+            min-width: 2.2em;
+            min-height: 2.2em;
+            padding: 0.2em;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #FFEB3B;
-            border-radius: 50%;
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            color: #000;
             font-weight: 700;
             font-size: var(--admin-base-size, 10px);
             letter-spacing: 0.05em;
             -webkit-text-stroke: 0.04em black;
             filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
             cursor: grab;
-            /* Crucial: scale the inner circle smoothly, centered within the parent */
-            transform: scale(var(--marker-scale, 1));
-            transform-origin: center center;
-            transition: transform 0.2s;
         }
         
         .marker-circle:active {
@@ -118,7 +119,7 @@
         }
         
         .marker-circle:hover {
-            transform: scale(calc(var(--marker-scale, 1) * 1.2));
+            transform: translate(-50%, -50%) scale(1.2);
         }
         
         .marker-available { color: #22c55e; }
@@ -666,15 +667,12 @@
             // Calculate scale multiplier using Math.pow for exponential scaling
             const scale = Math.pow(2, currentZoom - minZoom);
             
-            // Update all markers with CSS variable
+            // Update all markers with CSS variable on the outer div-icon
             Object.values(markerObjects).forEach(markerObj => {
                 const markerElement = markerObj.marker.getElement();
                 if (markerElement) {
-                    const markerCircle = markerElement.querySelector('.marker-circle');
-                    if (markerCircle) {
-                        // Set CSS variable for scale
-                        markerCircle.style.setProperty('--marker-scale', scale);
-                    }
+                    // Set CSS variable for scale on the outer container
+                    markerElement.style.setProperty('--marker-scale', scale);
                 }
             });
         }
