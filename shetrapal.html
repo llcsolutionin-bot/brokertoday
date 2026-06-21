@@ -87,6 +87,11 @@
         .leaflet-div-icon {
             background: transparent !important;
             border: none !important;
+            transform: translate(-50%, -50%) !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            white-space: nowrap !important;
         }
         
         /* Plot Marker Numbers with Responsive Sizing and Thin Black Outline */
@@ -826,12 +831,13 @@
                     const lng = (parseFloat(plot.x) / 100) * w;
                     
                     // Create custom div icon with plot number (using clamp for responsive sizing)
+                    // iconSize and iconAnchor set to [0, 0] to prevent drift with responsive font sizing
                     const colorClass = plot.status === 'Sold' ? 'marker-sold' : 'marker-available';
                     const icon = L.divIcon({
                         className: 'custom-marker',
                         html: `<div class="plot-number ${colorClass}">${plot.plotNo}</div>`,
-                        iconSize: [40, 40],
-                        iconAnchor: [20, 20]
+                        iconSize: [0, 0],
+                        iconAnchor: [0, 0]
                     });
                     
                     // Create marker
