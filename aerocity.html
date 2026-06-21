@@ -9,6 +9,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Leaflet.js CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
@@ -17,92 +21,109 @@
             background: rgba(15, 23, 42, 0.95); 
             backdrop-filter: blur(10px); 
         }
-        .map-wrapper { 
-            position: relative; 
+        /* Leaflet Map Container */
+        #map { 
             width: 100%; 
+            height: 600px; 
             max-width: 1200px; 
             margin: 0 auto; 
             border-radius: 12px; 
-            overflow: visible; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            user-select: none;
-            transform-origin: top left;
-            transition: transform 0.3s ease;
-        }
-        .map-image { 
-            width: 100%; 
-            height: auto; 
-            display: block; 
-            pointer-events: none; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: #f8fafc;
+            z-index: 1;
+            position: relative;
         }
         
-        /* Zoom Controls */
-        .zoom-controls {
-            display: flex;
-            flex-direction: row;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-        .zoom-btn {
-            background: white;
-            border: 2px solid #cbd5e1;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            font-weight: bold;
-            color: #475569;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            transition: all 0.2s;
-        }
-        .zoom-btn:hover {
-            background: #f1f5f9;
-            border-color: #4f46e5;
-            color: #4f46e5;
-        }
-        .zoom-btn:active {
-            transform: scale(0.95);
-        }
-        
-        /* NUMBER MARKERS DESIGN (No Background Circle) */
-        .plot-marker {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            font-weight: 900; 
-            cursor: pointer;
-            z-index: 10;
-            line-height: 1;
-            text-shadow: 
-                -0.5px -0.5px 0 #000,  
-                 0.5px -0.5px 0 #000,
-                -0.5px  0.5px 0 #000,
-                 0.5px  0.5px 0 #000,
-                 0px  1px 2px rgba(0,0,0,0.8); 
-            transition: all 0.2s;
-            pointer-events: auto;
-        }
-        .plot-marker:hover { 
-            transform: translate(-50%, -50%) scale(1.3); 
-            z-index: 20; 
-        }
-        
-        /* Mobile-specific smaller markers */
         @media (max-width: 768px) {
-            .plot-marker {
-                font-weight: 800;
-                text-shadow: 
-                    -0.3px -0.3px 0 #000,  
-                     0.3px -0.3px 0 #000,
-                    -0.3px  0.3px 0 #000,
-                     0.3px  0.3px 0 #000,
-                     0px  0.5px 1px rgba(0,0,0,0.7);
+            #map {
+                height: 400px;
             }
+        }
+        
+        /* Ensure modals are above map */
+        .zoom-modal {
+            z-index: 9999 !important;
+        }
+        
+        /* Hide default Leaflet attribution */
+        .leaflet-control-attribution {
+            display: none;
+        }
+        
+        /* Leaflet container z-index */
+        .leaflet-container {
+            z-index: 1;
+        }
+        
+        /* Custom Leaflet Zoom Controls Styling */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        }
+        
+        .leaflet-control-zoom a {
+            background: white !important;
+            border: 2px solid #cbd5e1 !important;
+            color: #475569 !important;
+            font-weight: bold !important;
+            width: 40px !important;
+            height: 40px !important;
+            line-height: 36px !important;
+            font-size: 20px !important;
+        }
+        
+        .leaflet-control-zoom a:hover {
+            background: #f1f5f9 !important;
+            border-color: #4f46e5 !important;
+            color: #4f46e5 !important;
+        }
+        
+        /* Leaflet Marker Styling */
+        .leaflet-marker-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+        
+        .leaflet-div-icon {
+            background: transparent !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Yellow Circle Background for Markers */
+        .marker-circle {
+            position: absolute;
+            transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
+            transform-origin: center center;
+            background-color: #FFEB3B;
+            border-radius: 50%;
+            min-width: 2.2em;
+            min-height: 2.2em;
+            padding: 0.2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: var(--admin-base-size, 14px);
+            cursor: grab;
+            pointer-events: auto;
+            transition: none;
+        }
+        
+        /* Plot Marker Numbers with CSS Variable Scaling */
+        .plot-number {
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: 0.05em;
+            /* Scalable outline for crisp rendering at all sizes */
+            -webkit-text-stroke: 0.04em black;
+            /* Soft scalable shadow for depth */
+            filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
+        }
+        
+        .plot-number:active {
+            cursor: grabbing;
         }
         
         .marker-available { color: #22c55e; }
@@ -144,10 +165,16 @@
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
+            z-index: 10000;
         }
         @keyframes spin { 
             0% { transform: rotate(0deg); } 
             100% { transform: rotate(360deg); } 
+        }
+        
+        /* Ensure loading overlay is above everything */
+        #loadingOverlay {
+            z-index: 10000 !important;
         }
 
         /* ZOOM FIX FOR MODAL CONTENT */
@@ -254,22 +281,15 @@
             </div>
         </div>
 
-        <div style="position: relative; overflow: hidden; border-radius: 12px;">
-            <div class="map-wrapper" id="mapWrapper">
-                <img src="aerocity-map.jpg" alt="Aerocity Map" class="map-image" id="mapImage">
-                <div id="markersContainer"></div>
-            </div>
-        </div>
+        <!-- Leaflet Map Container -->
+        <div id="map"></div>
         
-        <!-- Zoom Controls -->
-        <div class="zoom-controls">
-            <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
-            <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
-            <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
-            <div id="adminMarkerControls" class="hidden bg-white border-2 border-indigo-500 rounded-lg p-2 shadow-lg">
-                <label class="block text-[10px] font-bold text-slate-700 mb-1">Marker Size (Desktop)</label>
-                <input type="range" id="markerSizeSlider" min="6" max="16" value="9" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                <div class="text-[9px] text-center text-slate-600 mt-1"><span id="markerSizeValue">9</span>px</div>
+        <!-- Admin Marker Size Control (Below Map) -->
+        <div class="flex justify-center mt-4">
+            <div id="adminMarkerControls" class="hidden bg-white border-2 border-indigo-500 rounded-lg p-3 shadow-lg">
+                <label class="block text-xs font-bold text-slate-700 mb-2">Marker Size (Desktop)</label>
+                <input type="range" id="markerSizeSlider" min="6" max="24" value="16" step="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <div class="text-xs text-center text-slate-600 mt-2"><span id="markerSizeValue">16</span>px</div>
             </div>
         </div>
 
@@ -531,16 +551,12 @@
 
         let isAdmin = false;
         let activePlots = []; 
-        let activeAgents = []; 
-        let draggingPlot = null;
-        let hasDragged = false;
-        let currentZoom = 1;
-        let isPanning = false;
-        let startX = 0;
-        let startY = 0;
-        let translateX = 0;
-        let translateY = 0;
-        let desktopMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || 9;
+        let activeAgents = [];
+        let map = null;
+        let imageOverlay = null;
+        let markersLayer = null;
+        let markerObjects = {}; // Store marker references by plotNo
+        let desktopMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || 16;
         
         // Calculate responsive marker size based on viewport width
         function getResponsiveMarkerSize() {
@@ -548,16 +564,12 @@
             const viewportWidth = window.innerWidth;
             
             if (viewportWidth >= 1200) {
-                // Desktop: full size
                 return baseSize;
             } else if (viewportWidth >= 768) {
-                // Tablet: 70% of desktop
                 return baseSize * 0.7;
             } else if (viewportWidth >= 480) {
-                // Large mobile: 45% of desktop
                 return baseSize * 0.45;
             } else {
-                // Small mobile: 35% of desktop
                 return baseSize * 0.35;
             }
         }
@@ -577,45 +589,57 @@
             }
         }
 
-        // Zoom Functions
-        function zoomIn() {
-            currentZoom = Math.min(currentZoom + 0.2, 3);
-            applyZoom();
-        }
+        // Initialize Leaflet Map with Simple CRS
+        function initializeMap() {
+            // Create map with Simple CRS (for static images, not geographic coordinates)
+            map = L.map('map', {
+                crs: L.CRS.Simple,
+                minZoom: window.innerWidth < 768 ? -1 : 0,
+                maxZoom: 2,
+                zoomControl: true,
+                attributionControl: false
+            });
 
-        function zoomOut() {
-            currentZoom = Math.max(currentZoom - 0.2, 1);
-            if (currentZoom === 1) {
-                translateX = 0;
-                translateY = 0;
-            }
-            applyZoom();
+            // Load the image to get its dimensions
+            const img = new Image();
+            img.onload = function() {
+                const w = img.width;
+                const h = img.height;
+                
+                // Define bounds for the image
+                const bounds = [[0, 0], [h, w]];
+                
+                // Add image overlay
+                imageOverlay = L.imageOverlay('aerocity-map.jpg', bounds).addTo(map);
+                
+                // Fit the map to the image bounds
+                map.fitBounds(bounds);
+                
+                // Set strict max bounds to prevent panning outside image
+                map.setMaxBounds(bounds.map(corner => [corner[0] - 50, corner[1] - 50]));
+                
+                // Create a layer group for markers
+                markersLayer = L.layerGroup().addTo(map);
+                
+                // Render markers after map is ready
+                renderMarkers();
+                
+                // Add zoom event listener for proportional marker scaling
+                map.on('zoomend', updateMarkerSizesOnZoom);
+                
+                // Handle map click for admin mode
+                map.on('click', function(e) {
+                    if (!isAdmin) return;
+                    
+                    const latlng = e.latlng;
+                    const xPercent = ((latlng.lng / w) * 100).toFixed(2);
+                    const yPercent = ((latlng.lat / h) * 100).toFixed(2);
+                    
+                    openAdminModal(null, xPercent, yPercent);
+                });
+            };
+            img.src = 'aerocity-map.jpg';
         }
-
-        function resetZoom() {
-            currentZoom = 1;
-            translateX = 0;
-            translateY = 0;
-            applyZoom();
-        }
-
-        function applyZoom() {
-            const mapWrapper = document.getElementById('mapWrapper');
-            mapWrapper.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
-        }
-
-        // Pan functionality for zoomed map
-        const mapWrapper = document.getElementById('mapWrapper');
-        
-        // Mouse Wheel Zoom
-        mapWrapper.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (e.deltaY < 0) {
-                zoomIn();
-            } else {
-                zoomOut();
-            }
-        }, { passive: false });
 
         // Marker Size Control
         const markerSizeSlider = document.getElementById('markerSizeSlider');
@@ -626,74 +650,45 @@
             markerSizeValue.textContent = desktopMarkerSize;
             localStorage.setItem('aerocity_marker_size', desktopMarkerSize);
             currentMarkerSize = getResponsiveMarkerSize();
-            updateMarkerSizes();
+            renderMarkers();
         });
         
         // Set slider to saved value on load
         markerSizeSlider.value = desktopMarkerSize;
         markerSizeValue.textContent = desktopMarkerSize;
         
+        // Update marker sizes based on zoom level using CSS variables
+        function updateMarkerSizesOnZoom() {
+            if (!map || !markerObjects) return;
+            
+            const currentZoom = map.getZoom();
+            const minZoom = map.getMinZoom();
+            
+            // Calculate scale multiplier using Math.pow for exponential scaling
+            const scale = Math.pow(2, currentZoom - minZoom);
+            
+            // Update all markers with CSS variable on the marker-circle
+            Object.values(markerObjects).forEach(markerObj => {
+                const markerElement = markerObj.marker.getElement();
+                if (markerElement) {
+                    const markerCircle = markerElement.querySelector('.marker-circle');
+                    if (markerCircle) {
+                        // Set CSS variable for scale on the circle container
+                        markerCircle.style.setProperty('--marker-scale', scale);
+                    }
+                }
+            });
+        }
+        
         // Adjust marker size on window resize with debouncing
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                desktopMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || 9;
+                desktopMarkerSize = parseFloat(localStorage.getItem('aerocity_marker_size')) || 16;
                 currentMarkerSize = getResponsiveMarkerSize();
-                updateMarkerSizes();
+                renderMarkers();
             }, 100);
-        });
-
-        function updateMarkerSizes() {
-            document.querySelectorAll('.plot-marker').forEach(marker => {
-                marker.style.fontSize = `${currentMarkerSize}px`;
-            });
-        }
-        
-        mapWrapper.addEventListener('mousedown', (e) => {
-            if (currentZoom > 1 && !e.target.classList.contains('plot-marker')) {
-                isPanning = true;
-                startX = e.clientX - translateX;
-                startY = e.clientY - translateY;
-                mapWrapper.style.cursor = 'grabbing';
-            }
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isPanning) {
-                translateX = e.clientX - startX;
-                translateY = e.clientY - startY;
-                applyZoom();
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isPanning) {
-                isPanning = false;
-                mapWrapper.style.cursor = currentZoom > 1 ? 'grab' : 'default';
-            }
-        });
-
-        // Touch support for mobile
-        mapWrapper.addEventListener('touchstart', (e) => {
-            if (currentZoom > 1 && e.touches.length === 1) {
-                isPanning = true;
-                startX = e.touches[0].clientX - translateX;
-                startY = e.touches[0].clientY - translateY;
-            }
-        });
-
-        mapWrapper.addEventListener('touchmove', (e) => {
-            if (isPanning && e.touches.length === 1) {
-                e.preventDefault();
-                translateX = e.touches[0].clientX - startX;
-                translateY = e.touches[0].clientY - startY;
-                applyZoom();
-            }
-        });
-
-        mapWrapper.addEventListener('touchend', () => {
-            isPanning = false;
         });
 
         // ==========================================
@@ -836,79 +831,82 @@
             }
         }
 
-        // --- 3. MAP RENDERING & DRAG LOGIC ---
+        // --- 3. LEAFLET MAP RENDERING & MARKER LOGIC ---
 
         function renderMarkers() {
-            const container = document.getElementById('markersContainer');
-            container.innerHTML = ''; 
+            if (!map || !markersLayer) return;
             
-            activePlots.forEach(plot => {
-                if (!plot.x || !plot.y) return; 
-
-                const marker = document.createElement('div');
-                marker.style.left = `${plot.x}%`;
-                marker.style.top = `${plot.y}%`;
-                marker.style.fontSize = `${currentMarkerSize}px`;
-                marker.className = `plot-marker ${plot.status === 'Sold' ? 'marker-sold' : 'marker-available'}`;
-                marker.innerText = plot.plotNo;
+            // Clear existing markers and references
+            markersLayer.clearLayers();
+            markerObjects = {};
+            
+            // Get image dimensions from the overlay
+            const img = new Image();
+            img.src = 'aerocity-map.jpg';
+            
+            img.onload = function() {
+                const w = img.width;
+                const h = img.height;
                 
-                marker.onpointerdown = (e) => {
-                    if (!isAdmin) return;
-                    e.stopPropagation();
-                    draggingPlot = plot;
-                    hasDragged = false;
-                    marker.setPointerCapture(e.pointerId);
-                };
-
-                marker.onpointermove = (e) => {
-                    if (!draggingPlot || draggingPlot.plotNo !== plot.plotNo) return;
-                    hasDragged = true;
+                activePlots.forEach(plot => {
+                    if (!plot.x || !plot.y) return;
                     
-                    const rect = document.getElementById('mapWrapper').getBoundingClientRect();
-                    let xPercent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-                    let yPercent = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+                    // Convert percentage to pixel coordinates
+                    const lat = (parseFloat(plot.y) / 100) * h;
+                    const lng = (parseFloat(plot.x) / 100) * w;
                     
-                    marker.style.left = `${xPercent}%`;
-                    marker.style.top = `${yPercent}%`;
-                    plot.x = xPercent.toFixed(2);
-                    plot.y = yPercent.toFixed(2);
-                };
-
-                marker.onpointerup = (e) => {
-                    if (!isAdmin) return;
-                    e.stopPropagation();
-                    marker.releasePointerCapture(e.pointerId);
+                    // Create custom div icon with plot number wrapped in yellow circle
+                    // iconSize and iconAnchor set to [0, 0] to prevent drift
+                    const colorClass = plot.status === 'Sold' ? 'marker-sold' : 'marker-available';
+                    const baseSize = desktopMarkerSize; // Use admin-set base size
+                    const icon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div class="marker-circle" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;"><span class="plot-number ${colorClass}">${plot.plotNo}</span></div>`,
+                        iconSize: [0, 0],
+                        iconAnchor: [0, 0]
+                    });
                     
-                    if (hasDragged) {
-                        localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
-                        sendDataToN8n(plot, 'update_location'); 
-                    } else {
-                        openAdminModal(plot);
+                    // Create marker
+                    const marker = L.marker([lat, lng], { 
+                        icon: icon,
+                        draggable: isAdmin
+                    }).addTo(markersLayer);
+                    
+                    // Store marker reference
+                    markerObjects[plot.plotNo] = { marker: marker, plot: plot };
+                    
+                    // Click event for user modal
+                    marker.on('click', function() {
+                        if (!isAdmin) {
+                            openUserModal(plot);
+                        } else {
+                            openAdminModal(plot);
+                        }
+                    });
+                    
+                    // Drag event for admin mode
+                    if (isAdmin) {
+                        // Disable map panning when dragging marker
+                        marker.on('dragstart', function() {
+                            map.dragging.disable();
+                        });
+                        
+                        marker.on('dragend', function(e) {
+                            // Re-enable map panning
+                            map.dragging.enable();
+                            
+                            // Save new coordinates
+                            const newLatLng = e.target.getLatLng();
+                            plot.x = ((newLatLng.lng / w) * 100).toFixed(2);
+                            plot.y = ((newLatLng.lat / h) * 100).toFixed(2);
+                            
+                            localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
+                            sendDataToN8n(plot, 'update_location');
+                        });
                     }
-                    draggingPlot = null;
-                    hasDragged = false;
-                };
-
-                marker.onclick = (e) => {
-                    e.stopPropagation(); 
-                    if (!isAdmin) {
-                        openUserModal(plot);
-                    }
-                };
-                
-                container.appendChild(marker);
-            });
+                });
+            };
         }
-
-        document.getElementById('mapWrapper').addEventListener('click', function(e) {
-            if (!isAdmin || e.target.classList.contains('plot-marker')) return; 
-            
-            const rect = this.getBoundingClientRect();
-            const xPercent = (((e.clientX - rect.left) / rect.width) * 100).toFixed(2);
-            const yPercent = (((e.clientY - rect.top) / rect.height) * 100).toFixed(2);
-            
-            openAdminModal(null, xPercent, yPercent);
-        });
 
         // --- 4. ADMIN PANEL LOGIC ---
 
@@ -983,14 +981,22 @@
             const plotNo = document.getElementById('adminPlotNo').value;
             if (!confirm(`क्या आप वाकई प्लॉट ${plotNo} को पूरी तरह से हटाना चाहते हैं?\n\nAre you sure you want to completely DELETE Plot ${plotNo}?`)) return;
 
+            // Remove marker from Leaflet map
+            if (markerObjects[plotNo]) {
+                markersLayer.removeLayer(markerObjects[plotNo].marker);
+                delete markerObjects[plotNo];
+            }
+            
+            // Remove from activePlots array
             const plotIndex = activePlots.findIndex(p => p.plotNo === plotNo);
             if (plotIndex > -1) {
                 activePlots.splice(plotIndex, 1);
             }
             
+            // Update localStorage
             localStorage.setItem('aerocity_live_plots', JSON.stringify(activePlots));
-            renderMarkers();
             
+            // Sync to server
             await sendDataToN8n({ 
                 uid: `${PROJECT_NAME}_${plotNo}`, 
                 plotNo: plotNo,
@@ -1250,16 +1256,12 @@
 
         // --- 9. INITIALIZE ON LOAD ---
         window.onload = async () => {
+            // Initialize Leaflet map first
+            initializeMap();
+            
+            // Load data
             await loadAgents(); 
             loadPlots();
-            
-            // Auto-zoom for mobile devices on initial load
-            if (window.innerWidth < 768) {
-                setTimeout(() => {
-                    currentZoom = 2.5;
-                    applyZoom();
-                }, 500);
-            }
         };
     </script>
 </body>
