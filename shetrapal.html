@@ -94,13 +94,19 @@
             white-space: nowrap !important;
         }
         
-        /* Plot Marker Numbers - No Black Outline */
+        /* Plot Marker Numbers with Thin Black Outline */
         .plot-number {
             font-weight: 900;
             line-height: 1;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-block;
+            -webkit-text-stroke: 0.5px black;
+            text-shadow: 
+                -1px -1px 0 #000,  
+                 1px -1px 0 #000,
+                -1px  1px 0 #000,
+                 1px  1px 0 #000;
         }
         
         .plot-number:hover {
@@ -603,6 +609,9 @@
                 // Render markers after map is ready
                 renderMarkers();
                 
+                // Add zoom event listener for proportional marker scaling
+                map.on('zoomend', updateMarkerSizesOnZoom);
+                
                 // Handle map click for admin mode
                 map.on('click', function(e) {
                     if (!isAdmin) return;
@@ -633,12 +642,41 @@
         markerSizeSlider.value = desktopMarkerSize;
         markerSizeValue.textContent = desktopMarkerSize;
         
+        // Update marker sizes based on zoom level
+        function updateMarkerSizesOnZoom() {
+            if (!map || !markerObjects) return;
+            
+            const currentZoom = map.getZoom();
+            const baseSize = getResponsiveMarkerSize();
+            
+            // Calculate zoom scale factor (zoom ranges from -1 to 2 for mobile, 0 to 2 for desktop)
+            const minZoom = window.innerWidth < 768 ? -1 : 0;
+            const maxZoom = 2;
+            const zoomRange = maxZoom - minZoom;
+            const zoomFactor = 1 + ((currentZoom - minZoom) / zoomRange) * 1.5; // Scale from 1x to 2.5x
+            
+            // Calculate new font size with minimum thresholds
+            const minSize = window.innerWidth < 768 ? 12 : 14;
+            const newSize = Math.max(minSize, baseSize * zoomFactor);
+            
+            // Update all marker font sizes
+            Object.values(markerObjects).forEach(markerObj => {
+                const markerElement = markerObj.marker.getElement();
+                if (markerElement) {
+                    const plotNumber = markerElement.querySelector('.plot-number');
+                    if (plotNumber) {
+                        plotNumber.style.fontSize = `${newSize}px`;
+                    }
+                }
+            });
+        }
+        
         // Adjust marker size on window resize with debouncing
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                desktopMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 9;
+                desktopMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 16;
                 currentMarkerSize = getResponsiveMarkerSize();
                 renderMarkers();
             }, 100);
