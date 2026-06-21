@@ -210,12 +210,12 @@
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
             <div class="flex flex-col w-full">
                 <div class="flex justify-between items-center w-full">
-                    <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+                    <div class="flex items-center gap-2">
                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
                             <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
-                    </a>
+                    </div>
                     <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
                         <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         <span class="font-medium text-sm">वापस होम</span>
@@ -289,16 +289,10 @@
         <div class="mt-12 grid md:grid-cols-2 gap-8">
             <!-- Location & Details -->
             <div class="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-bold text-amber-700 flex items-center gap-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        प्रोजेक्ट विवरण
-                    </h3>
-                    <a href="https://maps.app.goo.gl/t2NgRpxYmZXJyFCw8" target="_blank" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-md transition-all hover:shadow-lg">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Google Maps
-                    </a>
-                </div>
+                <h3 class="text-2xl font-bold text-amber-700 mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    प्रोजेक्ट विवरण
+                </h3>
                 <div class="space-y-4 text-slate-700">
                     <div>
                         <p class="font-bold text-sm text-slate-500">साइट पता (Site Address):</p>
@@ -666,14 +660,14 @@
             // Calculate scale multiplier using Math.pow for exponential scaling
             const scale = Math.pow(2, currentZoom - minZoom);
             
-            // Update all markers with CSS variable on the inner marker-circle
+            // Update all markers with CSS variable
             Object.values(markerObjects).forEach(markerObj => {
                 const markerElement = markerObj.marker.getElement();
                 if (markerElement) {
-                    const markerCircle = markerElement.querySelector('.marker-circle');
-                    if (markerCircle) {
-                        // Set CSS variable for scale on the inner circle
-                        markerCircle.style.setProperty('--marker-scale', scale);
+                    const plotNumber = markerElement.querySelector('.plot-number');
+                    if (plotNumber) {
+                        // Set CSS variable for scale
+                        plotNumber.style.setProperty('--marker-scale', scale);
                     }
                 }
             });
@@ -860,9 +854,9 @@
                     const baseSize = desktopMarkerSize; // Use admin-set base size
                     const icon = L.divIcon({
                         className: 'custom-marker',
-                        html: `<div class="marker-circle ${colorClass}" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;">${plot.plotNo}</div>`,
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
+                        html: `<div class="plot-number ${colorClass}" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;">${plot.plotNo}</div>`,
+                        iconSize: [0, 0],
+                        iconAnchor: [0, 0]
                     });
                     
                     // Create marker
@@ -1161,7 +1155,6 @@
                 document.getElementById('modeIndicator').innerText = "एडमिन मोड: प्लॉट जोड़ें, संपादित करें, ड्रैग करें या हटाएं।";
                 document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-600";
                 closeModal('passwordModal');
-                renderMarkers(); // Re-render markers to enable dragging
             } else {
                 alert("गलत पासवर्ड!");
             }
