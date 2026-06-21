@@ -87,6 +87,8 @@
         .leaflet-div-icon {
             background: transparent !important;
             border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
             transform: translate(-50%, -50%) !important;
             display: flex !important;
             justify-content: center !important;
@@ -99,7 +101,11 @@
             font-weight: 700;
             line-height: 1;
             cursor: pointer;
-            display: inline-block;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            height: 0px;
+            width: 0px;
             letter-spacing: 0.05em;
             -webkit-text-stroke: 0.04em black;
             filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
