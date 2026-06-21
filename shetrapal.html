@@ -670,10 +670,10 @@
             Object.values(markerObjects).forEach(markerObj => {
                 const markerElement = markerObj.marker.getElement();
                 if (markerElement) {
-                    const plotNumber = markerElement.querySelector('.plot-number');
-                    if (plotNumber) {
+                    const markerCircle = markerElement.querySelector('.marker-circle');
+                    if (markerCircle) {
                         // Set CSS variable for scale
-                        plotNumber.style.setProperty('--marker-scale', scale);
+                        markerCircle.style.setProperty('--marker-scale', scale);
                     }
                 }
             });
@@ -860,9 +860,9 @@
                     const baseSize = desktopMarkerSize; // Use admin-set base size
                     const icon = L.divIcon({
                         className: 'custom-marker',
-                        html: `<div class="plot-number ${colorClass}" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;">${plot.plotNo}</div>`,
-                        iconSize: [0, 0],
-                        iconAnchor: [0, 0]
+                        html: `<div class="marker-circle ${colorClass}" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;">${plot.plotNo}</div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
                     });
                     
                     // Create marker
