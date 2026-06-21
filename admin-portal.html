@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Broker Today</title>
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        .glass-nav { 
+            background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(10px); 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Navigation Bar -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
+        <div class="container mx-auto max-w-6xl flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today - Admin Portal</h1>
+            </a>
+            <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+                <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span class="font-medium text-sm">Back to Home</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-12">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
+            <h1 class="text-4xl font-extrabold mb-2">🔐 Admin Credentials Portal</h1>
+            <p class="text-lg text-slate-300">Centralized password management for all projects and pages</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12 max-w-6xl">
+        
+        <!-- Projects Section -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                Project Admin Passwords
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Shetrapal Residency -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-amber-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-amber-700">Shetrapal Residency</h3>
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">ACTIVE</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm font-semibold text-slate-600">Admin Password:</span>
+                            <code class="bg-amber-600 text-white px-3 py-1 rounded font-mono text-sm font-bold">Shetra@9026</code>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm font-semibold text-slate-600">Project Page:</span>
+                            <a href="shetrapal.html" target="_blank" class="text-amber-600 hover:text-amber-700 font-semibold text-sm flex items-center gap-1">
+                                Open Page
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm font-semibold text-slate-600">Google Maps:</span>
+                            <a href="https://maps.app.goo.gl/t2NgRpxYmZXJyFCw8" target="_blank" class="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center gap-1">
+                                View Location
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aerocity Residency -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-indigo-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-indigo-700">Aerocity Residency</h3>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">ACTIVE</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm font-semibold text-slate-600">Admin Password:</span>
+                            <code class="bg-indigo-600 text-white px-3 py-1 rounded font-mono text-sm font-bold">Aero@9026</code>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm font-semibold text-slate-600">Project Page:</span>
+                            <a href="aerocity.html" target="_blank" class="text-indigo-600 hover:text-indigo-700 font-semibold text-sm flex items-center gap-1">
+                                Open Page
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                            <span class="text-sm font-semibold text-slate-600">Google Maps:</span>
+                            <a href="https://maps.app.goo.gl/wg6mckscBFR9LUy19" target="_blank" class="text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center gap-1">
+                                View Location
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Pages Section -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Other Pages & Resources
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Agents Page -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-t-4 border-green-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-green-100 p-3 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Agents Page</h3>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-4">Property experts directory</p>
+                    <a href="agents.html" target="_blank" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors w-full justify-center">
+                        Open Page
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+
+                <!-- Admin Shetrapal -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-t-4 border-purple-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-purple-100 p-3 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Admin Shetrapal</h3>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-4">Backend admin panel</p>
+                    <a href="admin-sp.html" target="_blank" class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors w-full justify-center">
+                        Open Page
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+
+                <!-- Home Page -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-t-4 border-blue-500 hover:shadow-xl transition-shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Home Page</h3>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-4">Main landing page</p>
+                    <a href="index.html" target="_blank" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors w-full justify-center">
+                        Open Page
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Access Section -->
+        <section class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-2xl p-8 text-white">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <svg class="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Quick Access Links
+            </h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <a href="shetrapal.html" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-4 rounded-lg transition-all">
+                    <span class="text-2xl">🏘️</span>
+                    <div>
+                        <p class="font-bold">Shetrapal Residency Map</p>
+                        <p class="text-xs text-slate-300">Live interactive masterplan</p>
+                    </div>
+                </a>
+                <a href="aerocity.html" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-4 rounded-lg transition-all">
+                    <span class="text-2xl">🏙️</span>
+                    <div>
+                        <p class="font-bold">Aerocity Residency Map</p>
+                        <p class="text-xs text-slate-300">Live interactive masterplan</p>
+                    </div>
+                </a>
+                <a href="agents.html" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-4 rounded-lg transition-all">
+                    <span class="text-2xl">👥</span>
+                    <div>
+                        <p class="font-bold">Property Experts</p>
+                        <p class="text-xs text-slate-300">Agent directory</p>
+                    </div>
+                </a>
+                <a href="admin-sp.html" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-4 rounded-lg transition-all">
+                    <span class="text-2xl">⚙️</span>
+                    <div>
+                        <p class="font-bold">Admin Panel</p>
+                        <p class="text-xs text-slate-300">Backend management</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Security Notice -->
+        <div class="mt-12 bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <div>
+                    <h3 class="text-lg font-bold text-red-800 mb-2">🔒 Security Notice</h3>
+                    <p class="text-sm text-red-700">This page contains sensitive admin credentials. Do not share this URL or passwords with unauthorized personnel. Keep this information confidential and secure.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
+            <p class="text-slate-400 text-sm">© 2026 Broker Today. All rights reserved. | Admin Portal v1.0</p>
+        </div>
+    </footer>
+
+</body>
+</html>
