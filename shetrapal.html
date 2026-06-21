@@ -96,16 +96,13 @@
         
         /* Plot Marker Numbers with CSS Variable Scaling */
         .plot-number {
-            font-weight: 900;
+            font-weight: 700;
             line-height: 1;
             cursor: pointer;
             display: inline-block;
-            -webkit-text-stroke: 0.5px black;
-            text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000;
+            letter-spacing: 0.05em;
+            -webkit-text-stroke: 0.04em black;
+            filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
             font-size: var(--admin-base-size, 10px);
             transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
             transform-origin: center center;
