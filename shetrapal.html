@@ -1161,6 +1161,7 @@
                 document.getElementById('modeIndicator').innerText = "एडमिन मोड: प्लॉट जोड़ें, संपादित करें, ड्रैग करें या हटाएं।";
                 document.getElementById('modeIndicator').className = "text-sm mt-1 font-bold text-red-600";
                 closeModal('passwordModal');
+                renderMarkers(); // Re-render markers to enable dragging
             } else {
                 alert("गलत पासवर्ड!");
             }
