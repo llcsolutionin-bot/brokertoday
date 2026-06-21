@@ -100,12 +100,10 @@
         .plot-number {
             font-weight: 700;
             line-height: 1;
-            cursor: pointer;
+            cursor: grab;
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            height: 0px;
-            width: 0px;
             letter-spacing: 0.05em;
             -webkit-text-stroke: 0.04em black;
             filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
@@ -118,6 +116,11 @@
             aspect-ratio: 1 / 1;
             padding: 0.2em;
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            pointer-events: auto;
+        }
+        
+        .plot-number:active {
+            cursor: grabbing;
         }
         
         .plot-number:hover {
@@ -882,7 +885,16 @@
                     
                     // Drag event for admin mode
                     if (isAdmin) {
+                        // Disable map panning when dragging marker
+                        marker.on('dragstart', function() {
+                            map.dragging.disable();
+                        });
+                        
                         marker.on('dragend', function(e) {
+                            // Re-enable map panning
+                            map.dragging.enable();
+                            
+                            // Save new coordinates
                             const newLatLng = e.target.getLatLng();
                             plot.x = ((newLatLng.lng / w) * 100).toFixed(2);
                             plot.y = ((newLatLng.lat / h) * 100).toFixed(2);
