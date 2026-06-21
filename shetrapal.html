@@ -90,35 +90,28 @@
             /* Let Leaflet handle width/height/margin via iconSize/iconAnchor */
         }
         
-        /* Inner marker circle with CSS Variable Scaling */
-        .marker-circle {
-            width: 100%;
-            height: 100%;
-            display: flex;
+        /* Plot Marker Numbers with CSS Variable Scaling */
+        .plot-number {
+            font-weight: 700;
+            line-height: 1;
+            cursor: grab;
+            display: inline-flex;
             justify-content: center;
             align-items: center;
-            background-color: #FFEB3B;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            color: #000;
-            font-weight: 700;
-            font-size: var(--admin-base-size, 10px);
             letter-spacing: 0.05em;
-            -webkit-text-stroke: 0.04em black;
-            filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
-            cursor: grab;
-            /* Crucial: scale the inner circle smoothly, centered within the parent */
-            transform: scale(var(--marker-scale, 1));
+            font-size: var(--admin-base-size, 14px);
+            /* Thin black outline for visibility */
+            -webkit-text-stroke: 0.5px black;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            /* GPU-accelerated scaling */
+            transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
             transform-origin: center center;
-            transition: transform 0.2s;
+            transition: none;
+            pointer-events: auto;
         }
         
-        .marker-circle:active {
+        .plot-number:active {
             cursor: grabbing;
-        }
-        
-        .marker-circle:hover {
-            transform: scale(calc(var(--marker-scale, 1) * 1.2));
         }
         
         .marker-available { color: #22c55e; }
