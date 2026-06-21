@@ -215,12 +215,12 @@
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
             <div class="flex flex-col w-full">
                 <div class="flex justify-between items-center w-full">
-                    <div class="flex items-center gap-2">
+                    <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
                             <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
-                    </div>
+                    </a>
                     <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
                         <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         <span class="font-medium text-sm">वापस होम</span>
@@ -271,6 +271,9 @@
                 <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।</p>
             </div>
             <div class="flex gap-4 items-center">
+                <a href="https://maps.app.goo.gl/t2NgRpxYmZXJyFCw8" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 text-2xl" title="Open in Google Maps">
+                    📍
+                </a>
                 <button id="btnAdminLogin" onclick="openPasswordModal()" class="text-slate-300 hover:text-slate-500 text-xl" title="Admin Login">🔒</button>
                 <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow-md transition-all">
                     Save & Exit Admin

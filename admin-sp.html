@@ -204,7 +204,13 @@
     </div>
 
     <script>
-        const ADMIN_PASSWORD = "Goal@2030";
+        // All project and page passwords
+        const PASSWORDS = {
+            admin: "Goal@2030",
+            aerocity: "Aero@9026",
+            shetrapal: "Shetra@9026",
+            agents: "Agent@9026"
+        };
         
         // Toggle password visibility
         function togglePassword() {
@@ -235,7 +241,10 @@
             
             // Simulate authentication delay
             setTimeout(() => {
-                if (password === ADMIN_PASSWORD) {
+                // Check if password matches any of the valid passwords
+                const isValidPassword = Object.values(PASSWORDS).includes(password);
+                
+                if (isValidPassword) {
                     // Success - show dashboard
                     document.getElementById('passwordModal').classList.add('hidden');
                     document.getElementById('adminDashboard').classList.remove('hidden');
@@ -256,10 +265,8 @@
         // Logout function
         function logout() {
             sessionStorage.removeItem('admin_authenticated');
-            document.getElementById('adminDashboard').classList.add('hidden');
-            document.getElementById('passwordModal').classList.remove('hidden');
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('errorMessage').classList.add('hidden');
+            // Navigate to home page
+            window.location.href = 'index.html';
         }
 
         // Check if already authenticated
