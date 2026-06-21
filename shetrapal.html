@@ -87,25 +87,30 @@
         .leaflet-div-icon {
             background: transparent !important;
             border: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
         }
         
         /* Yellow Circle Background for Markers */
         .marker-circle {
+            /* Remove width 100% and height 100% */
             position: absolute;
+            top: 50%;
+            left: 50%;
+            /* Scale outwards from the absolute center of the 30x30 hitbox */
             transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
-            transform-origin: center center;
-            background-color: #FFEB3B;
-            border-radius: 50%;
+            
+            /* Revert to the perfect fit-to-fit content sizing */
             min-width: 2.2em;
             min-height: 2.2em;
             padding: 0.2em;
+            background-color: #FFEB3B;
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            font-size: var(--admin-base-size, 14px);
+            color: #000;
+            font-weight: bold;
+            font-size: var(--admin-base-size, 10px);
             cursor: grab;
             pointer-events: auto;
             transition: none;
@@ -863,8 +868,8 @@
                     const icon = L.divIcon({
                         className: 'custom-marker',
                         html: `<div class="marker-circle" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;"><span class="plot-number ${colorClass}">${plot.plotNo}</span></div>`,
-                        iconSize: [0, 0],
-                        iconAnchor: [0, 0]
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
                     });
                     
                     // Create marker
