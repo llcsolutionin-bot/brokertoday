@@ -94,41 +94,17 @@
             white-space: nowrap !important;
         }
         
-        /* Plot Marker Numbers with Responsive Sizing and Thin Black Outline */
+        /* Plot Marker Numbers - No Black Outline */
         .plot-number {
             font-weight: 900;
             line-height: 1;
             cursor: pointer;
-            font-size: clamp(14px, 2.5vw, 22px) !important;
-            -webkit-text-stroke: 0.8px #000;
-            text-stroke: 0.8px #000;
-            text-shadow: 
-                -0.8px -0.8px 0 #000,  
-                 0.8px -0.8px 0 #000,
-                -0.8px  0.8px 0 #000,
-                 0.8px  0.8px 0 #000,
-                 0px  1.5px 3px rgba(0,0,0,0.9);
             transition: all 0.2s;
             display: inline-block;
         }
         
         .plot-number:hover {
             transform: scale(1.2);
-        }
-        
-        @media (max-width: 768px) {
-            .plot-number {
-                font-size: clamp(12px, 3vw, 18px) !important;
-                font-weight: 800;
-                -webkit-text-stroke: 0.6px #000;
-                text-stroke: 0.6px #000;
-                text-shadow: 
-                    -0.6px -0.6px 0 #000,  
-                     0.6px -0.6px 0 #000,
-                    -0.6px  0.6px 0 #000,
-                     0.6px  0.6px 0 #000,
-                     0px  1px 2px rgba(0,0,0,0.8);
-            }
         }
         
         .marker-available { color: #22c55e; }
@@ -290,8 +266,8 @@
         <div class="flex justify-center mt-4">
             <div id="adminMarkerControls" class="hidden bg-white border-2 border-amber-500 rounded-lg p-3 shadow-lg">
                 <label class="block text-xs font-bold text-slate-700 mb-2">Marker Size (Desktop)</label>
-                <input type="range" id="markerSizeSlider" min="6" max="16" value="9" step="0.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
-                <div class="text-xs text-center text-slate-600 mt-2"><span id="markerSizeValue">9</span>px</div>
+                <input type="range" id="markerSizeSlider" min="6" max="24" value="16" step="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <div class="text-xs text-center text-slate-600 mt-2"><span id="markerSizeValue">16</span>px</div>
             </div>
         </div>
 
@@ -558,7 +534,8 @@
         let map = null;
         let imageOverlay = null;
         let markersLayer = null;
-        let desktopMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 9;
+        let markerObjects = {}; // Store marker references by plotNo
+        let desktopMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 16;
         
         // Calculate responsive marker size based on viewport width
         function getResponsiveMarkerSize() {
@@ -812,8 +789,9 @@
         function renderMarkers() {
             if (!map || !markersLayer) return;
             
-            // Clear existing markers
+            // Clear existing markers and references
             markersLayer.clearLayers();
+            markerObjects = {};
             
             // Get image dimensions from the overlay
             const img = new Image();
@@ -830,12 +808,13 @@
                     const lat = (parseFloat(plot.y) / 100) * h;
                     const lng = (parseFloat(plot.x) / 100) * w;
                     
-                    // Create custom div icon with plot number (using clamp for responsive sizing)
-                    // iconSize and iconAnchor set to [0, 0] to prevent drift with responsive font sizing
+                    // Create custom div icon with plot number
+                    // iconSize and iconAnchor set to [0, 0] to prevent drift
                     const colorClass = plot.status === 'Sold' ? 'marker-sold' : 'marker-available';
+                    const markerSize = getResponsiveMarkerSize();
                     const icon = L.divIcon({
                         className: 'custom-marker',
-                        html: `<div class="plot-number ${colorClass}">${plot.plotNo}</div>`,
+                        html: `<div class="plot-number ${colorClass}" style="font-size: ${markerSize}px;">${plot.plotNo}</div>`,
                         iconSize: [0, 0],
                         iconAnchor: [0, 0]
                     });
@@ -845,6 +824,9 @@
                         icon: icon,
                         draggable: isAdmin
                     }).addTo(markersLayer);
+                    
+                    // Store marker reference
+                    markerObjects[plot.plotNo] = { marker: marker, plot: plot };
                     
                     // Click event for user modal
                     marker.on('click', function() {
@@ -943,14 +925,22 @@
             const plotNo = document.getElementById('adminPlotNo').value;
             if (!confirm(`क्या आप वाकई प्लॉट ${plotNo} को पूरी तरह से हटाना चाहते हैं?\n\nAre you sure you want to completely DELETE Plot ${plotNo}?`)) return;
 
+            // Remove marker from Leaflet map
+            if (markerObjects[plotNo]) {
+                markersLayer.removeLayer(markerObjects[plotNo].marker);
+                delete markerObjects[plotNo];
+            }
+            
+            // Remove from activePlots array
             const plotIndex = activePlots.findIndex(p => p.plotNo === plotNo);
             if (plotIndex > -1) {
                 activePlots.splice(plotIndex, 1);
             }
             
+            // Update localStorage
             localStorage.setItem('shetrapal_live_plots', JSON.stringify(activePlots));
-            renderMarkers();
             
+            // Sync to server
             await sendDataToN8n({ 
                 uid: `${PROJECT_NAME}_${plotNo}`, 
                 plotNo: plotNo,
