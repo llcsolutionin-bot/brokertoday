@@ -94,12 +94,11 @@
             white-space: nowrap !important;
         }
         
-        /* Plot Marker Numbers with Thin Black Outline */
+        /* Plot Marker Numbers with CSS Variable Scaling */
         .plot-number {
             font-weight: 900;
             line-height: 1;
             cursor: pointer;
-            transition: all 0.2s;
             display: inline-block;
             -webkit-text-stroke: 0.5px black;
             text-shadow: 
@@ -107,10 +106,14 @@
                  1px -1px 0 #000,
                 -1px  1px 0 #000,
                  1px  1px 0 #000;
+            font-size: var(--admin-base-size, 10px);
+            transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
+            transform-origin: center center;
+            transition: transform 0.2s;
         }
         
         .plot-number:hover {
-            transform: scale(1.2);
+            transform: translate(-50%, -50%) scale(calc(var(--marker-scale, 1) * 1.2));
         }
         
         .marker-available { color: #22c55e; }
@@ -642,30 +645,24 @@
         markerSizeSlider.value = desktopMarkerSize;
         markerSizeValue.textContent = desktopMarkerSize;
         
-        // Update marker sizes based on zoom level
+        // Update marker sizes based on zoom level using CSS variables
         function updateMarkerSizesOnZoom() {
             if (!map || !markerObjects) return;
             
             const currentZoom = map.getZoom();
-            const baseSize = getResponsiveMarkerSize();
+            const minZoom = map.getMinZoom();
             
-            // Calculate zoom scale factor (zoom ranges from -1 to 2 for mobile, 0 to 2 for desktop)
-            const minZoom = window.innerWidth < 768 ? -1 : 0;
-            const maxZoom = 2;
-            const zoomRange = maxZoom - minZoom;
-            const zoomFactor = 1 + ((currentZoom - minZoom) / zoomRange) * 1.5; // Scale from 1x to 2.5x
+            // Calculate scale multiplier using Math.pow for exponential scaling
+            const scale = Math.pow(2, currentZoom - minZoom);
             
-            // Calculate new font size with minimum thresholds
-            const minSize = window.innerWidth < 768 ? 12 : 14;
-            const newSize = Math.max(minSize, baseSize * zoomFactor);
-            
-            // Update all marker font sizes
+            // Update all markers with CSS variable
             Object.values(markerObjects).forEach(markerObj => {
                 const markerElement = markerObj.marker.getElement();
                 if (markerElement) {
                     const plotNumber = markerElement.querySelector('.plot-number');
                     if (plotNumber) {
-                        plotNumber.style.fontSize = `${newSize}px`;
+                        // Set CSS variable for scale
+                        plotNumber.style.setProperty('--marker-scale', scale);
                     }
                 }
             });
@@ -846,13 +843,13 @@
                     const lat = (parseFloat(plot.y) / 100) * h;
                     const lng = (parseFloat(plot.x) / 100) * w;
                     
-                    // Create custom div icon with plot number
+                    // Create custom div icon with plot number using CSS variables
                     // iconSize and iconAnchor set to [0, 0] to prevent drift
                     const colorClass = plot.status === 'Sold' ? 'marker-sold' : 'marker-available';
-                    const markerSize = getResponsiveMarkerSize();
+                    const baseSize = desktopMarkerSize; // Use admin-set base size
                     const icon = L.divIcon({
                         className: 'custom-marker',
-                        html: `<div class="plot-number ${colorClass}" style="font-size: ${markerSize}px;">${plot.plotNo}</div>`,
+                        html: `<div class="plot-number ${colorClass}" style="--admin-base-size: ${baseSize}px; --marker-scale: 1;">${plot.plotNo}</div>`,
                         iconSize: [0, 0],
                         iconAnchor: [0, 0]
                     });
