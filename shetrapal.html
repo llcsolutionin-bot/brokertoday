@@ -539,7 +539,28 @@
         let translateX = 0;
         let translateY = 0;
         let desktopMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 9;
-        let currentMarkerSize = window.innerWidth < 768 ? desktopMarkerSize / 2 : desktopMarkerSize;
+        
+        // Calculate responsive marker size based on viewport width
+        function getResponsiveMarkerSize() {
+            const baseSize = desktopMarkerSize;
+            const viewportWidth = window.innerWidth;
+            
+            if (viewportWidth >= 1200) {
+                // Desktop: full size
+                return baseSize;
+            } else if (viewportWidth >= 768) {
+                // Tablet: 70% of desktop
+                return baseSize * 0.7;
+            } else if (viewportWidth >= 480) {
+                // Large mobile: 45% of desktop
+                return baseSize * 0.45;
+            } else {
+                // Small mobile: 35% of desktop
+                return baseSize * 0.35;
+            }
+        }
+        
+        let currentMarkerSize = getResponsiveMarkerSize();
 
         // Toggle Password Visibility
         function togglePassword() {
@@ -602,7 +623,7 @@
             desktopMarkerSize = parseFloat(this.value);
             markerSizeValue.textContent = desktopMarkerSize;
             localStorage.setItem('shetrapal_marker_size', desktopMarkerSize);
-            currentMarkerSize = window.innerWidth < 768 ? desktopMarkerSize / 2 : desktopMarkerSize;
+            currentMarkerSize = getResponsiveMarkerSize();
             updateMarkerSizes();
         });
         
@@ -610,11 +631,15 @@
         markerSizeSlider.value = desktopMarkerSize;
         markerSizeValue.textContent = desktopMarkerSize;
         
-        // Adjust marker size on window resize
+        // Adjust marker size on window resize with debouncing
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            const newDesktopSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 9;
-            currentMarkerSize = window.innerWidth < 768 ? newDesktopSize / 2 : newDesktopSize;
-            updateMarkerSizes();
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                desktopMarkerSize = parseFloat(localStorage.getItem('shetrapal_marker_size')) || 9;
+                currentMarkerSize = getResponsiveMarkerSize();
+                updateMarkerSizes();
+            }, 100);
         });
 
         function updateMarkerSizes() {
