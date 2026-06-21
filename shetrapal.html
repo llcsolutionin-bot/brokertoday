@@ -87,44 +87,38 @@
         .leaflet-div-icon {
             background: transparent !important;
             border: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            transform: translate(-50%, -50%) !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            white-space: nowrap !important;
+            /* Let Leaflet handle width/height/margin via iconSize/iconAnchor */
         }
         
-        /* Plot Marker Numbers with CSS Variable Scaling */
-        .plot-number {
-            font-weight: 700;
-            line-height: 1;
-            cursor: grab;
-            display: inline-flex;
+        /* Inner marker circle with CSS Variable Scaling */
+        .marker-circle {
+            width: 100%;
+            height: 100%;
+            display: flex;
             justify-content: center;
             align-items: center;
+            background-color: #FFEB3B;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            color: #000;
+            font-weight: 700;
+            font-size: var(--admin-base-size, 10px);
             letter-spacing: 0.05em;
             -webkit-text-stroke: 0.04em black;
             filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
-            font-size: var(--admin-base-size, 10px);
-            transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
+            cursor: grab;
+            /* Crucial: scale the inner circle smoothly, centered within the parent */
+            transform: scale(var(--marker-scale, 1));
             transform-origin: center center;
             transition: transform 0.2s;
-            background-color: #FFEB3B;
-            border-radius: 50%;
-            aspect-ratio: 1 / 1;
-            padding: 0.2em;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            pointer-events: auto;
         }
         
-        .plot-number:active {
+        .marker-circle:active {
             cursor: grabbing;
         }
         
-        .plot-number:hover {
-            transform: translate(-50%, -50%) scale(calc(var(--marker-scale, 1) * 1.2));
+        .marker-circle:hover {
+            transform: scale(calc(var(--marker-scale, 1) * 1.2));
         }
         
         .marker-available { color: #22c55e; }
@@ -216,12 +210,12 @@
         <div class="container mx-auto max-w-6xl flex justify-between items-center">
             <div class="flex flex-col w-full">
                 <div class="flex justify-between items-center w-full">
-                    <div class="flex items-center gap-2">
+                    <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
                         <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
                             <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
-                    </div>
+                    </a>
                     <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
                         <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         <span class="font-medium text-sm">वापस होम</span>
