@@ -181,19 +181,19 @@
                     </div>
                 </div>
 
-                <!-- Settings (Placeholder) -->
-                <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border-2 border-slate-200 opacity-60">
+                <!-- Password Management -->
+                <button onclick="openPasswordManager()" class="group block bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 rounded-xl p-6 border-2 border-red-200 hover:border-red-400 transition-all shadow-md hover:shadow-xl text-left w-full">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="bg-slate-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
-                            ⚙️
+                        <div class="bg-red-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            🔐
                         </div>
-                        <h3 class="text-xl font-bold text-slate-800">Settings</h3>
+                        <h3 class="text-xl font-bold text-slate-800">Password Manager</h3>
                     </div>
-                    <p class="text-slate-600 text-sm mb-4">Coming Soon</p>
-                    <div class="text-slate-400 font-semibold text-sm">
-                        Under Development
+                    <p class="text-slate-600 text-sm mb-4">View and update all project passwords</p>
+                    <div class="flex items-center text-red-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                        Manage Passwords →
                     </div>
-                </div>
+                </button>
             </div>
 
             <!-- Footer Info -->
@@ -203,14 +203,133 @@
         </div>
     </div>
 
+    <!-- Password Manager Modal -->
+    <div id="passwordManagerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800">🔐 Password Manager</h2>
+                <button onclick="closePasswordManager()" class="text-slate-400 hover:text-slate-600 text-2xl">✖</button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Aerocity Password -->
+                <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-slate-800">🏢 Aerocity Residency</h3>
+                        <button onclick="editPassword('aerocity')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm">Edit</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-600 text-sm">Password:</span>
+                        <code id="pwd-aerocity" class="bg-white px-3 py-1 rounded border border-indigo-200 font-mono text-sm">••••••••</code>
+                        <button onclick="togglePasswordVisibility('aerocity')" class="text-indigo-600 hover:text-indigo-800">👁️</button>
+                    </div>
+                </div>
+
+                <!-- Shetrapal Password -->
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-slate-800">🏘️ Shetrapal Residency</h3>
+                        <button onclick="editPassword('shetrapal')" class="text-amber-600 hover:text-amber-800 font-semibold text-sm">Edit</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-600 text-sm">Password:</span>
+                        <code id="pwd-shetrapal" class="bg-white px-3 py-1 rounded border border-amber-200 font-mono text-sm">••••••••</code>
+                        <button onclick="togglePasswordVisibility('shetrapal')" class="text-amber-600 hover:text-amber-800">👁️</button>
+                    </div>
+                </div>
+
+                <!-- Agents Password -->
+                <div class="bg-green-50 border-2 border-green-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-slate-800">👥 Agents Management</h3>
+                        <button onclick="editPassword('agents')" class="text-green-600 hover:text-green-800 font-semibold text-sm">Edit</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-600 text-sm">Password:</span>
+                        <code id="pwd-agents" class="bg-white px-3 py-1 rounded border border-green-200 font-mono text-sm">••••••••</code>
+                        <button onclick="togglePasswordVisibility('agents')" class="text-green-600 hover:text-green-800">👁️</button>
+                    </div>
+                </div>
+
+                <!-- Banking (Future) -->
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 opacity-60">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-slate-800">🏦 Banking Experts</h3>
+                        <span class="text-blue-400 text-sm">Coming Soon</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-600 text-sm">Password:</span>
+                        <code class="bg-white px-3 py-1 rounded border border-blue-200 font-mono text-sm">Not Set</code>
+                    </div>
+                </div>
+
+                <!-- Legal (Future) -->
+                <div class="bg-purple-50 border-2 border-purple-200 rounded-xl p-4 opacity-60">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-slate-800">⚖️ Legal Experts</h3>
+                        <span class="text-purple-400 text-sm">Coming Soon</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-600 text-sm">Password:</span>
+                        <code class="bg-white px-3 py-1 rounded border border-purple-200 font-mono text-sm">Not Set</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-200">
+                <p class="text-xs text-slate-500 text-center">⚠️ Passwords are stored locally in your browser. Clear browser data will reset them to defaults.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Password Modal -->
+    <div id="editPasswordModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Edit Password</h3>
+            <form id="editPasswordForm" class="space-y-4">
+                <input type="hidden" id="editPasswordKey">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Project/Page Name</label>
+                    <input type="text" id="editPasswordName" readonly class="w-full border-2 border-slate-300 p-3 rounded-lg bg-slate-100">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">New Password</label>
+                    <input type="text" id="editPasswordValue" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        Save Password
+                    </button>
+                    <button type="button" onclick="closeEditPassword()" class="flex-1 bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-3 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Load passwords from localStorage or use defaults
+        function loadPasswords() {
+            const stored = localStorage.getItem('broker_passwords');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            return {
+                admin: "Goal@2030",
+                aerocity: "Aero@9026",
+                shetrapal: "Shetra@9026",
+                agents: "Agent@9026"
+            };
+        }
+
+        // Save passwords to localStorage
+        function savePasswords(passwords) {
+            localStorage.setItem('broker_passwords', JSON.stringify(passwords));
+        }
+
         // All project and page passwords
-        const PASSWORDS = {
-            admin: "Goal@2030",
-            aerocity: "Aero@9026",
-            shetrapal: "Shetra@9026",
-            agents: "Agent@9026"
-        };
+        let PASSWORDS = loadPasswords();
         
         // Toggle password visibility
         function togglePassword() {
@@ -241,10 +360,8 @@
             
             // Simulate authentication delay
             setTimeout(() => {
-                // Check if password matches any of the valid passwords
-                const isValidPassword = Object.values(PASSWORDS).includes(password);
-                
-                if (isValidPassword) {
+                // Only accept super admin password
+                if (password === PASSWORDS.admin) {
                     // Success - show dashboard
                     document.getElementById('passwordModal').classList.add('hidden');
                     document.getElementById('adminDashboard').classList.remove('hidden');
@@ -268,6 +385,66 @@
             // Navigate to home page
             window.location.href = 'index.html';
         }
+
+        // Password Manager Functions
+        function openPasswordManager() {
+            document.getElementById('passwordManagerModal').classList.remove('hidden');
+            updatePasswordDisplay();
+        }
+
+        function closePasswordManager() {
+            document.getElementById('passwordManagerModal').classList.add('hidden');
+        }
+
+        function updatePasswordDisplay() {
+            // Reset all to hidden
+            document.getElementById('pwd-aerocity').textContent = '••••••••';
+            document.getElementById('pwd-shetrapal').textContent = '••••••••';
+            document.getElementById('pwd-agents').textContent = '••••••••';
+        }
+
+        function togglePasswordVisibility(key) {
+            const el = document.getElementById(`pwd-${key}`);
+            if (el.textContent === '••••••••') {
+                el.textContent = PASSWORDS[key];
+            } else {
+                el.textContent = '••••••••';
+            }
+        }
+
+        function editPassword(key) {
+            const names = {
+                aerocity: 'Aerocity Residency',
+                shetrapal: 'Shetrapal Residency',
+                agents: 'Agents Management'
+            };
+            
+            document.getElementById('editPasswordKey').value = key;
+            document.getElementById('editPasswordName').value = names[key];
+            document.getElementById('editPasswordValue').value = PASSWORDS[key];
+            document.getElementById('editPasswordModal').classList.remove('hidden');
+        }
+
+        function closeEditPassword() {
+            document.getElementById('editPasswordModal').classList.add('hidden');
+        }
+
+        document.getElementById('editPasswordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const key = document.getElementById('editPasswordKey').value;
+            const newPassword = document.getElementById('editPasswordValue').value;
+            
+            // Update password
+            PASSWORDS[key] = newPassword;
+            savePasswords(PASSWORDS);
+            
+            // Close modal and update display
+            closeEditPassword();
+            updatePasswordDisplay();
+            
+            alert(`✅ Password for ${key} updated successfully!`);
+        });
 
         // Check if already authenticated
         window.onload = function() {
