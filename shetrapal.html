@@ -548,8 +548,9 @@
     <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
         // --- 1. CONFIGURATION & WEBHOOKS ---
-        const PROJECT_NAME = "Shetrapal Residency";
-        const ADMIN_PASSWORD = "Shetra@9026";
+        const PROJECT_NAME = "Shetrapal Residency (क्षेत्रपाल रेजिडेन्सी)";
+        const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
+        let CURRENT_PAGE_PASSWORD = "";
         
         const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
         const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
@@ -1162,7 +1163,7 @@
 
         function verifyPassword() {
             const pwd = document.getElementById('adminPwdInput').value;
-            if (pwd === ADMIN_PASSWORD) {
+            if (pwd === CURRENT_PAGE_PASSWORD) {
                 isAdmin = true;
                 document.getElementById('app-container').classList.add('admin-active');
                 document.getElementById('btnAdminLogin').classList.add('hidden');
@@ -1263,9 +1264,43 @@
             if (e.key === 'Enter') sendChatMessage();
         });
 
+        // Fetch password from database
+        async function fetchPagePassword() {
+            try {
+                const response = await fetch(WEBHOOK_GET_PASSWORDS, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch passwords');
+                }
+                
+                const passwordsArray = await response.json();
+                
+                // Find password for 'shetrapal'
+                if (Array.isArray(passwordsArray)) {
+                    const pageData = passwordsArray.find(item => item.id === 'shetrapal');
+                    if (pageData && pageData.password) {
+                        CURRENT_PAGE_PASSWORD = pageData.password;
+                    } else {
+                        // Fallback to default
+                        CURRENT_PAGE_PASSWORD = "Shetra@9026";
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching password:', error);
+                // Fallback to default
+                CURRENT_PAGE_PASSWORD = "Shetra@9026";
+            }
+        }
+
         // --- 9. INITIALIZE ON LOAD ---
         window.onload = async () => {
-            // Initialize Leaflet map first
+            // Fetch password first
+            await fetchPagePassword();
+            
+            // Initialize Leaflet map
             initializeMap();
             
             // Load data

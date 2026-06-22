@@ -455,27 +455,45 @@
     </div>
 
     <script>
-        // Load passwords from localStorage or use defaults
-        function loadPasswords() {
-            const stored = localStorage.getItem('broker_passwords');
-            if (stored) {
-                return JSON.parse(stored);
+        // Webhook URLs for password management
+        const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
+        const WEBHOOK_POST_PASSWORD = 'https://llcsolution.duckdns.org/webhook/a9a0edf7-0502-41bc-8152-151c534b7ea0';
+
+        // All project and page passwords (fetched from database)
+        let PASSWORDS = {};
+
+        // Fetch passwords from database
+        async function fetchPasswords() {
+            try {
+                const response = await fetch(WEBHOOK_GET_PASSWORDS, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch passwords');
+                }
+                
+                const passwordsArray = await response.json();
+                
+                // Transform array to key-value mapping
+                PASSWORDS = {};
+                if (Array.isArray(passwordsArray)) {
+                    passwordsArray.forEach(item => {
+                        if (item.id && item.password) {
+                            PASSWORDS[item.id] = item.password;
+                        }
+                    });
+                }
+                
+                return passwordsArray;
+            } catch (error) {
+                console.error('Error fetching passwords:', error);
+                // Fallback to default admin password
+                PASSWORDS = { admin: "Goal@2030" };
+                return [];
             }
-            return {
-                admin: "Goal@2030",
-                aerocity: "Aero@9026",
-                shetrapal: "Shetra@9026",
-                agents: "Agent@9026"
-            };
         }
-
-        // Save passwords to localStorage
-        function savePasswords(passwords) {
-            localStorage.setItem('broker_passwords', JSON.stringify(passwords));
-        }
-
-        // All project and page passwords
-        let PASSWORDS = loadPasswords();
         
         // Toggle password visibility
         function togglePassword() {
@@ -575,28 +593,61 @@
             document.getElementById('editPasswordModal').classList.add('hidden');
         }
 
-        document.getElementById('editPasswordForm').addEventListener('submit', function(e) {
+        document.getElementById('editPasswordForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
+            
             const key = document.getElementById('editPasswordKey').value;
+            const name = document.getElementById('editPasswordName').value;
             const newPassword = document.getElementById('editPasswordValue').value;
             
-            // Update password
-            PASSWORDS[key] = newPassword;
-            savePasswords(PASSWORDS);
-            
-            // Close modal and update display
-            closeEditPassword();
-            updatePasswordDisplay();
-            
-            alert(`✅ Password for ${key} updated successfully!`);
+            try {
+                // Send POST request to update password
+                const response = await fetch(WEBHOOK_POST_PASSWORD, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: key,
+                        name: name,
+                        password: newPassword
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update password');
+                }
+                
+                // Re-fetch passwords to update global state
+                await fetchPasswords();
+                
+                // Close modal and update display
+                closeEditPassword();
+                updatePasswordDisplay();
+                
+                alert(`✅ Password for ${name} updated successfully!`);
+                
+            } catch (error) {
+                console.error('Error updating password:', error);
+                alert('❌ Failed to update password. Please try again.');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         });
 
-        // Check if already authenticated
-        window.onload = function() {
+        // Check if already authenticated and fetch passwords
+        window.onload = async function() {
+            // Fetch passwords from database
+            await fetchPasswords();
+            
             if (sessionStorage.getItem('admin_authenticated') === 'true') {
                 document.getElementById('passwordModal').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
+                loadProjectsList();
             }
         };
 
@@ -894,6 +945,22 @@
                 
                 if (!saveResponse.ok) {
                     throw new Error('Project save failed');
+                }
+                
+                // STEP 5: Auto-assign default admin password to new project
+                try {
+                    await fetch(WEBHOOK_POST_PASSWORD, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: projectId,
+                            name: projectName,
+                            password: 'Goal@2030'
+                        })
+                    });
+                } catch (pwdError) {
+                    console.error('Failed to set project password:', pwdError);
+                    // Continue anyway - password can be set manually later
                 }
                 
                 // Show success message
