@@ -334,13 +334,13 @@
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Cover Image</label>
-                    <input type="file" id="projectCoverImage" accept="image/*" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-teal-500">
+                    <input type="file" id="projectCoverImage" accept="image/*" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-teal-500">
                     <p class="text-xs text-slate-500 mt-1">Upload a cover image for the project card (recommended: 800x400px)</p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Map Image</label>
-                    <input type="file" id="projectMapImage" accept="image/*" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-teal-500">
+                    <input type="file" id="projectMapImage" accept="image/*" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-teal-500">
                     <p class="text-xs text-slate-500 mt-1">Upload the master plan/map image for plot marking</p>
                 </div>
 
@@ -817,6 +817,7 @@
                                     <th class="text-left p-3 font-bold text-slate-700">Project Name</th>
                                     <th class="text-left p-3 font-bold text-slate-700">Theme</th>
                                     <th class="text-left p-3 font-bold text-slate-700">Project Password</th>
+                                    <th class="text-center p-3 font-bold text-slate-700">Status</th>
                                     <th class="text-left p-3 font-bold text-slate-700">Created</th>
                                     <th class="text-center p-3 font-bold text-slate-700">Actions</th>
                                 </tr>
@@ -835,6 +836,7 @@
                     
                     const theme = themeColors[project.themeColor] || themeColors.indigo;
                     const createdDate = project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A';
+                    const isActive = project.isActive !== false && project.isActive !== 'false';
                     
                     html += `
                         <tr class="border-b border-slate-200 hover:bg-slate-100 transition-colors" id="project-row-${project.id}">
@@ -855,6 +857,12 @@
                                         📋
                                     </button>
                                 </div>
+                            </td>
+                            <td class="p-3 text-center">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleProjectStatus('${project.id}', this.checked)" class="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2">
+                                    <span class="ml-2 text-sm font-medium ${isActive ? 'text-green-600' : 'text-red-600'}">${isActive ? 'Active' : 'Inactive'}</span>
+                                </label>
                             </td>
                             <td class="p-3 text-sm text-slate-600">${createdDate}</td>
                             <td class="p-3 text-center">
@@ -927,6 +935,83 @@
 
         function refreshProjectsList() {
             loadProjectsList();
+        }
+
+        // Toggle project active/inactive status
+        async function toggleProjectStatus(projectId, newStatus) {
+            try {
+                // Find the project
+                const project = allProjects.find(p => p.id === projectId);
+                if (!project) {
+                    // Fetch projects if not loaded
+                    const response = await fetch(WEBHOOK_GET_PROJECTS, {
+                        method: 'GET',
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
+                    allProjects = await response.json();
+                    const fetchedProject = allProjects.find(p => p.id === projectId);
+                    if (!fetchedProject) {
+                        alert('❌ Project not found');
+                        return;
+                    }
+                    Object.assign(project, fetchedProject);
+                }
+                
+                // Update isActive property
+                const updatedProject = {
+                    ...project,
+                    isActive: newStatus
+                };
+                
+                // Send POST request to save webhook
+                const response = await fetch('https://llcsolution.duckdns.org/webhook/d9e9751a-59bb-44c0-a575-83f8eaa417a2', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedProject)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update project status');
+                }
+                
+                // Update the label text and color
+                const row = document.getElementById(`project-row-${projectId}`);
+                if (row) {
+                    const label = row.querySelector('label span');
+                    if (label) {
+                        label.textContent = newStatus ? 'Active' : 'Inactive';
+                        label.className = `ml-2 text-sm font-medium ${newStatus ? 'text-green-600' : 'text-red-600'}`;
+                    }
+                }
+                
+                // Show success toast
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+                toast.textContent = `✅ Project ${newStatus ? 'activated' : 'deactivated'} successfully!`;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+                
+                // Update allProjects cache
+                const projectIndex = allProjects.findIndex(p => p.id === projectId);
+                if (projectIndex !== -1) {
+                    allProjects[projectIndex].isActive = newStatus;
+                }
+                
+            } catch (error) {
+                console.error('Error toggling project status:', error);
+                alert('❌ Failed to update project status. Please try again.');
+                // Revert checkbox state
+                const row = document.getElementById(`project-row-${projectId}`);
+                if (row) {
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        checkbox.checked = !newStatus;
+                    }
+                }
+            }
         }
 
         // Load projects list when dashboard loads

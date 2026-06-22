@@ -465,9 +465,14 @@
                 // Clear loading state
                 container.innerHTML = '';
                 
-                // Render each dynamic project
-                if (Array.isArray(projects) && projects.length > 0) {
-                    projects.forEach(project => {
+                // Filter only active projects
+                const activeProjects = Array.isArray(projects) 
+                    ? projects.filter(project => project.isActive !== false && project.isActive !== 'false')
+                    : [];
+                
+                // Render each active dynamic project
+                if (activeProjects.length > 0) {
+                    activeProjects.forEach(project => {
                         const card = createProjectCard(project);
                         container.appendChild(card);
                     });
