@@ -275,6 +275,18 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Cover Image (Optional)</label>
+                    <input type="file" id="editProjectCoverImage" accept="image/*" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">Leave empty to keep current image. Upload new image to replace.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Map Image (Optional)</label>
+                    <input type="file" id="editProjectMapImage" accept="image/*" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">Leave empty to keep current image. Upload new image to replace.</p>
+                </div>
+
+                <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Amenities</label>
                     <div class="bg-slate-50 border-2 border-slate-300 rounded-lg p-4">
                         <div class="grid grid-cols-2 gap-3 mb-3">
@@ -474,6 +486,18 @@
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Project Description</label>
                     <textarea id="editProjectDescription" rows="3" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Cover Image (Optional)</label>
+                    <input type="file" id="editCoverImageFile" accept="image/*" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">Leave empty to keep current image. Upload new image to replace.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Map Image (Optional)</label>
+                    <input type="file" id="editMapImageFile" accept="image/*" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">Leave empty to keep current image. Upload new image to replace.</p>
                 </div>
 
                 <div>
@@ -1082,13 +1106,43 @@
                 // Find original project to preserve image URLs
                 const originalProject = allProjects.find(p => p.id === projectId);
                 
+                // Check if new images were uploaded
+                const coverImageFile = document.getElementById('editCoverImageFile').files[0];
+                const mapImageFile = document.getElementById('editMapImageFile').files[0];
+                
+                let coverImageUrl = originalProject.coverImageUrl;
+                let mapImageUrl = originalProject.mapImageUrl;
+                
+                // If images were uploaded, upload them first
+                if (coverImageFile || mapImageFile) {
+                    submitBtnLoader.textContent = 'Uploading Images...';
+                    
+                    const formData = new FormData();
+                    if (coverImageFile) formData.append('coverImage', coverImageFile);
+                    if (mapImageFile) formData.append('mapImage', mapImageFile);
+                    formData.append('projectId', projectId);
+                    
+                    const uploadResponse = await fetch('https://llcsolution.duckdns.org/webhook/e1c6d4da-abbc-4d7d-8b36-0829962d8bdc', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (uploadResponse.ok) {
+                        const uploadData = await uploadResponse.json();
+                        if (uploadData.coverImageUrl) coverImageUrl = uploadData.coverImageUrl;
+                        if (uploadData.mapImageUrl) mapImageUrl = uploadData.mapImageUrl;
+                    }
+                }
+                
+                submitBtnLoader.textContent = 'Updating Project...';
+                
                 // Prepare updated project data
                 const updatedProjectData = {
                     id: projectId,
                     name: projectName,
                     themeColor: projectTheme,
-                    coverImageUrl: originalProject.coverImageUrl,
-                    mapImageUrl: originalProject.mapImageUrl,
+                    coverImageUrl: coverImageUrl,
+                    mapImageUrl: mapImageUrl,
                     googleMapLink: projectMapLink,
                     address: projectAddress,
                     description: projectDescription,
