@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Project Map | Broker Today</title>
+    
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        .glass-nav { 
+            background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(10px); 
+        }
+        /* Leaflet Map Container */
+        #map { 
+            width: 100%; 
+            height: 600px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: #f8fafc;
+            z-index: 1;
+            position: relative;
+        }
+        
+        @media (max-width: 768px) {
+            #map {
+                height: 400px;
+            }
+        }
+        
+        /* Ensure modals are above map */
+        .zoom-modal {
+            z-index: 9999 !important;
+        }
+        
+        /* Hide default Leaflet attribution */
+        .leaflet-control-attribution {
+            display: none;
+        }
+        
+        /* Leaflet container z-index */
+        .leaflet-container {
+            z-index: 1;
+        }
+        
+        /* Custom Leaflet Zoom Controls Styling */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        }
+        
+        .leaflet-control-zoom a {
+            background: white !important;
+            border: 2px solid #cbd5e1 !important;
+            color: #475569 !important;
+            font-weight: bold !important;
+            width: 40px !important;
+            height: 40px !important;
+            line-height: 36px !important;
+            font-size: 20px !important;
+        }
+        
+        .leaflet-control-zoom a:hover {
+            background: #f1f5f9 !important;
+            border-color: var(--theme-color) !important;
+            color: var(--theme-color) !important;
+        }
+        
+        /* Leaflet Marker Styling */
+        .leaflet-marker-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+        
+        .leaflet-div-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+        
+        /* Yellow Circle Background for Markers */
+        .marker-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(var(--marker-scale, 1));
+            
+            /* THE GOLDEN FIX: Responsive font size that never gets too massive */
+            font-size: clamp(10px, 3vw, 16px); 
+            
+            /* Perfect circle sizing based on the clamped font */
+            min-width: 2.2em;
+            min-height: 2.2em;
+            padding: 0.2em;
+            
+            background-color: #FFEB3B;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            color: #000;
+            font-weight: bold;
+            line-height: 1;
+            cursor: grab;
+            pointer-events: auto;
+            transition: none;
+        }
+        
+        /* Plot Marker Numbers with CSS Variable Scaling */
+        .plot-number {
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: 0.05em;
+            /* Scalable outline for crisp rendering at all sizes */
+            -webkit-text-stroke: 0.04em black;
+            /* Soft scalable shadow for depth */
+            filter: drop-shadow(0.05em 0.05em 0 rgba(0,0,0,0.5));
+        }
+        
+        .plot-number:active {
+            cursor: grabbing;
+        }
+        
+        .marker-available { color: #22c55e; }
+        .marker-sold { color: #ef4444; }
+        
+        /* Admin Mode Layout */
+        .admin-active .map-wrapper { 
+            cursor: crosshair; 
+            touch-action: none; 
+        }
+        .admin-active .map-wrapper::after {
+            content: "ADMIN MODE ACTIVE - MAP IS EDITABLE";
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 30;
+        }
+        .admin-active .plot-marker { 
+            cursor: grab; 
+            pointer-events: auto; 
+        }
+        .admin-active .plot-marker:active { 
+            cursor: grabbing; 
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--theme-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            z-index: 10000;
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        
+        /* Ensure loading overlay is above everything */
+        #loadingOverlay {
+            z-index: 10000 !important;
+        }
+
+        /* ZOOM FIX FOR MODAL CONTENT */
+        .zoom-fixed-content {
+            transition: transform 0.1s ease-out;
+            transform-origin: center center;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="loader mb-4"></div>
+        <h2 class="text-xl font-bold text-slate-800">डेटा लोड हो रहा है...</h2>
+        <p class="text-sm text-slate-500 mt-2">Fetching project data...</p>
+    </div>
+
+    <!-- Admin Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative zoom-fixed-content">
+            <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="font-bold text-lg mb-4 text-slate-800">एडमिन लॉगिन (Admin Login)</h3>
+            <div class="relative">
+                <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none pr-12" style="border-color: var(--theme-color);">
+                <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-slate-500 text-xl" style="color: var(--theme-color);">
+                    <span id="eyeIcon">👁️</span>
+                </button>
+            </div>
+            <button onclick="verifyPassword()" class="text-white font-bold w-full py-3 rounded-lg transition-colors" style="background-color: var(--theme-color);">लॉगिन करें (Login)</button>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
+        <div class="container mx-auto max-w-6xl flex justify-between items-center">
+            <div class="flex flex-col w-full">
+                <div class="flex justify-between items-center w-full">
+                    <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                            <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+                    </a>
+                    <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+                        <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span class="font-medium text-sm">वापस होम</span>
+                    </a>
+                </div>
+                
+                <div class="flex justify-between items-center w-full mt-2 sm:pl-10 flex-wrap gap-4">
+                    <div class="flex flex-wrap gap-2">
+                        <a href="agents.html" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            प्रॉपर्टी एक्सपर्ट्स
+                        </a>
+                        <a href="#" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            लीगल एक्सपर्ट्स
+                        </a>
+                        <a href="#" class="inline-block bg-slate-800 hover:bg-blue-600 border border-slate-600 hover:border-blue-400 text-[#FF6D5A] hover:text-white text-xs px-3 py-1.5 rounded-md shadow-sm transition-all duration-200 w-max font-semibold tracking-wide">
+                            बैंकिंग एक्सपर्ट्स
+                        </a>
+                    </div>
+                    
+                    <!-- Location Selector -->
+                    <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-md px-2.5 py-1.5 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-[#FF6D5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <select class="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer pr-1">
+                            <option value="Sirohi" selected class="bg-slate-800">Sirohi</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-10" id="projectHeader">
+        <div class="container mx-auto px-4 max-w-6xl text-center">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200" id="projectTitle">Loading Project...</h1>
+            <p class="text-lg text-indigo-100 mt-2" id="projectSubtitle">Please wait...</p>
+        </div>
+    </header>
+
+    <!-- Map Section -->
+    <main class="container mx-auto px-4 py-8 max-w-6xl" id="app-container">
+        <div class="mb-6 flex justify-between items-end">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टरप्लान</h2>
+                <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।</p>
+            </div>
+            <div class="flex gap-4 items-center">
+                <a href="#" id="googleMapsLink" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 text-2xl" title="Open in Google Maps">
+                    📍
+                </a>
+                <button id="btnAdminLogin" onclick="openPasswordModal()" class="text-slate-300 hover:text-slate-500 text-xl" title="Admin Login">🔒</button>
+                <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow-md transition-all">
+                    Save & Exit Admin
+                </button>
+            </div>
+        </div>
+
+        <!-- Leaflet Map Container -->
+        <div id="map"></div>
+        
+        <!-- Admin Marker Size Control (Below Map) -->
+        <div class="flex justify-center mt-4">
+            <div id="adminMarkerControls" class="hidden bg-white border-2 rounded-lg p-3 shadow-lg" style="border-color: var(--theme-color);">
+                <label class="block text-xs font-bold text-slate-700 mb-2">Marker Size (Desktop)</label>
+                <input type="range" id="markerSizeSlider" min="6" max="24" value="16" step="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <div class="text-xs text-center text-slate-600 mt-2"><span id="markerSizeValue">16</span>px</div>
+            </div>
+        </div>
+
+        <!-- Project Details Section -->
+        <div class="mt-12 grid md:grid-cols-2 gap-8">
+            <!-- Location & Details -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+                <h3 class="text-2xl font-bold mb-6 flex items-center gap-2" style="color: var(--theme-color);">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    प्रोजेक्ट विवरण
+                </h3>
+                <div class="space-y-4 text-slate-700" id="projectDetails">
+                    <p>Loading project details...</p>
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+                <h3 class="text-2xl font-bold mb-6 flex items-center gap-2" style="color: var(--theme-color);">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    सुविधाएं (Amenities)
+                </h3>
+                <div id="amenitiesGrid" class="grid grid-cols-2 gap-4">
+                    <div class="text-center py-4 text-slate-500 col-span-2">Loading amenities...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin Add/Edit Plot Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative zoom-fixed-content">
+            <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="text-xl font-bold mb-4" id="adminModalTitle" style="color: var(--theme-color);">Add New Plot</h3>
+            
+            <form id="adminForm" class="space-y-3">
+                <input type="hidden" id="adminX">
+                <input type="hidden" id="adminY">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">प्लॉट नंबर (Plot Number)</label>
+                        <input type="text" id="adminPlotNo" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold" style="color: var(--theme-color);">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">स्थिति (Status)</label>
+                        <select id="adminStatus" class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold">
+                            <option value="Available" class="text-green-600">उपलब्ध (Available)</option>
+                            <option value="Sold" class="text-red-600">बिक गया (Sold)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">कुल वर्ग फुट (Total Sq. Feet)</label>
+                        <input type="text" id="adminSqFt" placeholder="उदा. 600" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">आयाम (L x W)</label>
+                        <input type="text" id="adminSize" placeholder="उदा. 20x30" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                    </div>
+                    <div id="priceContainer">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">मूल्य / वर्ग फुट (₹)</label>
+                        <input type="text" id="adminPrice" placeholder="उदा. 1200" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">दिशा (Facing Direction)</label>
+                        <select id="adminDirection" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                            <option value="East">पूर्व (East)</option>
+                            <option value="West">पश्चिम (West)</option>
+                            <option value="North">उत्तर (North)</option>
+                            <option value="South">दक्षिण (South)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-4 pt-2">
+                    <button type="submit" class="flex-1 text-white font-bold py-2.5 rounded transition-colors" style="background-color: var(--theme-color);">
+                        सेव करें (Save)
+                    </button>
+                    <button type="button" id="btnDeletePlot" onclick="deletePlot()" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded transition-colors">
+                        हटाएं (Delete)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Plot Details Modal -->
+    <div id="userModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative zoom-fixed-content">
+            <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <h3 id="uPlotNo" class="text-3xl font-black text-slate-800">Plot --</h3>
+            </div>
+            
+            <div class="space-y-3 mb-6 text-sm">
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">Status:</span>
+                    <span id="uStatus" class="font-bold">--</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">Total Area:</span>
+                    <span class="font-bold text-slate-800"><span id="uSqFt">--</span> Sq.Ft</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">Size (L x W):</span>
+                    <span id="uSize" class="font-bold text-slate-800">--</span>
+                </div>
+                <div id="uPriceRow" class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">Price/Sq.Ft:</span>
+                    <span class="font-bold text-slate-800">₹<span id="uPrice">--</span></span>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <span class="text-slate-500">Facing:</span>
+                    <span id="uDirection" class="font-bold text-slate-800">--</span>
+                </div>
+            </div>
+
+            <button id="btnContactAgent" onclick="openContactModal()" class="w-full bg-slate-800 hover:bg-black text-white font-bold py-3 rounded-xl transition-colors">
+                एजेंट से संपर्क करें (Contact Agent)
+            </button>
+        </div>
+    </div>
+
+    <!-- Contact Agent WhatsApp Modal -->
+    <div id="contactModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 zoom-modal">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full relative zoom-fixed-content">
+            <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Inquiry for Plot <span id="contactPlotLabel" style="color: var(--theme-color);"></span></h3>
+            
+            <form id="contactForm" class="space-y-4">
+                <input type="hidden" id="cPlotNo">
+                
+                <div>
+                    <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" style="border-color: var(--theme-color);">
+                </div>
+                <div>
+                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" style="border-color: var(--theme-color);">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Select Agents to Notify:</label>
+                    <div id="dynamicAgentList" class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-48 overflow-y-auto">
+                        <span class="text-sm text-slate-500">Loading agents...</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors mt-2">
+                    Send Inquiry on WhatsApp
+                </button>
+            </form>
+            <div id="formSuccess" class="hidden mt-4 text-sm text-green-700 bg-green-50 p-3 rounded-lg text-center border border-green-200 font-bold">
+                मैसेज भेज दिया गया है!
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAT WIDGET -->
+    <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <button id="chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+        </button>
+
+        <div id="chat-window" class="hidden w-80 max-h-96 bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col mt-4 overflow-hidden transform origin-bottom-right transition-all duration-300">
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center rounded-t-2xl">
+                <h4 class="font-bold">Broker Today Support</h4>
+                <button id="chat-close" class="text-white hover:text-blue-200 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3 h-64">
+                <div class="flex items-start">
+                    <div class="bg-white border border-slate-200 text-slate-700 text-sm p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
+                        नमस्ते! मैं Broker Today का डिजिटल असिस्टेंट हूँ। मैं आपकी कैसे मदद कर सकता हूँ?
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 bg-white border-t border-slate-100 flex items-center">
+                <input type="text" id="chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
+                <button id="chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // --- GOOGLE DRIVE IMAGE URL CONVERTER ---
+        function convertDriveUrlToThumbnail(url) {
+            if (!url) return url;
+            
+            // Check if it's a Google Drive URL
+            if (url.includes('drive.google.com')) {
+                // Extract file ID using regex
+                let fileId = null;
+                
+                // Pattern 1: /file/d/FILE_ID/
+                const pattern1 = /\/file\/d\/([a-zA-Z0-9_-]+)/;
+                const match1 = url.match(pattern1);
+                if (match1) {
+                    fileId = match1[1];
+                }
+                
+                // Pattern 2: id=FILE_ID or ?id=FILE_ID
+                if (!fileId) {
+                    const pattern2 = /[?&]id=([a-zA-Z0-9_-]+)/;
+                    const match2 = url.match(pattern2);
+                    if (match2) {
+                        fileId = match2[1];
+                    }
+                }
+                
+                // Pattern 3: /uc?id=FILE_ID
+                if (!fileId) {
+                    const pattern3 = /\/uc\?id=([a-zA-Z0-9_-]+)/;
+                    const match3 = url.match(pattern3);
+                    if (match3) {
+                        fileId = match3[1];
+                    }
+                }
+                
+                // If file ID found, return thumbnail URL
+                if (fileId) {
+                    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+                }
+            }
+            
+            // Return original URL if not a Drive URL or ID not found
+            return url;
+        }
+
+        // --- 1. CONFIGURATION & WEBHOOKS ---
+        let PROJECT_NAME = "";
+        let PROJECT_ID = "";
+        let PROJECT_DATA = null;
+        const ADMIN_PASSWORD = "Goal@2030"; // Universal admin password for dynamic projects
+        
+        const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
+        const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
+        const WEBHOOK_GET_PLOTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeade";
+        const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
+        const N8N_CHAT_WEBHOOK_URL = 'https://llcsolution.duckdns.org/webhook/7750d216-8bb4-4030-9b30-aeba85986268-widget';
+
+        let isAdmin = false;
+        let activePlots = []; 
+        let activeAgents = [];
+        let map = null;
+        let imageOverlay = null;
+        let markersLayer = null;
+        let markerObjects = {}; // Store marker references by plotNo
+        let desktopMarkerSize = 16;
+        
+        // Theme colors mapping
+        const themeColors = {
+            indigo: { color: '#4f46e5', bg: '#eef2ff', border: '#c7d2fe' },
+            amber: { color: '#f59e0b', bg: '#fef3c7', border: '#fde68a' },
+            green: { color: '#10b981', bg: '#d1fae5', border: '#a7f3d0' },
+            purple: { color: '#a855f7', bg: '#f3e8ff', border: '#e9d5ff' },
+            red: { color: '#ef4444', bg: '#fee2e2', border: '#fecaca' }
+        };
+
+        // Get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Load project data from backend
+        async function loadProjectData() {
+            PROJECT_ID = getUrlParameter('project');
+            
+            if (!PROJECT_ID) {
+                alert('❌ No project specified in URL');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                // Fetch all projects from Webhook 3
+                const response = await fetch('https://llcsolution.duckdns.org/webhook/f66e2891-a8cb-4729-a659-2a85496512a0', {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch projects');
+                }
+                
+                const projects = await response.json();
+                
+                // Find the specific project
+                PROJECT_DATA = Array.isArray(projects) ? projects.find(p => p.id === PROJECT_ID) : null;
+
+                if (!PROJECT_DATA) {
+                    alert('❌ Project not found');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                PROJECT_NAME = PROJECT_DATA.name;
+                
+                // Apply theme colors
+                const theme = themeColors[PROJECT_DATA.themeColor] || themeColors.indigo;
+                document.documentElement.style.setProperty('--theme-color', theme.color);
+                document.documentElement.style.setProperty('--theme-bg', theme.bg);
+                document.documentElement.style.setProperty('--theme-border', theme.border);
+
+                // Update page title and header
+                document.getElementById('pageTitle').textContent = `${PROJECT_NAME} | Broker Today`;
+                document.getElementById('projectTitle').textContent = PROJECT_NAME;
+                document.getElementById('projectSubtitle').textContent = PROJECT_DATA.description;
+                document.getElementById('googleMapsLink').href = PROJECT_DATA.googleMapLink;
+
+                // Update project details
+                document.getElementById('projectDetails').innerHTML = `
+                    <div>
+                        <p class="font-bold text-sm text-slate-500">पता (Address):</p>
+                        <p class="text-base">${PROJECT_DATA.address || 'Address not specified'}</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-slate-500">प्रोजेक्ट विवरण:</p>
+                        <p class="text-base">${PROJECT_DATA.description}</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-slate-500">Google Maps:</p>
+                        <a href="${PROJECT_DATA.googleMapLink}" target="_blank" class="text-blue-600 hover:underline text-sm">View on Google Maps →</a>
+                    </div>
+                `;
+
+                // Render dynamic amenities
+                renderAmenities();
+
+                // Load marker size from localStorage
+                desktopMarkerSize = parseFloat(localStorage.getItem(`${PROJECT_ID}_marker_size`)) || 16;
+                
+            } catch (error) {
+                console.error('Error loading project:', error);
+                alert('❌ Failed to load project data. Please try again.');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Calculate responsive marker size based on viewport width
+        function getResponsiveMarkerSize() {
+            const baseSize = desktopMarkerSize;
+            const viewportWidth = window.innerWidth;
+            
+            if (viewportWidth >= 1200) {
+                return baseSize;
+            } else if (viewportWidth >= 768) {
+                return baseSize * 0.7;
+            } else if (viewportWidth >= 480) {
+                return baseSize * 0.45;
+            } else {
+                return baseSize * 0.35;
+            }
+        }
+        
+        let currentMarkerSize = getResponsiveMarkerSize();
+
+        // Toggle Password Visibility
+        function togglePassword() {
+            const pwdInput = document.getElementById('adminPwdInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.textContent = '🙈';
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.textContent = '👁️';
+            }
+        }
+
+        // Initialize Leaflet Map with Simple CRS
+        function initializeMap() {
+            // Create map with Simple CRS (for static images, not geographic coordinates)
+            map = L.map('map', {
+                crs: L.CRS.Simple,
+                minZoom: window.innerWidth < 768 ? -1 : 0,
+                maxZoom: 2,
+                zoomControl: true,
+                attributionControl: false
+            });
+
+            // Load the image from URL (convert Google Drive URL)
+            const img = new Image();
+            
+            img.onload = function() {
+                const w = img.width;
+                const h = img.height;
+                
+                const bounds = [[0, 0], [h, w]];
+                const mapImageUrl = convertDriveUrlToThumbnail(PROJECT_DATA.mapImageUrl);
+                
+                imageOverlay = L.imageOverlay(mapImageUrl, bounds).addTo(map);
+                map.fitBounds(bounds);
+                map.setMaxBounds(bounds.map(corner => [corner[0] - 50, corner[1] - 50]));
+                
+                markersLayer = L.layerGroup().addTo(map);
+                renderMarkers();
+                map.on('zoomend', updateMarkerSizesOnZoom);
+                
+                map.on('click', function(e) {
+                    if (!isAdmin) return;
+                    const latlng = e.latlng;
+                    const xPercent = ((latlng.lng / w) * 100).toFixed(2);
+                    const yPercent = ((latlng.lat / h) * 100).toFixed(2);
+                    openAdminModal(null, xPercent, yPercent);
+                });
+            };
+            
+            img.onerror = function() {
+                console.error("Map image failed to load. Check Drive permissions or URL.", img.src);
+            };
+            
+            // CRITICAL: Force the converter on the source to avoid the 403 download block
+            img.src = convertDriveUrlToThumbnail(PROJECT_DATA.mapImageUrl);
+        }
+
+        // Marker Size Control
+        const markerSizeSlider = document.getElementById('markerSizeSlider');
+        const markerSizeValue = document.getElementById('markerSizeValue');
+        
+        markerSizeSlider.addEventListener('input', function() {
+            desktopMarkerSize = parseFloat(this.value);
+            markerSizeValue.textContent = desktopMarkerSize;
+            localStorage.setItem(`${PROJECT_ID}_marker_size`, desktopMarkerSize);
+            currentMarkerSize = getResponsiveMarkerSize();
+            renderMarkers();
+        });
+        
+        // Set slider to saved value on load
+        markerSizeSlider.value = desktopMarkerSize;
+        markerSizeValue.textContent = desktopMarkerSize;
+        
+        // Update marker sizes based on zoom level using CSS variables
+        function updateMarkerSizesOnZoom() {
+            if (!map || !markerObjects) return;
+            
+            const currentZoom = map.getZoom();
+            const minZoom = map.getMinZoom();
+            
+            // Calculate scale multiplier using Math.pow for exponential scaling
+            const rawScale = Math.pow(2, currentZoom - minZoom);
+            // Clamp the multiplier between 0.5x (zoomed out) and 2.5x (zoomed in)
+            const safeScale = Math.min(Math.max(rawScale, 0.5), 2.5);
+            
+            // Update all markers with CSS variable on the marker-circle
+            Object.values(markerObjects).forEach(markerObj => {
+                const markerElement = markerObj.marker.getElement();
+                if (markerElement) {
+                    const markerCircle = markerElement.querySelector('.marker-circle');
+                    if (markerCircle) {
+                        // Set CSS variable for scale on the circle container
+                        markerCircle.style.setProperty('--marker-scale', safeScale);
+                    }
+                }
+            });
+        }
+        
+        // Adjust marker size on window resize with debouncing
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                desktopMarkerSize = parseFloat(localStorage.getItem(`${PROJECT_ID}_marker_size`)) || 16;
+                currentMarkerSize = getResponsiveMarkerSize();
+                renderMarkers();
+            }, 100);
+        });
+
+        // ==========================================
+        // SMART MOBILE ZOOM FIX LOGIC (ANTI-SQUASH)
+        // ==========================================
+        function fixModalZoom(modalId) {
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('.zoom-fixed-content'); 
+            
+            function updatePosition() {
+                if (modal.classList.contains('hidden') || !window.visualViewport) return;
+                
+                const vv = window.visualViewport;
+
+                if (vv.scale > 1.05) {
+                    modal.style.position = 'absolute';
+                    modal.style.left = `${vv.pageLeft}px`;
+                    modal.style.top = `${vv.pageTop}px`;
+                    modal.style.width = `${vv.width}px`;
+                    modal.style.height = `${vv.height}px`;
+
+                    content.style.width = '340px';
+                    content.style.flexShrink = '0';
+                    content.style.transform = `scale(${1 / vv.scale})`;
+                } else {
+                    modal.style.position = '';
+                    modal.style.left = '';
+                    modal.style.top = '';
+                    modal.style.width = '';
+                    modal.style.height = '';
+                    
+                    content.style.width = '';
+                    content.style.flexShrink = '';
+                    content.style.transform = '';
+                }
+            }
+
+            updatePosition();
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', updatePosition);
+                window.visualViewport.addEventListener('scroll', updatePosition);
+                modal._zoomHandler = updatePosition;
+            }
+        }
+
+        function removeZoomFix(modalId) {
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('.zoom-fixed-content');
+            
+            if (modal._zoomHandler && window.visualViewport) {
+                window.visualViewport.removeEventListener('resize', modal._zoomHandler);
+                window.visualViewport.removeEventListener('scroll', modal._zoomHandler);
+            }
+            
+            modal.style.position = ''; 
+            modal.style.left = ''; 
+            modal.style.top = ''; 
+            modal.style.width = ''; 
+            modal.style.height = '';
+            
+            if(content) { 
+                content.style.width = ''; 
+                content.style.flexShrink = ''; 
+                content.style.transform = ''; 
+            }
+        }
+
+        function closeModal(id) {
+            removeZoomFix(id); 
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // --- 2. DATA FETCHING LOGIC ---
+
+        async function loadAgents() {
+            try {
+                const cacheBuster = new Date().getTime();
+                const response = await fetch(`${WEBHOOK_GET_AGENTS}?t=${cacheBuster}`, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
+                
+                const jsonRes = await response.json();
+                let parsedAgents = [];
+
+                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
+                    parsedAgents = jsonRes[0].myField;
+                } else if (jsonRes.myField) {
+                    parsedAgents = jsonRes.myField;
+                } else if (Array.isArray(jsonRes)) {
+                    parsedAgents = jsonRes;
+                }
+
+                activeAgents = parsedAgents.filter(item => item.phone || item.rating);
+                
+                if (activeAgents.length > 0) {
+                    localStorage.setItem('broker_agents', JSON.stringify(activeAgents));
+                }
+            } catch (error) {
+                activeAgents = JSON.parse(localStorage.getItem('broker_agents') || '[]');
+            }
+        }
+
+        async function loadPlots() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('hidden'); 
+            
+            try {
+                const cacheBuster = new Date().getTime();
+                const url = `${WEBHOOK_GET_PLOTS}?projectName=${encodeURIComponent(PROJECT_NAME)}&t=${cacheBuster}`;
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+                    cache: 'no-store'
+                });
+                
+                const jsonRes = await response.json();
+                let liveData = [];
+                
+                if (Array.isArray(jsonRes) && jsonRes.length > 0 && jsonRes[0].myField) {
+                    liveData = jsonRes[0].myField;
+                } else if (jsonRes.myField) {
+                    liveData = jsonRes.myField;
+                } else if (Array.isArray(jsonRes)) {
+                    liveData = jsonRes;
+                }
+
+                if (Array.isArray(liveData) && liveData.length > 0) {
+                    activePlots = liveData.filter(item => item.plotNo);
+                    localStorage.setItem(`${PROJECT_ID}_live_plots`, JSON.stringify(activePlots));
+                }
+            } catch (error) {
+                const savedLocal = localStorage.getItem(`${PROJECT_ID}_live_plots`);
+                if (savedLocal) {
+                    activePlots = JSON.parse(savedLocal);
+                }
+            } finally {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+                renderMarkers();
+            }
+        }
+
+        // --- 3. LEAFLET MAP RENDERING & MARKER LOGIC ---
+
+        function renderMarkers() {
+            if (!map || !markersLayer) return;
+            
+            // Clear existing markers and references
+            markersLayer.clearLayers();
+            markerObjects = {};
+            
+            // Get image dimensions from the overlay
+            const img = new Image();
+            img.src = convertDriveUrlToThumbnail(PROJECT_DATA.mapImageUrl);
+            
+            img.onload = function() {
+                const w = img.width;
+                const h = img.height;
+                
+                activePlots.forEach(plot => {
+                    if (!plot.x || !plot.y) return;
+                    
+                    // Convert percentage to pixel coordinates
+                    const lat = (parseFloat(plot.y) / 100) * h;
+                    const lng = (parseFloat(plot.x) / 100) * w;
+                    
+                    // Create custom div icon with plot number wrapped in yellow circle
+                    const colorClass = plot.status === 'Sold' ? 'marker-sold' : 'marker-available';
+                    const baseSize = currentMarkerSize; // Use responsive marker size
+                    const icon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div class="marker-circle" style="font-size: ${baseSize}px; --marker-scale: 1;"><span class="plot-number ${colorClass}">${plot.plotNo}</span></div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
+                    
+                    // Create marker
+                    const marker = L.marker([lat, lng], { 
+                        icon: icon,
+                        draggable: isAdmin
+                    }).addTo(markersLayer);
+                    
+                    // Store marker reference
+                    markerObjects[plot.plotNo] = { marker: marker, plot: plot };
+                    
+                    // Click event for user modal
+                    marker.on('click', function() {
+                        if (!isAdmin) {
+                            openUserModal(plot);
+                        } else {
+                            openAdminModal(plot);
+                        }
+                    });
+                    
+                    // Drag event for admin mode
+                    if (isAdmin) {
+                        // Disable map panning when dragging marker
+                        marker.on('dragstart', function() {
+                            map.dragging.disable();
+                        });
+                        
+                        marker.on('dragend', function(e) {
+                            // Re-enable map panning
+                            map.dragging.enable();
+                            
+                            // Save new coordinates
+                            const newLatLng = e.target.getLatLng();
+                            plot.x = ((newLatLng.lng / w) * 100).toFixed(2);
+                            plot.y = ((newLatLng.lat / h) * 100).toFixed(2);
+                            
+                            localStorage.setItem(`${PROJECT_ID}_live_plots`, JSON.stringify(activePlots));
+                            sendDataToN8n(plot, 'update_location');
+                        });
+                    }
+                });
+            };
+        }
+
+        // --- 4. ADMIN PANEL LOGIC ---
+
+        document.getElementById('adminStatus').addEventListener('change', function() {
+            document.getElementById('priceContainer').style.display = this.value === 'Sold' ? 'none' : 'block';
+        });
+
+        function openPasswordModal() {
+            document.getElementById('passwordModal').classList.remove('hidden');
+            fixModalZoom('passwordModal');
+        }
+
+        function verifyPassword() {
+            const pwd = document.getElementById('adminPwdInput').value;
+            if (pwd === ADMIN_PASSWORD) {
+                closeModal('passwordModal');
+                enterAdminMode();
+            } else {
+                alert('❌ Incorrect password');
+                document.getElementById('adminPwdInput').value = '';
+            }
+        }
+
+        function enterAdminMode() {
+            isAdmin = true;
+            document.getElementById('btnAdminLogin').classList.add('hidden');
+            document.getElementById('btnAdminExit').classList.remove('hidden');
+            document.getElementById('adminMarkerControls').classList.remove('hidden');
+            document.getElementById('modeIndicator').innerHTML = '<b class="text-red-600">ADMIN MODE ACTIVE</b> - Click map to add plots, click markers to edit';
+            renderMarkers();
+        }
+
+        function exitAdminMode() {
+            isAdmin = false;
+            document.getElementById('btnAdminLogin').classList.remove('hidden');
+            document.getElementById('btnAdminExit').classList.add('hidden');
+            document.getElementById('adminMarkerControls').classList.add('hidden');
+            document.getElementById('modeIndicator').innerHTML = 'प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।';
+            renderMarkers();
+        }
+
+        function openAdminModal(plot = null, x = 0, y = 0) {
+            document.getElementById('adminForm').reset();
+            
+            if (plot) {
+                document.getElementById('adminModalTitle').innerText = "Edit Plot " + plot.plotNo;
+                document.getElementById('adminPlotNo').value = plot.plotNo;
+                document.getElementById('adminPlotNo').readOnly = true; 
+                document.getElementById('adminX').value = plot.x;
+                document.getElementById('adminY').value = plot.y;
+                document.getElementById('adminStatus').value = plot.status;
+                document.getElementById('adminSqFt').value = plot.sqFt || "";
+                document.getElementById('adminSize').value = plot.size || "";
+                document.getElementById('adminPrice').value = plot.price || "";
+                document.getElementById('adminDirection').value = plot.dir || "East";
+                document.getElementById('btnDeletePlot').classList.remove('hidden');
+            } else {
+                document.getElementById('adminModalTitle').innerText = "Add New Plot";
+                document.getElementById('adminPlotNo').readOnly = false;
+                document.getElementById('adminX').value = x;
+                document.getElementById('adminY').value = y;
+                document.getElementById('btnDeletePlot').classList.add('hidden');
+            }
+            
+            document.getElementById('adminStatus').dispatchEvent(new Event('change'));
+            document.getElementById('adminModal').classList.remove('hidden');
+            fixModalZoom('adminModal');
+        }
+
+        document.getElementById('adminForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Saving...";
+
+            const plotNum = document.getElementById('adminPlotNo').value;
+            const newPlot = {
+                uid: `${PROJECT_NAME}_${plotNum}`,
+                projectName: PROJECT_NAME,
+                projectId: PROJECT_ID,
+                plotNo: plotNum,
+                x: document.getElementById('adminX').value,
+                y: document.getElementById('adminY').value,
+                status: document.getElementById('adminStatus').value,
+                sqFt: document.getElementById('adminSqFt').value,
+                size: document.getElementById('adminSize').value,
+                price: document.getElementById('adminStatus').value === 'Sold' ? "" : document.getElementById('adminPrice').value,
+                dir: document.getElementById('adminDirection').value
+            };
+
+            const existingIndex = activePlots.findIndex(p => p.plotNo === newPlot.plotNo);
+            if (existingIndex >= 0) {
+                activePlots[existingIndex] = newPlot;
+            } else {
+                activePlots.push(newPlot);
+            }
+            
+            localStorage.setItem(`${PROJECT_ID}_live_plots`, JSON.stringify(activePlots));
+            renderMarkers();
+            
+            await sendDataToN8n(newPlot, 'save');
+            
+            closeModal('adminModal');
+            btn.innerText = originalText;
+        });
+
+        async function deletePlot() {
+            const plotNo = document.getElementById('adminPlotNo').value;
+            if (!confirm(`क्या आप वाकई प्लॉट ${plotNo} को पूरी तरह से हटाना चाहते हैं?\n\nAre you sure you want to completely DELETE Plot ${plotNo}?`)) return;
+
+            // Remove marker from Leaflet map
+            if (markerObjects[plotNo]) {
+                markersLayer.removeLayer(markerObjects[plotNo].marker);
+                delete markerObjects[plotNo];
+            }
+            
+            // Remove from activePlots array
+            const plotIndex = activePlots.findIndex(p => p.plotNo === plotNo);
+            if (plotIndex > -1) {
+                const deletedPlot = activePlots[plotIndex];
+                activePlots.splice(plotIndex, 1);
+                localStorage.setItem(`${PROJECT_ID}_live_plots`, JSON.stringify(activePlots));
+                
+                await sendDataToN8n(deletedPlot, 'delete');
+            }
+            
+            closeModal('adminModal');
+        }
+
+        async function sendDataToN8n(plotData, action) {
+            try {
+                await fetch(WEBHOOK_SAVE_PLOT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        projectId: PROJECT_ID,
+                        ...plotData
+                    })
+                });
+            } catch (error) {
+                console.error('n8n webhook error:', error);
+            }
+        }
+
+        // --- 5. USER MODAL LOGIC ---
+
+        function openUserModal(plot) {
+            document.getElementById('uPlotNo').innerText = `Plot ${plot.plotNo}`;
+            document.getElementById('uStatus').innerText = plot.status;
+            document.getElementById('uStatus').className = plot.status === 'Sold' ? 'font-bold text-red-600' : 'font-bold text-green-600';
+            document.getElementById('uSqFt').innerText = plot.sqFt || '--';
+            document.getElementById('uSize').innerText = plot.size || '--';
+            document.getElementById('uPrice').innerText = plot.price || '--';
+            document.getElementById('uDirection').innerText = plot.dir || '--';
+            
+            if (plot.status === 'Sold') {
+                document.getElementById('uPriceRow').style.display = 'none';
+                document.getElementById('btnContactAgent').style.display = 'none';
+            } else {
+                document.getElementById('uPriceRow').style.display = 'flex';
+                document.getElementById('btnContactAgent').style.display = 'block';
+            }
+            
+            document.getElementById('cPlotNo').value = plot.plotNo;
+            document.getElementById('userModal').classList.remove('hidden');
+            fixModalZoom('userModal');
+        }
+
+        function openContactModal() {
+            closeModal('userModal');
+            const plotNo = document.getElementById('cPlotNo').value;
+            document.getElementById('contactPlotLabel').innerText = plotNo;
+            
+            // Populate agent list
+            const agentList = document.getElementById('dynamicAgentList');
+            if (activeAgents.length === 0) {
+                agentList.innerHTML = '<span class="text-sm text-slate-500">No agents available</span>';
+            } else {
+                agentList.innerHTML = activeAgents.map(agent => `
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-2 rounded">
+                        <input type="checkbox" name="selectedAgents" value="${agent.phone}" class="w-4 h-4">
+                        <span class="text-sm font-semibold">${agent.name}</span>
+                        <span class="text-xs text-slate-500">${agent.rating || ''}</span>
+                    </label>
+                `).join('');
+            }
+            
+            document.getElementById('contactModal').classList.remove('hidden');
+            fixModalZoom('contactModal');
+        }
+
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('cName').value;
+            const phone = document.getElementById('cPhone').value;
+            const plotNo = document.getElementById('cPlotNo').value;
+            
+            const selectedAgents = Array.from(document.querySelectorAll('input[name="selectedAgents"]:checked'))
+                .map(cb => cb.value);
+            
+            if (selectedAgents.length === 0) {
+                alert('कृपया कम से कम एक एजेंट चुनें (Please select at least one agent)');
+                return;
+            }
+            
+            const payload = {
+                customerName: name,
+                customerPhone: phone,
+                projectName: PROJECT_NAME,
+                projectId: PROJECT_ID,
+                plotNo: plotNo,
+                agentPhones: selectedAgents,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                await fetch(WEBHOOK_INQUIRY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                document.getElementById('contactForm').reset();
+                document.getElementById('formSuccess').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    closeModal('contactModal');
+                    document.getElementById('formSuccess').classList.add('hidden');
+                }, 2000);
+            } catch (error) {
+                alert('Error sending inquiry. Please try again.');
+            }
+        });
+
+        // --- CHAT WIDGET LOGIC ---
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatClose = document.getElementById('chat-close');
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatMessages = document.getElementById('chat-messages');
+
+        chatToggle.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
+        chatClose.addEventListener('click', () => chatWindow.classList.add('hidden'));
+
+        function appendMessage(text, isUser = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex items-start ${isUser ? 'justify-end' : ''}`;
+            
+            const innerDiv = document.createElement('div');
+            if (isUser) {
+                innerDiv.className = 'bg-blue-600 text-white text-sm p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]';
+            } else {
+                innerDiv.className = 'bg-white border border-slate-200 text-slate-700 text-sm p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]';
+            }
+            innerDiv.textContent = text;
+            
+            msgDiv.appendChild(innerDiv);
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, true);
+            chatInput.value = '';
+
+            const typingId = 'typing-' + Date.now();
+            const typingDiv = document.createElement('div');
+            typingDiv.id = typingId;
+            typingDiv.className = 'flex items-start text-xs text-slate-400 ml-2 mt-1';
+            typingDiv.textContent = 'typing...';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch(N8N_CHAT_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        source: `Broker Today - ${PROJECT_NAME}`,
+                        message: text,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                document.getElementById(typingId).remove();
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const replyText = data.reply || 'Thanks for reaching out! We received your message.';
+                    appendMessage(replyText, false);
+                } else {
+                    appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
+                }
+            } catch (error) {
+                console.error('Chat Error:', error);
+                document.getElementById(typingId).remove();
+                appendMessage('Network error. Please try again later.', false);
+            }
+        }
+
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Render amenities dynamically
+        function renderAmenities() {
+            const amenitiesGrid = document.getElementById('amenitiesGrid');
+            
+            if (!PROJECT_DATA || !PROJECT_DATA.amenities) {
+                amenitiesGrid.innerHTML = '<div class="text-center py-4 text-slate-500 col-span-2">No amenities specified</div>';
+                return;
+            }
+            
+            let amenitiesArray = [];
+            
+            // Parse amenities - handle both string and array
+            try {
+                if (typeof PROJECT_DATA.amenities === 'string') {
+                    amenitiesArray = JSON.parse(PROJECT_DATA.amenities);
+                } else if (Array.isArray(PROJECT_DATA.amenities)) {
+                    amenitiesArray = PROJECT_DATA.amenities;
+                }
+            } catch (error) {
+                console.error('Error parsing amenities:', error);
+                amenitiesGrid.innerHTML = '<div class="text-center py-4 text-slate-500 col-span-2">Error loading amenities</div>';
+                return;
+            }
+            
+            if (!Array.isArray(amenitiesArray) || amenitiesArray.length === 0) {
+                amenitiesGrid.innerHTML = '<div class="text-center py-4 text-slate-500 col-span-2">No amenities available</div>';
+                return;
+            }
+            
+            // Icon mapping for common amenities
+            const iconMap = {
+                'Patte Shuda Plots': '📜',
+                'CC Roads': '🛣️',
+                'Street Lights': '💡',
+                'Loanable': '🏦',
+                'Green Spaces': '🌳',
+                'CCTV Camera': '📹',
+                'Boundary Wall': '🚧',
+                'Gated Community': '🏘️'
+            };
+            
+            // Render each amenity
+            amenitiesGrid.innerHTML = amenitiesArray.map(amenity => {
+                const icon = iconMap[amenity] || '🔹'; // Default icon if not in map
+                return `
+                    <div class="flex items-center gap-3 p-3 rounded-lg border" style="background-color: var(--theme-bg); border-color: var(--theme-border);">
+                        <span class="text-2xl">${icon}</span>
+                        <span class="font-bold text-sm text-slate-700">${amenity}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', async function() {
+            await loadProjectData();
+            await loadAgents();
+            await loadPlots();
+            initializeMap();
+        });
+    </script>
+</body>
+</html>
