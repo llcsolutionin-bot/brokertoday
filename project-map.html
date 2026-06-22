@@ -541,7 +541,8 @@
         let PROJECT_NAME = "";
         let PROJECT_ID = "";
         let PROJECT_DATA = null;
-        const ADMIN_PASSWORD = "Goal@2030"; // Universal admin password for dynamic projects
+        const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
+        let CURRENT_PROJECT_PASSWORD = "";
         
         const WEBHOOK_INQUIRY = "https://llcsolution.duckdns.org/webhook/9cad05f9-5f1d-427e-8a49-11d6edc79617";
         const WEBHOOK_SAVE_PLOT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404"; 
@@ -1010,7 +1011,7 @@
 
         function verifyPassword() {
             const pwd = document.getElementById('adminPwdInput').value;
-            if (pwd === ADMIN_PASSWORD) {
+            if (pwd === CURRENT_PROJECT_PASSWORD) {
                 closeModal('passwordModal');
                 enterAdminMode();
             } else {
@@ -1360,9 +1361,41 @@
             }).join('');
         }
 
+        // Fetch password from database for this project
+        async function fetchProjectPassword() {
+            try {
+                const response = await fetch(WEBHOOK_GET_PASSWORDS, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch passwords');
+                }
+                
+                const passwordsArray = await response.json();
+                
+                // Find password for this PROJECT_ID
+                if (Array.isArray(passwordsArray)) {
+                    const projectData = passwordsArray.find(item => item.id === PROJECT_ID);
+                    if (projectData && projectData.password) {
+                        CURRENT_PROJECT_PASSWORD = projectData.password;
+                    } else {
+                        // Fallback to default
+                        CURRENT_PROJECT_PASSWORD = "Goal@2030";
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching password:', error);
+                // Fallback to default
+                CURRENT_PROJECT_PASSWORD = "Goal@2030";
+            }
+        }
+
         // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', async function() {
             await loadProjectData();
+            await fetchProjectPassword();
             await loadAgents();
             await loadPlots();
             initializeMap();

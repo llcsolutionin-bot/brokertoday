@@ -124,7 +124,8 @@
     </div>
 
     <script>
-        const ADMIN_PASSWORD = "Agent@9026";
+        const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
+        let CURRENT_PAGE_PASSWORD = "";
         
         // NEW WEBHOOKS UPDATED HERE
         const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
@@ -208,7 +209,7 @@
         }
 
         function openPasswordModal() { document.getElementById('adminPwdInput').value = ''; document.getElementById('passwordModal').classList.remove('hidden'); }
-        function verifyPassword() { if (document.getElementById('adminPwdInput').value === ADMIN_PASSWORD) { isAdmin = true; document.getElementById('btnAdminLogin').classList.add('hidden'); document.getElementById('adminControls').classList.remove('hidden'); closeModal('passwordModal'); renderAgents(); } else alert("गलत पासवर्ड!"); }
+        function verifyPassword() { if (document.getElementById('adminPwdInput').value === CURRENT_PAGE_PASSWORD) { isAdmin = true; document.getElementById('btnAdminLogin').classList.add('hidden'); document.getElementById('adminControls').classList.remove('hidden'); closeModal('passwordModal'); renderAgents(); } else alert("गलत पासवर्ड!"); }
         function exitAdminMode() { isAdmin = false; document.getElementById('adminControls').classList.add('hidden'); document.getElementById('btnAdminLogin').classList.remove('hidden'); renderAgents(); }
 
         function openAgentModal(agent = null) {
@@ -264,8 +265,43 @@
             agentsList = agentsList.filter(a => a.uid !== uid); localStorage.setItem('broker_agents', JSON.stringify(agentsList)); renderAgents();
             try { await fetch(WEBHOOK_SAVE_AGENT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: uid, action: 'delete' }) }); } catch(error) {}
         }
+        // Fetch password from database
+        async function fetchPagePassword() {
+            try {
+                const response = await fetch(WEBHOOK_GET_PASSWORDS, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch passwords');
+                }
+                
+                const passwordsArray = await response.json();
+                
+                // Find password for 'agents'
+                if (Array.isArray(passwordsArray)) {
+                    const pageData = passwordsArray.find(item => item.id === 'agents');
+                    if (pageData && pageData.password) {
+                        CURRENT_PAGE_PASSWORD = pageData.password;
+                    } else {
+                        // Fallback to default
+                        CURRENT_PAGE_PASSWORD = "Agent@9026";
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching password:', error);
+                // Fallback to default
+                CURRENT_PAGE_PASSWORD = "Agent@9026";
+            }
+        }
+
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        window.onload = loadAgents;
+        
+        window.onload = async () => {
+            await fetchPagePassword();
+            loadAgents();
+        };
     </script>
 </body>
 </html>
