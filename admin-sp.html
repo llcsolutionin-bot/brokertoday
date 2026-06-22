@@ -1079,6 +1079,8 @@
 
         // --- EDIT PROJECT LOGIC ---
         let allProjects = []; // Store all projects for editing
+        let existingCoverImageUrl = ''; // Store existing cover image URL
+        let existingMapImageUrl = ''; // Store existing map image URL
 
         async function openEditModal(projectId) {
             try {
@@ -1097,6 +1099,10 @@
                     alert('❌ Project not found');
                     return;
                 }
+                
+                // Store existing image URLs securely
+                existingCoverImageUrl = project.coverImageUrl || '';
+                existingMapImageUrl = project.mapImageUrl || '';
                 
                 // Pre-fill form fields
                 document.getElementById('editProjectId').value = project.id;
@@ -1195,8 +1201,9 @@
                 const coverImageFile = document.getElementById('editCoverImageFile').files[0];
                 const mapImageFile = document.getElementById('editMapImageFile').files[0];
                 
-                let coverImageUrl = originalProject.coverImageUrl;
-                let mapImageUrl = originalProject.mapImageUrl;
+                // Start with existing URLs from stored variables
+                let finalCoverUrl = existingCoverImageUrl;
+                let finalMapUrl = existingMapImageUrl;
                 
                 // If images were uploaded, upload them first
                 if (coverImageFile || mapImageFile) {
@@ -1222,18 +1229,21 @@
                     
                     try {
                         const uploadData = JSON.parse(responseText);
-                        if (uploadData.coverImageUrl) coverImageUrl = uploadData.coverImageUrl;
-                        if (uploadData.mapImageUrl) mapImageUrl = uploadData.mapImageUrl;
+                        // Only update if webhook returned valid URLs
+                        if (uploadData && uploadData.coverImageUrl) {
+                            finalCoverUrl = uploadData.coverImageUrl;
+                        }
+                        if (uploadData && uploadData.mapImageUrl) {
+                            finalMapUrl = uploadData.mapImageUrl;
+                        }
                     } catch (parseError) {
                         console.error('Failed to parse upload response:', parseError);
-                        // If JSON parsing fails, assume webhook returns URLs directly
-                        // Try to extract URLs from text response
+                        // If JSON parsing fails, try to extract URLs from text response
                         if (responseText.includes('http')) {
-                            // Simple extraction - adjust based on actual webhook response format
                             const urls = responseText.match(/https?:\/\/[^\s"']+/g);
                             if (urls && urls.length > 0) {
-                                if (coverImageFile && urls[0]) coverImageUrl = urls[0];
-                                if (mapImageFile && urls[1]) mapImageUrl = urls[1];
+                                if (coverImageFile && urls[0]) finalCoverUrl = urls[0];
+                                if (mapImageFile && urls[1]) finalMapUrl = urls[1];
                             }
                         }
                     }
@@ -1241,18 +1251,19 @@
                 
                 submitBtnLoader.textContent = 'Updating Project...';
                 
-                // Prepare updated project data
+                // Prepare updated project data with final URLs
                 const updatedProjectData = {
                     id: projectId,
                     name: projectName,
                     themeColor: projectTheme,
-                    coverImageUrl: coverImageUrl,
-                    mapImageUrl: mapImageUrl,
+                    coverImageUrl: finalCoverUrl,
+                    mapImageUrl: finalMapUrl,
                     googleMapLink: projectMapLink,
                     address: projectAddress,
                     description: projectDescription,
                     amenities: JSON.stringify(amenitiesArray),
-                    createdAt: originalProject.createdAt
+                    createdAt: originalProject.createdAt,
+                    isActive: originalProject.isActive !== undefined ? originalProject.isActive : true
                 };
                 
                 // Update project details
