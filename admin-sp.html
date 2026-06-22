@@ -826,8 +826,8 @@
                             </td>
                             <td class="p-3">
                                 <div class="flex items-center gap-2">
-                                    <code class="bg-slate-200 px-3 py-1 rounded font-mono text-sm">${ADMIN_PASSWORD}</code>
-                                    <button onclick="copyPassword('${ADMIN_PASSWORD}')" class="text-blue-600 hover:text-blue-800 text-sm" title="Copy Password">
+                                    <code class="bg-slate-200 px-3 py-1 rounded font-mono text-sm">${PASSWORDS[project.id] || 'Goal@2030'}</code>
+                                    <button onclick="copyPassword('${PASSWORDS[project.id] || 'Goal@2030'}')" class="text-blue-600 hover:text-blue-800 text-sm" title="Copy Password">
                                         📋
                                     </button>
                                 </div>
