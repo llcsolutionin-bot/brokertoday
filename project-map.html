@@ -1171,12 +1171,33 @@
             const plotNo = document.getElementById('cPlotNo').value;
             document.getElementById('contactPlotLabel').innerText = plotNo;
             
+            // Filter agents by current project
+            const filteredAgents = activeAgents.filter(agent => {
+                // Safely parse projects array
+                let agentProjects = [];
+                if (Array.isArray(agent.projects)) {
+                    agentProjects = agent.projects;
+                } else if (typeof agent.projects === 'string') {
+                    try {
+                        // Try parsing as JSON first
+                        agentProjects = JSON.parse(agent.projects);
+                    } catch (e) {
+                        // If JSON parse fails, try simple string parsing
+                        let cleanStr = agent.projects.replace(/[\[\]"]/g, '');
+                        agentProjects = cleanStr.split(',').map(p => p.trim()).filter(p => p);
+                    }
+                }
+                
+                // Check if agent is assigned to current project
+                return agentProjects.includes(PROJECT_NAME);
+            });
+            
             // Populate agent list
             const agentList = document.getElementById('dynamicAgentList');
-            if (activeAgents.length === 0) {
-                agentList.innerHTML = '<span class="text-sm text-slate-500">No agents available</span>';
+            if (filteredAgents.length === 0) {
+                agentList.innerHTML = '<span class="text-sm text-slate-500">No agents assigned to this project yet.</span>';
             } else {
-                agentList.innerHTML = activeAgents.map(agent => `
+                agentList.innerHTML = filteredAgents.map(agent => `
                     <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-2 rounded">
                         <input type="checkbox" name="selectedAgents" value="${agent.phone}" class="w-4 h-4">
                         <span class="text-sm font-semibold">${agent.name}</span>

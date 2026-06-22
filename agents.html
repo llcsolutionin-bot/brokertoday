@@ -125,13 +125,16 @@
 
     <script>
         const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
+        const WEBHOOK_GET_PROJECTS = 'https://llcsolution.duckdns.org/webhook/f66e2891-a8cb-4729-a659-2a85496512a0';
         let CURRENT_PAGE_PASSWORD = "";
         
         // NEW WEBHOOKS UPDATED HERE
         const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
         const WEBHOOK_SAVE_AGENT = "https://llcsolution.duckdns.org/webhook/cfbc262e-f8c3-4065-ab1b-d6353c587404sa"; 
         
-        const WEBSITE_PROJECTS = ["Aerocity Residency", "Shetrapal Residency"];
+        const LEGACY_PROJECTS = ["Aerocity Residency", "Shetrapal Residency"];
+        let dynamicProjects = [];
+        let allProjects = [];
 
         let isAdmin = false; let agentsList = [];
 
@@ -212,11 +215,33 @@
         function verifyPassword() { if (document.getElementById('adminPwdInput').value === CURRENT_PAGE_PASSWORD) { isAdmin = true; document.getElementById('btnAdminLogin').classList.add('hidden'); document.getElementById('adminControls').classList.remove('hidden'); closeModal('passwordModal'); renderAgents(); } else alert("गलत पासवर्ड!"); }
         function exitAdminMode() { isAdmin = false; document.getElementById('adminControls').classList.add('hidden'); document.getElementById('btnAdminLogin').classList.remove('hidden'); renderAgents(); }
 
+        async function fetchDynamicProjects() {
+            try {
+                const response = await fetch(WEBHOOK_GET_PROJECTS, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (response.ok) {
+                    const projects = await response.json();
+                    if (Array.isArray(projects)) {
+                        dynamicProjects = projects.map(p => p.name);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching dynamic projects:', error);
+            }
+            
+            // Combine legacy and dynamic projects
+            allProjects = [...LEGACY_PROJECTS, ...dynamicProjects];
+        }
+
         function openAgentModal(agent = null) {
             const form = document.getElementById('agentForm'); form.reset();
             const container = document.getElementById('projectCheckboxes');
             
-            container.innerHTML = WEBSITE_PROJECTS.map((proj) => `
+            // Render all projects (legacy + dynamic)
+            container.innerHTML = allProjects.map((proj) => `
                 <label class="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
                     <input type="checkbox" value="${proj}" class="project-selector-cb w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
                     <span>${proj}</span>
@@ -300,6 +325,7 @@
         
         window.onload = async () => {
             await fetchPagePassword();
+            await fetchDynamicProjects();
             loadAgents();
         };
     </script>
