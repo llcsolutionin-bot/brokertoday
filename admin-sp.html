@@ -260,6 +260,16 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Marker Circle Color</label>
+                    <select id="projectMarkerColor" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-teal-500">
+                        <option value="yellow">Yellow (Default)</option>
+                        <option value="red">Red</option>
+                        <option value="green">Green</option>
+                        <option value="blue">Blue</option>
+                    </select>
+                </div>
+
+                <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Google Maps Link</label>
                     <input type="url" id="projectMapLink" required placeholder="https://maps.app.goo.gl/..." class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-teal-500">
                 </div>
@@ -470,6 +480,16 @@
                         <option value="green">Green (Emerald)</option>
                         <option value="purple">Purple (Pink)</option>
                         <option value="red">Red (Rose)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Marker Circle Color</label>
+                    <select id="editProjectMarkerColor" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="yellow">Yellow (Default)</option>
+                        <option value="red">Red</option>
+                        <option value="green">Green</option>
+                        <option value="blue">Blue</option>
                     </select>
                 </div>
 
@@ -1108,6 +1128,7 @@
                 document.getElementById('editProjectId').value = project.id;
                 document.getElementById('editProjectName').value = project.name;
                 document.getElementById('editProjectTheme').value = project.themeColor;
+                document.getElementById('editProjectMarkerColor').value = project.markerColor || 'yellow';
                 document.getElementById('editProjectMapLink').value = project.googleMapLink;
                 document.getElementById('editProjectAddress').value = project.address;
                 document.getElementById('editProjectDescription').value = project.description;
@@ -1251,11 +1272,15 @@
                 
                 submitBtnLoader.textContent = 'Updating Project...';
                 
+                // Get marker color
+                const projectMarkerColor = document.getElementById('editProjectMarkerColor').value;
+                
                 // Prepare updated project data with final URLs
                 const updatedProjectData = {
                     id: projectId,
                     name: projectName,
                     themeColor: projectTheme,
+                    markerColor: projectMarkerColor,
                     coverImageUrl: finalCoverUrl,
                     mapImageUrl: finalMapUrl,
                     googleMapLink: projectMapLink,
@@ -1380,10 +1405,13 @@
                 submitBtnLoader.textContent = 'Saving Project...';
                 
                 // STEP 3: Prepare complete project data
+                const projectMarkerColor = document.getElementById('projectMarkerColor').value;
+                
                 const projectData = {
                     id: projectId,
                     name: projectName,
                     themeColor: projectTheme,
+                    markerColor: projectMarkerColor,
                     coverImageUrl: coverImageUrl,
                     mapImageUrl: mapImageUrl,
                     googleMapLink: projectMapLink,

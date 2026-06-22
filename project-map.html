@@ -931,6 +931,17 @@
             markersLayer.clearLayers();
             markerObjects = {};
             
+            // Define marker background color mapping
+            const markerColorMap = {
+                yellow: '#FFEB3B',
+                red: '#FCA5A5',
+                green: '#86EFAC',
+                blue: '#93C5FD'
+            };
+            
+            // Get marker color from project data (default to yellow)
+            const markerBgColor = markerColorMap[PROJECT_DATA.markerColor] || markerColorMap.yellow;
+            
             // Get image dimensions from the overlay
             const img = new Image();
             img.src = convertDriveUrlToThumbnail(PROJECT_DATA.mapImageUrl);
@@ -946,12 +957,12 @@
                     const lat = (parseFloat(plot.y) / 100) * h;
                     const lng = (parseFloat(plot.x) / 100) * w;
                     
-                    // Create custom div icon with plot number wrapped in yellow circle
+                    // Create custom div icon with plot number wrapped in colored circle
                     const colorClass = plot.status === 'Sold' ? 'marker-sold' : 'marker-available';
                     const baseSize = currentMarkerSize; // Use responsive marker size
                     const icon = L.divIcon({
                         className: 'custom-marker',
-                        html: `<div class="marker-circle" style="font-size: ${baseSize}px; --marker-scale: 1;"><span class="plot-number ${colorClass}">${plot.plotNo}</span></div>`,
+                        html: `<div class="marker-circle" style="background-color: ${markerBgColor}; font-size: ${baseSize}px; --marker-scale: 1;"><span class="plot-number ${colorClass}">${plot.plotNo}</span></div>`,
                         iconSize: [30, 30],
                         iconAnchor: [15, 15]
                     });
