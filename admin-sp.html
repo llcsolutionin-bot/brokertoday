@@ -428,6 +428,113 @@
         </div>
     </div>
 
+    <!-- Edit Project Modal -->
+    <div id="editProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800">✏️ Edit Project</h2>
+                <button onclick="closeEditProjectModal()" class="text-slate-400 hover:text-slate-600 text-2xl">✖</button>
+            </div>
+
+            <form id="editProjectForm" class="space-y-5">
+                <input type="hidden" id="editProjectId">
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Project Name</label>
+                    <input type="text" id="editProjectName" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Project Password</label>
+                    <input type="text" id="editProjectPassword" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">This password is used to access the project's admin mode</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Color Theme</label>
+                    <select id="editProjectTheme" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="indigo">Indigo (Blue)</option>
+                        <option value="amber">Amber (Orange)</option>
+                        <option value="green">Green (Emerald)</option>
+                        <option value="purple">Purple (Pink)</option>
+                        <option value="red">Red (Rose)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Google Maps Link</label>
+                    <input type="url" id="editProjectMapLink" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Project Address</label>
+                    <input type="text" id="editProjectAddress" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Project Description</label>
+                    <textarea id="editProjectDescription" rows="3" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Amenities</label>
+                    <div class="bg-slate-50 border-2 border-slate-300 rounded-lg p-4">
+                        <div class="grid grid-cols-2 gap-3 mb-3" id="editAmenitiesCheckboxes">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="Patte Shuda Plots" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">📜 Patte Shuda Plots</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="CC Roads" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">🛣️ CC Roads</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="Street Lights" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">💡 Street Lights</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="Loanable" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">🏦 Loanable</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="Green Spaces" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">🌳 Green Spaces</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="CCTV Camera" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">📹 CCTV Camera</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="Boundary Wall" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">🚧 Boundary Wall</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" value="Gated Community" class="edit-amenity-checkbox w-4 h-4">
+                                <span class="text-sm">🏘️ Gated Community</span>
+                            </label>
+                        </div>
+                        
+                        <div id="editCustomAmenitiesContainer" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        <span id="editSubmitBtnText">Update Project</span>
+                        <span id="editSubmitBtnLoader" class="hidden">Updating...</span>
+                    </button>
+                    <button type="button" onclick="closeEditProjectModal()" class="flex-1 bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-3 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+
+            <div id="editProjectSuccess" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-center font-bold">
+                ✅ Project updated successfully!
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Password Modal -->
     <div id="editPasswordModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
@@ -685,7 +792,7 @@
                                 <tr class="border-b-2 border-slate-300">
                                     <th class="text-left p-3 font-bold text-slate-700">Project Name</th>
                                     <th class="text-left p-3 font-bold text-slate-700">Theme</th>
-                                    <th class="text-left p-3 font-bold text-slate-700">Admin Password</th>
+                                    <th class="text-left p-3 font-bold text-slate-700">Project Password</th>
                                     <th class="text-left p-3 font-bold text-slate-700">Created</th>
                                     <th class="text-center p-3 font-bold text-slate-700">Actions</th>
                                 </tr>
@@ -727,9 +834,14 @@
                             </td>
                             <td class="p-3 text-sm text-slate-600">${createdDate}</td>
                             <td class="p-3 text-center">
-                                <button onclick="deleteProject('${project.id}', '${project.name}')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm">
-                                    🗑️ Delete
-                                </button>
+                                <div class="flex gap-2 justify-center">
+                                    <button onclick="openEditModal('${project.id}')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm">
+                                        ✏️ Edit
+                                    </button>
+                                    <button onclick="deleteProject('${project.id}', '${project.name}')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg transition-colors text-sm">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -855,6 +967,181 @@
                 document.getElementById('addCustomAmenityBtn').classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
+
+        // --- EDIT PROJECT LOGIC ---
+        let allProjects = []; // Store all projects for editing
+
+        async function openEditModal(projectId) {
+            try {
+                // Fetch all projects if not already loaded
+                if (allProjects.length === 0) {
+                    const response = await fetch(WEBHOOK_GET_PROJECTS, {
+                        method: 'GET',
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
+                    allProjects = await response.json();
+                }
+                
+                // Find the specific project
+                const project = allProjects.find(p => p.id === projectId);
+                if (!project) {
+                    alert('❌ Project not found');
+                    return;
+                }
+                
+                // Pre-fill form fields
+                document.getElementById('editProjectId').value = project.id;
+                document.getElementById('editProjectName').value = project.name;
+                document.getElementById('editProjectTheme').value = project.themeColor;
+                document.getElementById('editProjectMapLink').value = project.googleMapLink;
+                document.getElementById('editProjectAddress').value = project.address;
+                document.getElementById('editProjectDescription').value = project.description;
+                
+                // Fetch and set password
+                await fetchPasswords();
+                document.getElementById('editProjectPassword').value = PASSWORDS[projectId] || 'Goal@2030';
+                
+                // Parse and set amenities
+                let amenitiesArray = [];
+                try {
+                    if (typeof project.amenities === 'string') {
+                        amenitiesArray = JSON.parse(project.amenities);
+                    } else if (Array.isArray(project.amenities)) {
+                        amenitiesArray = project.amenities;
+                    }
+                } catch (e) {
+                    console.error('Error parsing amenities:', e);
+                }
+                
+                // Reset all checkboxes
+                document.querySelectorAll('.edit-amenity-checkbox').forEach(cb => cb.checked = false);
+                
+                // Check matching amenities
+                amenitiesArray.forEach(amenity => {
+                    const checkbox = document.querySelector(`.edit-amenity-checkbox[value="${amenity}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    } else {
+                        // Custom amenity - add to custom container
+                        const container = document.getElementById('editCustomAmenitiesContainer');
+                        const div = document.createElement('div');
+                        div.className = 'flex gap-2';
+                        div.innerHTML = `
+                            <input type="text" value="${amenity}" class="edit-custom-amenity-input flex-1 border border-slate-300 p-2 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                            <button type="button" onclick="this.parentElement.remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold">✖</button>
+                        `;
+                        container.appendChild(div);
+                    }
+                });
+                
+                // Show modal
+                document.getElementById('editProjectModal').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error opening edit modal:', error);
+                alert('❌ Failed to load project data');
+            }
+        }
+
+        function closeEditProjectModal() {
+            document.getElementById('editProjectModal').classList.add('hidden');
+            document.getElementById('editProjectForm').reset();
+            document.getElementById('editCustomAmenitiesContainer').innerHTML = '';
+            document.getElementById('editProjectSuccess').classList.add('hidden');
+        }
+
+        // Handle edit project form submission
+        document.getElementById('editProjectForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtnText = document.getElementById('editSubmitBtnText');
+            const submitBtnLoader = document.getElementById('editSubmitBtnLoader');
+            
+            submitBtnText.classList.add('hidden');
+            submitBtnLoader.classList.remove('hidden');
+            
+            try {
+                const projectId = document.getElementById('editProjectId').value;
+                const projectName = document.getElementById('editProjectName').value;
+                const projectPassword = document.getElementById('editProjectPassword').value;
+                const projectTheme = document.getElementById('editProjectTheme').value;
+                const projectMapLink = document.getElementById('editProjectMapLink').value;
+                const projectAddress = document.getElementById('editProjectAddress').value;
+                const projectDescription = document.getElementById('editProjectDescription').value;
+                
+                // Gather amenities
+                const amenitiesArray = [];
+                document.querySelectorAll('.edit-amenity-checkbox:checked').forEach(checkbox => {
+                    amenitiesArray.push(checkbox.value);
+                });
+                document.querySelectorAll('.edit-custom-amenity-input').forEach(input => {
+                    const value = input.value.trim();
+                    if (value) amenitiesArray.push(value);
+                });
+                
+                // Find original project to preserve image URLs
+                const originalProject = allProjects.find(p => p.id === projectId);
+                
+                // Prepare updated project data
+                const updatedProjectData = {
+                    id: projectId,
+                    name: projectName,
+                    themeColor: projectTheme,
+                    coverImageUrl: originalProject.coverImageUrl,
+                    mapImageUrl: originalProject.mapImageUrl,
+                    googleMapLink: projectMapLink,
+                    address: projectAddress,
+                    description: projectDescription,
+                    amenities: JSON.stringify(amenitiesArray),
+                    createdAt: originalProject.createdAt
+                };
+                
+                // Update project details
+                const updateResponse = await fetch('https://llcsolution.duckdns.org/webhook/d9e9751a-59bb-44c0-a575-83f8eaa417a2', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedProjectData)
+                });
+                
+                if (!updateResponse.ok) {
+                    throw new Error('Failed to update project');
+                }
+                
+                // Update password
+                const passwordResponse = await fetch(WEBHOOK_POST_PASSWORD, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: projectId,
+                        name: projectName,
+                        password: projectPassword
+                    })
+                });
+                
+                if (!passwordResponse.ok) {
+                    console.error('Failed to update password');
+                }
+                
+                // Re-fetch passwords and projects
+                await fetchPasswords();
+                allProjects = [];
+                await loadProjectsList();
+                
+                // Show success message
+                document.getElementById('editProjectSuccess').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    closeEditProjectModal();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error updating project:', error);
+                alert('❌ Failed to update project: ' + error.message);
+            } finally {
+                submitBtnText.classList.remove('hidden');
+                submitBtnLoader.classList.add('hidden');
+            }
+        });
 
         // Handle new project form submission
         document.getElementById('newProjectForm').addEventListener('submit', async function(e) {
