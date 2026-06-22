@@ -1127,10 +1127,30 @@
                         body: formData
                     });
                     
-                    if (uploadResponse.ok) {
-                        const uploadData = await uploadResponse.json();
+                    if (!uploadResponse.ok) {
+                        throw new Error('Image upload failed');
+                    }
+                    
+                    // Get response text first to debug
+                    const responseText = await uploadResponse.text();
+                    console.log('Upload response:', responseText);
+                    
+                    try {
+                        const uploadData = JSON.parse(responseText);
                         if (uploadData.coverImageUrl) coverImageUrl = uploadData.coverImageUrl;
                         if (uploadData.mapImageUrl) mapImageUrl = uploadData.mapImageUrl;
+                    } catch (parseError) {
+                        console.error('Failed to parse upload response:', parseError);
+                        // If JSON parsing fails, assume webhook returns URLs directly
+                        // Try to extract URLs from text response
+                        if (responseText.includes('http')) {
+                            // Simple extraction - adjust based on actual webhook response format
+                            const urls = responseText.match(/https?:\/\/[^\s"']+/g);
+                            if (urls && urls.length > 0) {
+                                if (coverImageFile && urls[0]) coverImageUrl = urls[0];
+                                if (mapImageFile && urls[1]) mapImageUrl = urls[1];
+                            }
+                        }
                     }
                 }
                 
