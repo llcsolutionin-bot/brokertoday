@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>किराये की प्रॉपर्टी | Broker Today</title>
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Image Slider Styles */
+        .image-slider { position: relative; overflow: hidden; }
+        .slider-track { display: flex; transition: transform 0.3s ease; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+        .slider-btn:hover { background: white; }
+        .slider-btn.prev { left: 8px; }
+        .slider-btn.next { right: 8px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Navigation Bar -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
+        <div class="container mx-auto max-w-6xl flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            </a>
+            <button id="btnListProperty" onclick="openAuthModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded-lg transition-colors shadow-lg">
+                अपनी प्रॉपर्टी किराये पर दें
+            </button>
+        </div>
+    </nav>
+
+    <!-- Public View: Listings Grid -->
+    <main id="publicView" class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="mb-8">
+            <h2 class="text-3xl font-extrabold text-slate-800">किराये की प्रॉपर्टी (Rental Properties)</h2>
+            <p class="text-slate-500 mt-2">सिरोही में उपलब्ध किराये की प्रॉपर्टीज देखें</p>
+        </div>
+        
+        <div id="listingsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full flex justify-center py-12">
+                <div class="loader"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- User Dashboard (Hidden by default) -->
+    <div id="userDashboard" class="hidden container mx-auto px-4 py-8 max-w-7xl">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-extrabold text-slate-800">मेरी प्रॉपर्टीज</h2>
+                <p class="text-slate-500 mt-1">Welcome, <span id="userName" class="font-bold"></span></p>
+            </div>
+            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2 rounded-lg transition-colors">
+                Logout
+            </button>
+        </div>
+
+        <div id="maxLimitWarning" class="hidden bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6 text-red-700 font-semibold">
+            ⚠️ आप अधिकतम 3 एक्टिव प्रॉपर्टीज लिस्ट कर सकते हैं। नई लिस्टिंग के लिए पुरानी को Inactive करें।
+        </div>
+
+        <button id="btnAddProperty" onclick="openPropertyModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-lg mb-6">
+            ➕ नई प्रॉपर्टी जोड़ें
+        </button>
+
+        <div id="myListingsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- Auth Modal (OTP) -->
+    <div id="authModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6">प्रॉपर्टी लिस्ट करें</h3>
+            
+            <!-- Step 1: Send OTP -->
+            <div id="step1">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">आपका नाम</label>
+                        <input type="text" id="ownerName" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp नंबर (+91)</label>
+                        <input type="tel" id="ownerWhatsapp" required maxlength="10" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button onclick="sendOTP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        OTP भेजें
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Verify OTP -->
+            <div id="step2" class="hidden">
+                <p class="text-sm text-slate-600 mb-4">OTP आपके WhatsApp पर भेजा गया है: <span id="displayPhone" class="font-bold"></span></p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">4-Digit OTP</label>
+                        <input type="text" id="otpInput" required maxlength="4" placeholder="1234" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 text-center text-2xl font-bold tracking-widest">
+                    </div>
+                    <button onclick="verifyOTP()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        Verify & Login
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="closeAuthModal()" class="mt-4 text-slate-500 hover:text-slate-700 text-sm">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Contact Owner Modal -->
+    <div id="contactModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6">मालिक से संपर्क करें</h3>
+            <form id="contactForm" class="space-y-4">
+                <input type="hidden" id="contactPropertyId">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">आपका नाम</label>
+                    <input type="text" id="customerName" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp नंबर (+91)</label>
+                    <input type="tel" id="customerWhatsapp" required maxlength="10" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                    WhatsApp पर संपर्क करें
+                </button>
+            </form>
+            <button onclick="closeContactModal()" class="mt-4 text-slate-500 hover:text-slate-700 text-sm">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Property Modal -->
+    <div id="propertyModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full my-8">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6" id="propertyModalTitle">नई प्रॉपर्टी जोड़ें</h3>
+            <form id="propertyForm" class="space-y-4">
+                <input type="hidden" id="propertyId">
+                <input type="hidden" id="formOwnerName">
+                <input type="hidden" id="formOwnerWhatsapp">
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">किराया राशि (₹/माह)</label>
+                        <input type="number" id="rentAmount" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">एडवांस राशि (₹)</label>
+                        <input type="number" id="advanceAmount" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">प्रॉपर्टी टाइप</label>
+                        <select id="propertyType" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                            <option value="">चुनें</option>
+                            <option value="Flat">Flat</option>
+                            <option value="House">House</option>
+                            <option value="Shop">Shop</option>
+                            <option value="Office">Office</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">अवधि</label>
+                        <select id="duration" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                            <option value="">चुनें</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Yearly">Yearly</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">खाली होने की तारीख</label>
+                    <input type="date" id="vacantDate" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">फ्लोर</label>
+                        <input type="text" id="floor" placeholder="e.g., Ground, 1st" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">पार्किंग</label>
+                        <select id="parking" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">रोड साइज (ft)</label>
+                        <input type="text" id="roadSize" placeholder="e.g., 30" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">किरायेदार प्राथमिकता</label>
+                    <select id="tenantPreference" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="Family">Family</option>
+                        <option value="Bachelor">Bachelor</option>
+                        <option value="Any">Any</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">पता</label>
+                    <textarea id="address" required rows="2" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">गांव</label>
+                        <input type="text" id="village" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">शहर</label>
+                        <input type="text" id="city" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Map Location (Google Maps URL)</label>
+                    <div class="flex gap-2">
+                        <input type="url" id="mapLocation" placeholder="https://maps.google.com/..." class="flex-1 border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                        <button type="button" onclick="useCurrentLocation()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 rounded-lg">
+                            📍 Current
+                        </button>
+                    </div>
+                </div>
+
+                <div id="imagesContainer">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Images (Max 5, comma-separated URLs)</label>
+                    <textarea id="images" rows="3" placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        Save Property
+                    </button>
+                    <button type="button" onclick="closePropertyModal()" class="flex-1 bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-3 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // API Endpoints
+        const API_GET_RENTALS = 'https://llcsolution.duckdns.org/webhook/79621d58-d31e-4f18-a02a-5bf179ea23f3';
+        const API_SEND_OTP = 'https://llcsolution.duckdns.org/webhook/4a16cf55-6d5a-4345-a52b-3b249e3ed925';
+        const API_VERIFY_OTP = 'https://llcsolution.duckdns.org/webhook/dda59b9b-1a80-4fd4-a3d6-2b229bf2f4fb';
+        const API_SAVE_PROPERTY = 'https://llcsolution.duckdns.org/webhook/b9795c0b-cf35-4e03-a3fe-2c5f4b83d935';
+        const API_CONTACT_OWNER = 'https://llcsolution.duckdns.org/webhook/fe3a2a14-b389-45e5-9fef-f04de9acee0e';
+
+        let currentUser = null;
+        let allProperties = [];
+        let isEditMode = false;
+
+        // Load all properties on page load
+        async function loadProperties() {
+            try {
+                const response = await fetch(API_GET_RENTALS, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch properties');
+                
+                allProperties = await response.json();
+                renderPublicListings();
+            } catch (error) {
+                console.error('Error loading properties:', error);
+                document.getElementById('listingsGrid').innerHTML = '<div class="col-span-full text-center py-12 text-red-500">Failed to load properties</div>';
+            }
+        }
+
+        // Render public listings
+        function renderPublicListings() {
+            const grid = document.getElementById('listingsGrid');
+            const activeProperties = allProperties.filter(p => p.isActive === true || p.isActive === 'true');
+            
+            if (activeProperties.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">कोई प्रॉपर्टी उपलब्ध नहीं है</div>';
+                return;
+            }
+            
+            grid.innerHTML = activeProperties.map(property => createPropertyCard(property)).join('');
+        }
+
+        // Create property card HTML
+        function createPropertyCard(property) {
+            const images = property.images ? property.images.split(',').map(img => img.trim()).slice(0, 5) : [];
+            const imageSlider = images.length > 0 ? `
+                <div class="image-slider h-48 bg-slate-200 relative">
+                    <div class="slider-track" id="slider-${property.propertyId}">
+                        ${images.map(img => `<img src="${img}" class="w-full h-48 object-cover flex-shrink-0" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">`).join('')}
+                    </div>
+                    ${images.length > 1 ? `
+                        <button class="slider-btn prev" onclick="slideImage('${property.propertyId}', -1)">‹</button>
+                        <button class="slider-btn next" onclick="slideImage('${property.propertyId}', 1)">›</button>
+                    ` : ''}
+                </div>
+            ` : '<div class="h-48 bg-slate-200 flex items-center justify-center text-slate-400">No Image</div>';
+            
+            return `
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-shadow">
+                    ${imageSlider}
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-2xl font-bold text-green-600">₹${property.rentAmount}/माह</h3>
+                                <p class="text-sm text-slate-500">Advance: ₹${property.advanceAmount}</p>
+                            </div>
+                            <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold">${property.propertyType}</span>
+                        </div>
+                        <div class="space-y-2 text-sm text-slate-600 mb-4">
+                            <p><strong>Duration:</strong> ${property.duration}</p>
+                            <p><strong>Vacant:</strong> ${property.vacantDate}</p>
+                            <p><strong>Floor:</strong> ${property.floor || 'N/A'} | <strong>Parking:</strong> ${property.parking || 'N/A'}</p>
+                            <p><strong>Tenant:</strong> ${property.tenantPreference}</p>
+                            <p><strong>📍</strong> ${property.village}, ${property.city}</p>
+                        </div>
+                        <button onclick="openContactModal('${property.propertyId}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                            WhatsApp पर संपर्क करें
+                        </button>
+                        <p class="text-center text-xs text-slate-500 mt-3">🔥 अब तक ${property.contactCount || 0} लोगों ने संपर्क किया है</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Image slider
+        let sliderPositions = {};
+        function slideImage(propertyId, direction) {
+            const track = document.getElementById(`slider-${propertyId}`);
+            const images = track.children.length;
+            if (!sliderPositions[propertyId]) sliderPositions[propertyId] = 0;
+            
+            sliderPositions[propertyId] += direction;
+            if (sliderPositions[propertyId] < 0) sliderPositions[propertyId] = images - 1;
+            if (sliderPositions[propertyId] >= images) sliderPositions[propertyId] = 0;
+            
+            track.style.transform = `translateX(-${sliderPositions[propertyId] * 100}%)`;
+        }
+
+        // Auth Modal
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+        }
+
+        // Send OTP
+        async function sendOTP() {
+            const name = document.getElementById('ownerName').value.trim();
+            const phone = document.getElementById('ownerWhatsapp').value.trim();
+            
+            if (!name || !phone || phone.length !== 10) {
+                alert('कृपया सही जानकारी दर्ज करें');
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_SEND_OTP, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone: '+91' + phone })
+                });
+                
+                if (!response.ok) throw new Error('Failed to send OTP');
+                
+                document.getElementById('displayPhone').textContent = '+91' + phone;
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+            } catch (error) {
+                alert('OTP भेजने में समस्या आई। कृपया पुनः प्रयास करें।');
+            }
+        }
+
+        // Verify OTP
+        async function verifyOTP() {
+            const phone = '+91' + document.getElementById('ownerWhatsapp').value.trim();
+            const otp = document.getElementById('otpInput').value.trim();
+            
+            if (otp.length !== 4) {
+                alert('कृपया 4-digit OTP दर्ज करें');
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_VERIFY_OTP, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, otp })
+                });
+                
+                if (!response.ok) throw new Error('Invalid OTP');
+                
+                const userData = await response.json();
+                currentUser = {
+                    name: document.getElementById('ownerName').value,
+                    phone: phone,
+                    properties: userData.properties || []
+                };
+                
+                sessionStorage.setItem('rentalUser', JSON.stringify(currentUser));
+                closeAuthModal();
+                showDashboard();
+            } catch (error) {
+                alert('गलत OTP। कृपया पुनः प्रयास करें।');
+            }
+        }
+
+        // Show Dashboard
+        function showDashboard() {
+            document.getElementById('publicView').classList.add('hidden');
+            document.getElementById('userDashboard').classList.remove('hidden');
+            document.getElementById('btnListProperty').classList.add('hidden');
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            loadUserProperties();
+        }
+
+        // Load user properties
+        function loadUserProperties() {
+            const userProperties = allProperties.filter(p => p.ownerWhatsapp === currentUser.phone);
+            const activeCount = userProperties.filter(p => p.isActive === true || p.isActive === 'true').length;
+            
+            // Max limit logic
+            if (activeCount >= 3) {
+                document.getElementById('maxLimitWarning').classList.remove('hidden');
+                document.getElementById('btnAddProperty').disabled = true;
+                document.getElementById('btnAddProperty').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('maxLimitWarning').classList.add('hidden');
+                document.getElementById('btnAddProperty').disabled = false;
+                document.getElementById('btnAddProperty').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            const grid = document.getElementById('myListingsGrid');
+            if (userProperties.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">आपने अभी तक कोई प्रॉपर्टी लिस्ट नहीं की है</div>';
+                return;
+            }
+            
+            grid.innerHTML = userProperties.map(property => `
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-slate-800">₹${property.rentAmount}/माह</h3>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" ${property.isActive ? 'checked' : ''} onchange="togglePropertyStatus('${property.propertyId}', this.checked)" class="w-5 h-5 text-green-600 rounded">
+                            <span class="ml-2 text-sm font-medium ${property.isActive ? 'text-green-600' : 'text-red-600'}">${property.isActive ? 'Active' : 'Inactive'}</span>
+                        </label>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-4">${property.propertyType} | ${property.village}, ${property.city}</p>
+                    <button onclick="openPropertyModal('${property.propertyId}')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg transition-colors">
+                        Edit
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Toggle property status
+        async function togglePropertyStatus(propertyId, newStatus) {
+            const property = allProperties.find(p => p.propertyId === propertyId);
+            if (!property) return;
+            
+            property.isActive = newStatus;
+            
+            try {
+                await fetch(API_SAVE_PROPERTY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(property)
+                });
+                
+                loadUserProperties();
+            } catch (error) {
+                alert('Status update failed');
+            }
+        }
+
+        // Open property modal
+        function openPropertyModal(propertyId = null) {
+            isEditMode = !!propertyId;
+            document.getElementById('propertyModalTitle').textContent = isEditMode ? 'प्रॉपर्टी एडिट करें' : 'नई प्रॉपर्टी जोड़ें';
+            
+            if (isEditMode) {
+                const property = allProperties.find(p => p.propertyId === propertyId);
+                if (!property) return;
+                
+                document.getElementById('propertyId').value = property.propertyId;
+                document.getElementById('rentAmount').value = property.rentAmount;
+                document.getElementById('advanceAmount').value = property.advanceAmount;
+                document.getElementById('propertyType').value = property.propertyType;
+                document.getElementById('duration').value = property.duration;
+                document.getElementById('vacantDate').value = property.vacantDate;
+                document.getElementById('floor').value = property.floor || '';
+                document.getElementById('parking').value = property.parking || 'No';
+                document.getElementById('roadSize').value = property.roadSize || '';
+                document.getElementById('tenantPreference').value = property.tenantPreference;
+                document.getElementById('address').value = property.address;
+                document.getElementById('village').value = property.village;
+                document.getElementById('city').value = property.city;
+                document.getElementById('mapLocation').value = property.mapLocation || '';
+                document.getElementById('images').value = property.images || '';
+                
+                // Disable fields in edit mode
+                document.getElementById('rentAmount').disabled = true;
+                document.getElementById('advanceAmount').disabled = true;
+                document.getElementById('imagesContainer').style.display = 'none';
+            } else {
+                document.getElementById('propertyForm').reset();
+                document.getElementById('propertyId').value = '';
+                document.getElementById('rentAmount').disabled = false;
+                document.getElementById('advanceAmount').disabled = false;
+                document.getElementById('imagesContainer').style.display = 'block';
+            }
+            
+            document.getElementById('formOwnerName').value = currentUser.name;
+            document.getElementById('formOwnerWhatsapp').value = currentUser.phone;
+            document.getElementById('propertyModal').classList.remove('hidden');
+        }
+
+        function closePropertyModal() {
+            document.getElementById('propertyModal').classList.add('hidden');
+        }
+
+        // Use current location
+        function useCurrentLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation not supported');
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('mapLocation').value = `https://www.google.com/maps?q=${lat},${lng}`;
+                },
+                (error) => {
+                    alert('Location access denied');
+                }
+            );
+        }
+
+        // Submit property form
+        document.getElementById('propertyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const propertyData = {
+                propertyId: document.getElementById('propertyId').value || `prop_${Date.now()}`,
+                ownerName: currentUser.name,
+                ownerWhatsapp: currentUser.phone,
+                rentAmount: document.getElementById('rentAmount').value,
+                advanceAmount: document.getElementById('advanceAmount').value,
+                propertyType: document.getElementById('propertyType').value,
+                duration: document.getElementById('duration').value,
+                vacantDate: document.getElementById('vacantDate').value,
+                floor: document.getElementById('floor').value,
+                parking: document.getElementById('parking').value,
+                roadSize: document.getElementById('roadSize').value,
+                tenantPreference: document.getElementById('tenantPreference').value,
+                address: document.getElementById('address').value,
+                village: document.getElementById('village').value,
+                city: document.getElementById('city').value,
+                mapLocation: document.getElementById('mapLocation').value,
+                images: isEditMode ? (allProperties.find(p => p.propertyId === propertyData.propertyId)?.images || '') : document.getElementById('images').value,
+                isActive: true,
+                contactCount: isEditMode ? (allProperties.find(p => p.propertyId === propertyData.propertyId)?.contactCount || 0) : 0
+            };
+            
+            try {
+                const response = await fetch(API_SAVE_PROPERTY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(propertyData)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save property');
+                
+                alert('प्रॉपर्टी सफलतापूर्वक सेव हो गई!');
+                closePropertyModal();
+                await loadProperties();
+                loadUserProperties();
+            } catch (error) {
+                alert('प्रॉपर्टी सेव करने में समस्या आई');
+            }
+        });
+
+        // Contact owner
+        function openContactModal(propertyId) {
+            document.getElementById('contactPropertyId').value = propertyId;
+            document.getElementById('contactModal').classList.remove('hidden');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+        }
+
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const propertyId = document.getElementById('contactPropertyId').value;
+            const customerName = document.getElementById('customerName').value;
+            const customerWhatsapp = '+91' + document.getElementById('customerWhatsapp').value;
+            
+            try {
+                await fetch(API_CONTACT_OWNER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ propertyId, customerName, customerWhatsapp })
+                });
+                
+                alert('संपर्क सफल! मालिक को आपकी जानकारी मिल गई है।');
+                closeContactModal();
+                document.getElementById('contactForm').reset();
+            } catch (error) {
+                alert('संपर्क करने में समस्या आई');
+            }
+        });
+
+        // Logout
+        function logout() {
+            sessionStorage.removeItem('rentalUser');
+            currentUser = null;
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('publicView').classList.remove('hidden');
+            document.getElementById('btnListProperty').classList.remove('hidden');
+        }
+
+        // Check session on load
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUser = sessionStorage.getItem('rentalUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                loadProperties().then(() => showDashboard());
+            } else {
+                loadProperties();
+            }
+        });
+    </script>
+</body>
+</html>
