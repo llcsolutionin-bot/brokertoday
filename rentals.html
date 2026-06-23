@@ -139,8 +139,8 @@
     </div>
 
     <!-- Add/Edit Property Modal -->
-    <div id="propertyModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full my-8">
+    <div id="propertyModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 p-4 overflow-y-auto flex items-start justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full my-8 max-h-[90vh] overflow-y-auto">
             <h3 class="text-2xl font-bold text-slate-800 mb-6" id="propertyModalTitle">नई प्रॉपर्टी जोड़ें</h3>
             <form id="propertyForm" class="space-y-4">
                 <input type="hidden" id="propertyId">
@@ -238,8 +238,9 @@
                 </div>
 
                 <div id="imagesContainer">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Images (Max 5, comma-separated URLs)</label>
-                    <textarea id="images" rows="3" placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Images (Max 5)</label>
+                    <input type="file" id="imageFiles" multiple accept="image/*" capture="environment" class="w-full border-2 border-slate-300 p-2 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">अधिकतम 5 फोटो चुनें (Max 5 images). Gallery या Camera का उपयोग करें।</p>
                 </div>
 
                 <div class="flex gap-3 pt-4">
@@ -445,10 +446,14 @@
                     return;
                 }
                 
+                // Crash-proof properties handling
+                let props = userData.properties || [];
+                if (!Array.isArray(props)) { props = [props]; }
+                
                 currentUser = {
                     name: document.getElementById('ownerName').value,
-                    phone: phone,
-                    properties: userData.properties || []
+                    phone: String(phone),
+                    properties: props
                 };
                 
                 sessionStorage.setItem('rentalUser', JSON.stringify(currentUser));
@@ -472,10 +477,23 @@
             loadUserProperties();
         }
 
-        // Load user properties
+        // Load user properties - Crash-proof version
         function loadUserProperties() {
-            const userProperties = allProperties.filter(p => p.ownerWhatsapp === currentUser.phone);
-            const activeCount = userProperties.filter(p => p.isActive === true || p.isActive === 'true').length;
+            if (!currentUser) return;
+            
+            let userProperties = [];
+            if (currentUser.properties && currentUser.properties.length > 0) {
+                userProperties = currentUser.properties;
+            } else if (typeof allProperties !== 'undefined' && Array.isArray(allProperties)) {
+                const userPhoneStr = String(currentUser.phone || '');
+                const mobileNumber = userPhoneStr.slice(-10);
+                userProperties = allProperties.filter(p => {
+                    if (!p.ownerWhatsapp) return false;
+                    return String(p.ownerWhatsapp).trim().endsWith(mobileNumber);
+                });
+            }
+            
+            const activeCount = userProperties.filter(p => p.isActive === true || p.isActive === 'true' || p.isActive === 'TRUE').length;
             
             // Max limit logic
             if (activeCount >= 3) {
@@ -483,24 +501,28 @@
                 document.getElementById('btnAddProperty').disabled = true;
                 document.getElementById('btnAddProperty').classList.add('opacity-50', 'cursor-not-allowed');
             } else {
-                document.getElementById('maxLimitWarning').classList.add('hidden');
-                document.getElementById('btnAddProperty').disabled = false;
-                document.getElementById('btnAddProperty').classList.remove('opacity-50', 'cursor-not-allowed');
+                if(document.getElementById('maxLimitWarning')) document.getElementById('maxLimitWarning').classList.add('hidden');
+                if(document.getElementById('btnAddProperty')) {
+                    document.getElementById('btnAddProperty').disabled = false;
+                    document.getElementById('btnAddProperty').classList.remove('opacity-50', 'cursor-not-allowed');
+                }
             }
             
             const grid = document.getElementById('myListingsGrid');
-            if (userProperties.length === 0) {
+            if (!userProperties || userProperties.length === 0) {
                 grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">आपने अभी तक कोई प्रॉपर्टी लिस्ट नहीं की है</div>';
                 return;
             }
             
-            grid.innerHTML = userProperties.map(property => `
+            grid.innerHTML = userProperties.map(property => {
+                const isActive = property.isActive === true || property.isActive === 'true' || property.isActive === 'TRUE';
+                return `
                 <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="text-xl font-bold text-slate-800">₹${property.rentAmount}/माह</h3>
                         <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" ${property.isActive ? 'checked' : ''} onchange="togglePropertyStatus('${property.propertyId}', this.checked)" class="w-5 h-5 text-green-600 rounded">
-                            <span class="ml-2 text-sm font-medium ${property.isActive ? 'text-green-600' : 'text-red-600'}">${property.isActive ? 'Active' : 'Inactive'}</span>
+                            <input type="checkbox" ${isActive ? 'checked' : ''} onchange="togglePropertyStatus('${property.propertyId}', this.checked)" class="w-5 h-5 text-green-600 rounded">
+                            <span class="ml-2 text-sm font-medium ${isActive ? 'text-green-600' : 'text-red-600'}">${isActive ? 'Active' : 'Inactive'}</span>
                         </label>
                     </div>
                     <p class="text-sm text-slate-600 mb-4">${property.propertyType} | ${property.village}, ${property.city}</p>
@@ -508,7 +530,7 @@
                         Edit
                     </button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         // Toggle property status
@@ -596,33 +618,105 @@
             );
         }
 
+        // Image compression helper
+        async function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Resize to max 800px
+                        const maxSize = 800;
+                        if (width > height && width > maxSize) {
+                            height = (height / width) * maxSize;
+                            width = maxSize;
+                        } else if (height > maxSize) {
+                            width = (width / height) * maxSize;
+                            height = maxSize;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Export as JPEG with 70% quality
+                        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                        resolve(base64);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         // Submit property form
         document.getElementById('propertyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const propertyData = {
-                propertyId: document.getElementById('propertyId').value || `prop_${Date.now()}`,
-                ownerName: currentUser.name,
-                ownerWhatsapp: currentUser.phone,
-                rentAmount: document.getElementById('rentAmount').value,
-                advanceAmount: document.getElementById('advanceAmount').value,
-                propertyType: document.getElementById('propertyType').value,
-                duration: document.getElementById('duration').value,
-                vacantDate: document.getElementById('vacantDate').value,
-                floor: document.getElementById('floor').value,
-                parking: document.getElementById('parking').value,
-                roadSize: document.getElementById('roadSize').value,
-                tenantPreference: document.getElementById('tenantPreference').value,
-                address: document.getElementById('address').value,
-                village: document.getElementById('village').value,
-                city: document.getElementById('city').value,
-                mapLocation: document.getElementById('mapLocation').value,
-                images: isEditMode ? (allProperties.find(p => p.propertyId === propertyData.propertyId)?.images || '') : document.getElementById('images').value,
-                isActive: true,
-                contactCount: isEditMode ? (allProperties.find(p => p.propertyId === propertyData.propertyId)?.contactCount || 0) : 0
-            };
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'सेव हो रहा है...';
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
             
             try {
+                const propertyId = document.getElementById('propertyId').value || `prop_${Date.now()}`;
+                let imagesString = '';
+                
+                // Handle images
+                if (!isEditMode) {
+                    const imageFiles = document.getElementById('imageFiles').files;
+                    if (imageFiles && imageFiles.length > 0) {
+                        const filesToProcess = Array.from(imageFiles).slice(0, 5);
+                        const compressedImages = [];
+                        
+                        for (const file of filesToProcess) {
+                            try {
+                                const base64 = await compressImage(file);
+                                compressedImages.push(base64);
+                            } catch (error) {
+                                console.error('Image compression failed:', error);
+                            }
+                        }
+                        
+                        imagesString = compressedImages.join(',');
+                    }
+                } else {
+                    // Edit mode: retain existing images
+                    const existingProperty = allProperties.find(p => p.propertyId === propertyId);
+                    imagesString = existingProperty?.images || '';
+                }
+                
+                const propertyData = {
+                    propertyId: propertyId,
+                    ownerName: currentUser.name,
+                    ownerWhatsapp: currentUser.phone,
+                    rentAmount: document.getElementById('rentAmount').value,
+                    advanceAmount: document.getElementById('advanceAmount').value,
+                    propertyType: document.getElementById('propertyType').value,
+                    duration: document.getElementById('duration').value,
+                    vacantDate: document.getElementById('vacantDate').value,
+                    floor: document.getElementById('floor').value,
+                    parking: document.getElementById('parking').value,
+                    roadSize: document.getElementById('roadSize').value,
+                    tenantPreference: document.getElementById('tenantPreference').value,
+                    address: document.getElementById('address').value,
+                    village: document.getElementById('village').value,
+                    city: document.getElementById('city').value,
+                    mapLocation: document.getElementById('mapLocation').value,
+                    images: imagesString,
+                    isActive: true,
+                    contactCount: isEditMode ? (allProperties.find(p => p.propertyId === propertyId)?.contactCount || 0) : 0
+                };
+                
                 const response = await fetch(API_SAVE_PROPERTY, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -636,7 +730,12 @@
                 await loadProperties();
                 loadUserProperties();
             } catch (error) {
+                console.error('Error saving property:', error);
                 alert('प्रॉपर्टी सेव करने में समस्या आई');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
             }
         });
 
