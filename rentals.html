@@ -92,7 +92,7 @@
                         <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp नंबर (+91)</label>
                         <input type="tel" id="ownerWhatsapp" required maxlength="10" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                     </div>
-                    <button onclick="sendOTP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
+                    <button id="btnSendOTP" onclick="sendOTP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
                         OTP भेजें
                     </button>
                 </div>
@@ -106,7 +106,7 @@
                         <label class="block text-sm font-bold text-slate-700 mb-2">4-Digit OTP</label>
                         <input type="text" id="otpInput" required maxlength="4" placeholder="1234" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 text-center text-2xl font-bold tracking-widest">
                     </div>
-                    <button onclick="verifyOTP()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                    <button id="btnVerifyOTP" onclick="verifyOTP()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
                         Verify & Login
                     </button>
                 </div>
@@ -374,6 +374,12 @@
                 return;
             }
             
+            const btn = document.getElementById('btnSendOTP');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'भेज रहे हैं... (Please wait)';
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            
             try {
                 const response = await fetch(API_SEND_OTP, {
                     method: 'POST',
@@ -381,12 +387,20 @@
                     body: JSON.stringify({ name, phone: '+91' + phone })
                 });
                 
-                if (!response.ok) throw new Error('Failed to send OTP');
+                if (!response.ok) {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    throw new Error('Failed to send OTP');
+                }
                 
                 document.getElementById('displayPhone').textContent = '+91' + phone;
                 document.getElementById('step1').classList.add('hidden');
                 document.getElementById('step2').classList.remove('hidden');
             } catch (error) {
+                btn.disabled = false;
+                btn.innerText = originalText;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
                 alert('OTP भेजने में समस्या आई। कृपया पुनः प्रयास करें।');
             }
         }
@@ -401,6 +415,12 @@
                 return;
             }
             
+            const btn = document.getElementById('btnVerifyOTP');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'वेरीफाई कर रहे हैं...';
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            
             try {
                 const response = await fetch(API_VERIFY_OTP, {
                     method: 'POST',
@@ -408,9 +428,23 @@
                     body: JSON.stringify({ phone, otp })
                 });
                 
-                if (!response.ok) throw new Error('Invalid OTP');
+                if (!response.ok) {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    throw new Error('Invalid OTP');
+                }
                 
                 const userData = await response.json();
+                
+                if (userData.success === false) {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    alert('गलत OTP। कृपया पुनः प्रयास करें।');
+                    return;
+                }
+                
                 currentUser = {
                     name: document.getElementById('ownerName').value,
                     phone: phone,
@@ -421,6 +455,9 @@
                 closeAuthModal();
                 showDashboard();
             } catch (error) {
+                btn.disabled = false;
+                btn.innerText = originalText;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
                 alert('गलत OTP। कृपया पुनः प्रयास करें।');
             }
         }
