@@ -478,25 +478,26 @@
             loadUserProperties();
         }
 
-        // Load user properties - Crash-proof version
+        // Load user properties - Fixed version (prioritizes fresh data)
         function loadUserProperties() {
             if (!currentUser) return;
             
+            // ALWAYS prioritize fresh data from allProperties
             let userProperties = [];
-            if (currentUser.properties && currentUser.properties.length > 0) {
-                userProperties = currentUser.properties;
-            } else if (typeof allProperties !== 'undefined' && Array.isArray(allProperties)) {
+            if (typeof allProperties !== 'undefined' && Array.isArray(allProperties) && allProperties.length > 0) {
                 const userPhoneStr = String(currentUser.phone || '');
                 const mobileNumber = userPhoneStr.slice(-10);
                 userProperties = allProperties.filter(p => {
                     if (!p.ownerWhatsapp) return false;
                     return String(p.ownerWhatsapp).trim().endsWith(mobileNumber);
                 });
+            } else if (currentUser.properties) {
+                // Fallback to session cache ONLY if fresh data hasn't loaded yet
+                userProperties = currentUser.properties;
             }
             
             const activeCount = userProperties.filter(p => p.isActive === true || p.isActive === 'true' || p.isActive === 'TRUE').length;
             
-            // Max limit logic
             if (activeCount >= 3) {
                 document.getElementById('maxLimitWarning').classList.remove('hidden');
                 document.getElementById('btnAddProperty').disabled = true;
@@ -766,6 +767,29 @@
             document.getElementById('userDashboard').classList.add('hidden');
             document.getElementById('publicView').classList.remove('hidden');
             document.getElementById('btnListProperty').classList.remove('hidden');
+
+            // Reset Auth Modal Inputs
+            if(document.getElementById('ownerName')) document.getElementById('ownerName').value = '';
+            if(document.getElementById('ownerWhatsapp')) document.getElementById('ownerWhatsapp').value = '';
+            if(document.getElementById('otpInput')) document.getElementById('otpInput').value = '';
+
+            // Reset Auth Buttons to normal state
+            const btnSend = document.getElementById('btnSendOTP');
+            if(btnSend) {
+                btnSend.disabled = false;
+                btnSend.innerText = 'OTP भेजें';
+                btnSend.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+            const btnVerify = document.getElementById('btnVerifyOTP');
+            if(btnVerify) {
+                btnVerify.disabled = false;
+                btnVerify.innerText = 'Verify & Login';
+                btnVerify.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+
+            // Reset Step Views
+            if(document.getElementById('step1')) document.getElementById('step1').classList.remove('hidden');
+            if(document.getElementById('step2')) document.getElementById('step2').classList.add('hidden');
         }
 
         // Check session on load
