@@ -237,6 +237,23 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         </div>
     </div>
 
+    <!-- Lightbox: image zoom / PDF viewer -->
+    <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-[120] flex flex-col">
+        <div class="flex items-center justify-between p-3 text-white gap-3">
+            <div id="lbControls" class="flex items-center gap-2">
+                <button type="button" onclick="lbZoom(-0.3)" class="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">−</button>
+                <button type="button" onclick="lbReset()" class="px-3 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-sm font-semibold">Fit</button>
+                <button type="button" onclick="lbZoom(0.3)" class="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">+</button>
+            </div>
+            <a id="lbOpenTab" href="#" target="_blank" rel="noopener" class="hidden text-sm font-semibold underline">नई टैब में खोलें ↗</a>
+            <button type="button" onclick="closeLightbox()" aria-label="Close" class="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">✕</button>
+        </div>
+        <div id="lbStage" class="flex-1 overflow-auto flex items-center justify-center p-2 sm:p-4">
+            <img id="lbImage" class="hidden max-w-full max-h-full select-none" style="transform-origin:center center;" alt="">
+            <iframe id="lbFrame" class="hidden w-full h-full bg-white rounded"></iframe>
+        </div>
+    </div>
+
     <script>
         // ===== CONFIG =====
         const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
@@ -384,11 +401,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     ? `<div class="mt-3 flex flex-wrap gap-1">${projects.map(p => `<span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-medium">${escapeHtml(p)}</span>`).join('')}</div>`
                     : '';
                 const image = news.imageUrl
-                    ? `<img src="${escapeHtml(news.imageUrl)}" class="w-full h-44 object-cover" onerror="this.style.display='none'">`
+                    ? `<img src="${escapeHtml(news.imageUrl)}" data-lightbox="${escapeHtml(news.imageUrl)}" class="w-full h-44 object-cover cursor-zoom-in" title="क्लिक करके पूरा देखें (Click to enlarge)" onerror="this.style.display='none'">`
                     : `<div class="w-full h-44 bg-gradient-to-br from-orange-100 to-rose-50 flex items-center justify-center text-4xl">📰</div>`;
                 const links = [];
                 if (news.verifyUrl) links.push(`<a href="${escapeHtml(news.verifyUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs font-semibold">✅ Verify</a>`);
-                if (news.pdfUrl) links.push(`<a href="${escapeHtml(news.pdfUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-red-600 hover:underline text-xs font-semibold">📄 PDF</a>`);
+                if (news.pdfUrl) links.push(`<a href="${escapeHtml(news.pdfUrl)}" data-pdf="${escapeHtml(news.pdfUrl)}" class="inline-flex items-center gap-1 text-red-600 hover:underline text-xs font-semibold cursor-pointer">📄 PDF देखें</a>`);
                 const linksHtml = links.length ? `<div class="mt-3 flex gap-4">${links.join('')}</div>` : '';
                 const controls = isAdmin
                     ? `<div class="mt-4 flex gap-2 border-t pt-3">
@@ -543,6 +560,80 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             }
         }
 
+        // ===== LIGHTBOX (image zoom / PDF viewer) =====
+        let lbScale = 1, lbTx = 0, lbTy = 0, lbDragging = false, lbStartX = 0, lbStartY = 0;
+        function lbApply() {
+            const img = document.getElementById('lbImage');
+            img.style.transform = `translate(${lbTx}px, ${lbTy}px) scale(${lbScale})`;
+            img.style.cursor = lbScale > 1 ? 'grab' : 'zoom-in';
+        }
+        function lbZoom(delta) {
+            lbScale = Math.min(6, Math.max(1, +(lbScale + delta).toFixed(2)));
+            if (lbScale === 1) { lbTx = 0; lbTy = 0; }
+            lbApply();
+        }
+        function lbReset() { lbScale = 1; lbTx = 0; lbTy = 0; lbApply(); }
+        function pdfEmbedUrl(url) {
+            if (/drive\.google\.com/.test(url)) {
+                const m = url.match(/\/file\/d\/([^/]+)/);
+                if (m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+                return url.replace(/\/view.*$/, '/preview');
+            }
+            return url;
+        }
+        function openImageLightbox(url) {
+            const img = document.getElementById('lbImage');
+            const frame = document.getElementById('lbFrame');
+            frame.classList.add('hidden'); frame.src = '';
+            document.getElementById('lbControls').classList.remove('hidden');
+            document.getElementById('lbOpenTab').classList.add('hidden');
+            lbReset();
+            img.src = url;
+            img.classList.remove('hidden');
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function openPdfLightbox(url) {
+            const img = document.getElementById('lbImage');
+            const frame = document.getElementById('lbFrame');
+            img.classList.add('hidden'); img.src = '';
+            document.getElementById('lbControls').classList.add('hidden'); // PDF viewer has its own zoom
+            const openTab = document.getElementById('lbOpenTab');
+            openTab.href = url; openTab.classList.remove('hidden');
+            frame.src = pdfEmbedUrl(url);
+            frame.classList.remove('hidden');
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.getElementById('lbImage').src = '';
+            document.getElementById('lbFrame').src = '';
+            document.body.style.overflow = '';
+        }
+        function initLightbox() {
+            // open via delegated clicks on cards
+            document.addEventListener('click', function (e) {
+                const imgEl = e.target.closest('[data-lightbox]');
+                if (imgEl) { openImageLightbox(imgEl.getAttribute('data-lightbox')); return; }
+                const pdfEl = e.target.closest('[data-pdf]');
+                if (pdfEl) { e.preventDefault(); openPdfLightbox(pdfEl.getAttribute('data-pdf')); return; }
+            });
+            // close on backdrop click (but not when interacting with the image/iframe)
+            document.getElementById('lbStage').addEventListener('click', function (e) {
+                if (e.target.id === 'lbStage') closeLightbox();
+            });
+            // image zoom + pan interactions
+            const lbImg = document.getElementById('lbImage');
+            lbImg.addEventListener('dblclick', function () { lbScale = lbScale > 1 ? 1 : 2.5; if (lbScale === 1) { lbTx = 0; lbTy = 0; } lbApply(); });
+            lbImg.addEventListener('wheel', function (e) { e.preventDefault(); lbZoom(e.deltaY < 0 ? 0.3 : -0.3); }, { passive: false });
+            lbImg.addEventListener('pointerdown', function (e) { if (lbScale <= 1) return; lbDragging = true; lbStartX = e.clientX - lbTx; lbStartY = e.clientY - lbTy; try { lbImg.setPointerCapture(e.pointerId); } catch (x) {} });
+            lbImg.addEventListener('pointermove', function (e) { if (!lbDragging) return; lbTx = e.clientX - lbStartX; lbTy = e.clientY - lbStartY; lbApply(); });
+            lbImg.addEventListener('pointerup', function () { lbDragging = false; lbApply(); });
+            // Esc to close
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !document.getElementById('lightbox').classList.contains('hidden')) closeLightbox(); });
+        }
+
         // ===== INIT =====
         document.getElementById('newsDescription').addEventListener('input', updateWordCounter);
         document.getElementById('newsImageFile').addEventListener('change', function (e) {
@@ -552,6 +643,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         });
 
         window.addEventListener('DOMContentLoaded', async () => {
+            initLightbox();
             await Promise.all([fetchPagePassword(), fetchProjects()]);
             await loadNews();
             renderNews();
