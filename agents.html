@@ -558,6 +558,23 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             messages.appendChild(row);
             messages.scrollTop = messages.scrollHeight;
         }
+        function appendNavButton(url, html) {
+            const row = document.createElement('div');
+            row.className = 'flex items-start';
+            const a = document.createElement('a');
+            a.href = url;
+            a.className = 'inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition-colors';
+            a.innerHTML = html;
+            row.appendChild(a);
+            messages.appendChild(row);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        const shownRentSell = new Set();
+        function appendRentSellNav(text, reply) {
+            const c = ((text || '') + ' ' + (reply || '')).toLowerCase();
+            if (/(\brent|rental|किराय|किराए|kiray)/.test(c) && !shownRentSell.has('rent')) { shownRentSell.add('rent'); appendNavButton('rentals.html?type=rent', '🔑 किराये की प्रॉपर्टी देखें'); }
+            if (/(\bsell|\bsale|बिक्री|बेच|becho)/.test(c) && !shownRentSell.has('sell')) { shownRentSell.add('sell'); appendNavButton('rentals.html?type=sell', '🏷️ बिक्री के लिए प्रॉपर्टी देखें'); }
+        }
         fetch(PROJECTS_WEBHOOK, { headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).then(projects => {
             if (Array.isArray(projects)) {
                 projects.filter(p => p && p.isActive !== false && p.isActive !== 'false').forEach(p => {
@@ -614,6 +631,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     let proj = data.mapUrl ? { url: data.mapUrl, label: data.projectName || 'प्रोजेक्ट' } : null;
                     proj = proj || detectProject(text) || detectProject(reply);
                     if (proj) appendMapButton(proj);
+                    appendRentSellNav(text, reply);
                 } else {
                     appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
                 }
@@ -622,6 +640,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 appendMessage('Network error. Please try again later.', false);
                 const proj = detectProject(text);
                 if (proj) appendMapButton(proj);
+                appendRentSellNav(text, '');
             } finally {
                 renderSuggestions();
             }

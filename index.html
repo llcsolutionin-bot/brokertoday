@@ -502,6 +502,25 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // --- TAP-TO-NAVIGATE to Rent / Sell pages when discussed ---
+        function appendNavButton(url, html) {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex items-start';
+            const a = document.createElement('a');
+            a.href = url;
+            a.className = 'inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition-colors';
+            a.innerHTML = html;
+            wrap.appendChild(a);
+            chatMessages.appendChild(wrap);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        const shownRentSell = new Set();
+        function appendRentSellNav(text, reply) {
+            const c = ((text || '') + ' ' + (reply || '')).toLowerCase();
+            if (/(\brent|rental|किराय|किराए|kiray)/.test(c) && !shownRentSell.has('rent')) { shownRentSell.add('rent'); appendNavButton('rentals.html?type=rent', '🔑 किराये की प्रॉपर्टी देखें'); }
+            if (/(\bsell|\bsale|बिक्री|बेच|becho)/.test(c) && !shownRentSell.has('sell')) { shownRentSell.add('sell'); appendNavButton('rentals.html?type=sell', '🏷️ बिक्री के लिए प्रॉपर्टी देखें'); }
+        }
+
         // --- TAP-AND-USE QUICK QUESTIONS (always visible, rotate each turn) ---
         const CHAT_SUGGESTIONS = [
             { label: '🏘️ उपलब्ध प्लॉट्स', text: 'उपलब्ध प्लॉट्स दिखाएं' },
@@ -568,6 +587,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     let proj = (data.mapUrl) ? { url: data.mapUrl, label: data.projectName || 'प्रोजेक्ट' } : null;
                     proj = proj || detectProject(text) || detectProject(replyText);
                     if (proj) appendMapButton(proj);
+                    appendRentSellNav(text, replyText);
                 } else {
                     appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
                 }
@@ -577,6 +597,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 appendMessage('Network error. Please try again later.', false);
                 const proj = detectProject(text);
                 if (proj) appendMapButton(proj);
+                appendRentSellNav(text, '');
             } finally {
                 // Always offer a fresh set of suggestions after each exchange
                 renderQuickSuggestions();
