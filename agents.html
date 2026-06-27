@@ -65,9 +65,27 @@
             <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">लीगल एक्सपर्ट्स (Legal Experts)</a>
             <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">बैंकिंग एक्सपर्ट्स (Banking Experts)</a>
         </nav>
-        <div class="mt-auto p-4 border-t border-slate-700 flex items-center gap-1.5 text-sm text-slate-400">
-            <svg class="w-4 h-4 text-[#FF6D5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            Location: Sirohi
+        <!-- Theme selector — real Light / Dark experience. The logo color is never themed. -->
+        <div class="mt-auto p-4 border-t border-slate-700">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">थीम चुनें (Theme)</p>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-xl leading-none">🖥️</span>
+                    <span class="text-[10px] text-slate-300">System</span>
+                </button>
+                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-xl leading-none">☀️</span>
+                    <span class="text-[10px] text-slate-300">Light</span>
+                </button>
+                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-xl leading-none">🌙</span>
+                    <span class="text-[10px] text-slate-300">Dark</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm text-slate-400">
+                <svg class="w-4 h-4 text-[#FF6D5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Location: Sirohi
+            </div>
         </div>
     </aside>
     <script>
@@ -79,6 +97,60 @@
             document.getElementById('mainMenu').classList.add('hidden');
             document.getElementById('mainMenuOverlay').classList.add('hidden');
         }
+
+        // --- BROKER TODAY THEME (Light / Dark / System). Logo color is NEVER themed. ---
+        (function () {
+            const css = `
+:root{--brand:#FF6D5A;--brand-dark:#F04E38;--brand-ring:#FF8A7A;}
+
+/* Brand accent (coral) for primary actions — identical in every theme */
+.bg-blue-600,.bg-blue-500,.bg-green-600,.bg-green-500,.bg-indigo-600,.bg-indigo-500{background-color:var(--brand)!important;}
+.hover\\:bg-blue-700:hover,.hover\\:bg-blue-600:hover,.hover\\:bg-green-700:hover,.hover\\:bg-green-600:hover,.hover\\:bg-indigo-700:hover,.hover\\:bg-black:hover{background-color:var(--brand-dark)!important;}
+.text-\\[\\#FF6D5A\\]{color:var(--brand)!important;}
+.focus\\:border-blue-500:focus,.focus\\:border-indigo-500:focus{border-color:var(--brand)!important;}
+.focus\\:ring-blue-500:focus{--tw-ring-color:var(--brand-ring)!important;}
+.from-blue-600,.from-green-600{--tw-gradient-from:var(--brand)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important;}
+.to-indigo-600,.to-emerald-600{--tw-gradient-to:var(--brand-dark)!important;}
+
+/* DARK THEME — surfaces, text, borders, inputs */
+html[data-theme="dark"] body{background-color:#0B1220!important;color:#E2E8F0!important;}
+html[data-theme="dark"] .bg-white{background-color:#1E293B!important;}
+html[data-theme="dark"] .bg-slate-50{background-color:#0F172A!important;}
+html[data-theme="dark"] .bg-slate-100{background-color:#334155!important;}
+html[data-theme="dark"] .bg-slate-200{background-color:#475569!important;}
+html[data-theme="dark"] .text-slate-900,html[data-theme="dark"] .text-slate-800,html[data-theme="dark"] .text-slate-700{color:#E2E8F0!important;}
+html[data-theme="dark"] .text-slate-600,html[data-theme="dark"] .text-slate-500{color:#94A3B8!important;}
+html[data-theme="dark"] .border-slate-100,html[data-theme="dark"] .border-slate-200,html[data-theme="dark"] .border-slate-300{border-color:#334155!important;}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background-color:#0F172A!important;color:#E2E8F0!important;border-color:#334155!important;}
+html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-theme="dark"] .shadow-2xl{box-shadow:0 10px 30px rgba(0,0,0,.55)!important;}
+`;
+            const style = document.createElement('style');
+            style.textContent = css;
+            document.head.appendChild(style);
+        })();
+
+        const _btDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
+        function applySavedTheme() {
+            const stored = localStorage.getItem('bt_theme') || 'system';
+            const useDark = stored === 'dark' || (stored === 'system' && _btDarkMQL.matches);
+            if (useDark) document.documentElement.setAttribute('data-theme', 'dark');
+            else document.documentElement.removeAttribute('data-theme');
+            document.querySelectorAll('.theme-opt').forEach(function (b) {
+                const active = b.getAttribute('data-theme-value') === stored;
+                b.classList.toggle('ring-2', active);
+                b.classList.toggle('ring-white', active);
+            });
+        }
+        function setTheme(t) {
+            localStorage.setItem('bt_theme', t);
+            applySavedTheme();
+        }
+        if (_btDarkMQL.addEventListener) {
+            _btDarkMQL.addEventListener('change', function () {
+                if ((localStorage.getItem('bt_theme') || 'system') === 'system') applySavedTheme();
+            });
+        }
+        applySavedTheme();
     </script>
     <!-- ===== END SITE MENU ===== -->
 
