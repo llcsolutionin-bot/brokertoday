@@ -243,10 +243,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         const WEBHOOK_GET_PROJECTS = 'https://llcsolution.duckdns.org/webhook/f66e2891-a8cb-4729-a659-2a85496512a0';
         const IMGBB_API_KEY = 'a31e91458ccc1c4896125f42c4c3d7f8';
 
-        // TODO: create these n8n endpoints and paste the URLs here.
-        // Until then the page works offline using localStorage as the store.
-        const WEBHOOK_GET_NEWS = '';
-        const WEBHOOK_SAVE_NEWS = '';
+        const WEBHOOK_GET_NEWS = 'https://llcsolution.duckdns.org/webhook/d90bd771-b8d4-4687-95cb-7bba8620fb1b';
+        const WEBHOOK_SAVE_NEWS = 'https://llcsolution.duckdns.org/webhook/55a2c0dc-3097-48de-9722-a1814a69902a';
 
         const DEFAULT_NEWS_PASSWORD = 'Mela@2026';
         const LEGACY_PROJECTS = ['Aerocity Residency', 'Shetrapal Residency'];
@@ -309,6 +307,22 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
 
         // ===== NEWS DATA =====
+        // Map a backend/sheet record (newsId, image, dateCreated, isActive…) to the
+        // internal shape used everywhere else in this page.
+        function normalizeNews(n) {
+            return {
+                uid: n.uid || n.newsId || ('news_' + Math.random().toString(36).slice(2)),
+                title: n.title || '',
+                description: n.description || '',
+                imageUrl: n.imageUrl || n.image || '',
+                pdfUrl: n.pdfUrl || '',
+                verifyUrl: n.verifyUrl || '',
+                projects: n.projects || [],
+                date: n.date || n.dateCreated || '',
+                isActive: n.isActive
+            };
+        }
+
         async function loadNews() {
             // Try the webhook first, fall back to localStorage cache
             if (WEBHOOK_GET_NEWS) {
@@ -317,13 +331,16 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     if (res.ok) {
                         const data = await res.json();
                         let parsed = Array.isArray(data) ? data : (data.myField || []);
-                        newsList = parsed.filter(n => n && (n.title || n.description));
+                        newsList = parsed
+                            .filter(n => n && (n.title || n.description))                 // drop empty/placeholder rows
+                            .filter(n => n.isActive === undefined || n.isActive === '' || n.isActive === true || String(n.isActive).toLowerCase() === 'true')
+                            .map(normalizeNews);
                         localStorage.setItem('broker_news', JSON.stringify(newsList));
                         return;
                     }
                 } catch (e) { /* fall through */ }
             }
-            newsList = JSON.parse(localStorage.getItem('broker_news') || '[]');
+            newsList = JSON.parse(localStorage.getItem('broker_news') || '[]').map(normalizeNews);
         }
 
         function parseProjects(value) {
@@ -473,6 +490,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
                 const projects = Array.from(document.querySelectorAll('.news-project-cb:checked')).map(cb => cb.value);
 
+                const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (matches sheet)
                 const data = {
                     uid,
                     title: document.getElementById('newsTitle').value,
@@ -481,8 +499,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     pdfUrl: document.getElementById('newsPdfUrl').value,
                     verifyUrl: document.getElementById('newsVerifyUrl').value,
                     projects,
-                    date: existing ? (existing.date || new Date().toISOString()) : new Date().toISOString(),
-                    action: 'save'
+                    date: existing ? (existing.date || todayStr) : todayStr,
+                    isActive: true
                 };
 
                 const idx = newsList.findIndex(n => n.uid === uid);
@@ -491,7 +509,20 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 renderNews();
 
                 if (WEBHOOK_SAVE_NEWS) {
-                    try { await fetch(WEBHOOK_SAVE_NEWS, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); } catch (err) { /* cached locally */ }
+                    // Map internal shape -> backend/sheet column names (read from $json.body.* in n8n)
+                    const payload = {
+                        newsId: data.uid,
+                        title: data.title,
+                        description: data.description,
+                        image: data.imageUrl,
+                        pdfUrl: data.pdfUrl,
+                        verifyUrl: data.verifyUrl,
+                        projects: data.projects,
+                        dateCreated: data.date,
+                        isActive: true,
+                        action: 'save'
+                    };
+                    try { await fetch(WEBHOOK_SAVE_NEWS, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch (err) { /* cached locally */ }
                 }
                 closeModal('newsModal');
             } catch (err) {
@@ -508,7 +539,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             localStorage.setItem('broker_news', JSON.stringify(newsList));
             renderNews();
             if (WEBHOOK_SAVE_NEWS) {
-                try { await fetch(WEBHOOK_SAVE_NEWS, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid, action: 'delete' }) }); } catch (err) { /* cached locally */ }
+                try { await fetch(WEBHOOK_SAVE_NEWS, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ newsId: uid, action: 'delete' }) }); } catch (err) { /* cached locally */ }
             }
         }
 
