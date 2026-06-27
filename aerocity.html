@@ -584,35 +584,42 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         </div>
     </div>
 
-    <!-- CHAT WIDGET -->
-    <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <button id="chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
+    <!-- ===== BROKER TODAY CHAT WIDGET (shared across all pages except admin) ===== -->
+    <div id="bt-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <button id="bt-chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
         </button>
-
-        <div id="chat-window" class="hidden w-80 max-h-96 bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col mt-4 overflow-hidden transform origin-bottom-right transition-all duration-300">
+        <div id="bt-chat-window" class="hidden w-[90vw] max-w-sm sm:w-96 h-[70vh] sm:h-[540px] max-h-[80vh] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col mt-4 overflow-hidden transform origin-bottom-right transition-all duration-300">
             <div class="bg-blue-600 text-white p-4 flex justify-between items-center rounded-t-2xl">
-                <h4 class="font-bold">Broker Today Support</h4>
-                <button id="chat-close" class="text-white hover:text-blue-200 focus:outline-none">
+                <div>
+                    <h4 class="font-bold leading-tight">Broker Today Support</h4>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"></span>
+                        </span>
+                        <span class="text-xs font-semibold text-green-200">Live</span>
+                    </div>
+                </div>
+                <button id="bt-chat-close" class="text-white hover:text-blue-200 focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
             </div>
-            
-            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3 h-64">
+            <div id="bt-chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3">
                 <div class="flex items-start">
                     <div class="bg-white border border-slate-200 text-slate-700 text-sm p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
                         नमस्ते! मैं Broker Today का डिजिटल असिस्टेंट हूँ। मैं आपकी कैसे मदद कर सकता हूँ?
                     </div>
                 </div>
             </div>
-
+            <div id="bt-chat-quick" class="px-3 pt-3 bg-white flex flex-wrap gap-2"></div>
             <div class="p-3 bg-white border-t border-slate-100 flex items-center">
-                <input type="text" id="chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
-                <button id="chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
+                <input type="text" id="bt-chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
+                <button id="bt-chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
                     </svg>
@@ -620,6 +627,144 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             </div>
         </div>
     </div>
+    <script>
+    (function () {
+        const WEBHOOK = 'https://llcsolution.duckdns.org/webhook/7750d216-8bb4-4030-9b30-aeba85986268-widget';
+        const PROJECTS_WEBHOOK = 'https://llcsolution.duckdns.org/webhook/f66e2891-a8cb-4729-a659-2a85496512a0';
+        const toggle = document.getElementById('bt-chat-toggle');
+        const win = document.getElementById('bt-chat-window');
+        const closeBtn = document.getElementById('bt-chat-close');
+        const input = document.getElementById('bt-chat-input');
+        const sendBtn = document.getElementById('bt-chat-send');
+        const messages = document.getElementById('bt-chat-messages');
+        const quick = document.getElementById('bt-chat-quick');
+        if (!toggle || !win) return;
+
+        toggle.addEventListener('click', () => win.classList.toggle('hidden'));
+        closeBtn.addEventListener('click', () => win.classList.add('hidden'));
+
+        function appendMessage(text, isUser) {
+            const row = document.createElement('div');
+            row.className = 'flex items-start' + (isUser ? ' justify-end' : '');
+            const bubble = document.createElement('div');
+            bubble.className = isUser
+                ? 'bg-blue-600 text-white text-sm p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]'
+                : 'bg-white border border-slate-200 text-slate-700 text-sm p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]';
+            bubble.textContent = text;
+            row.appendChild(bubble);
+            messages.appendChild(row);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // ---- live-map detection ----
+        let chatProjects = [
+            { keywords: ['aerocity', 'एरोसिटी', 'aero city'], url: 'aerocity.html', label: 'Aerocity Residency' },
+            { keywords: ['shetrapal', 'क्षेत्रपाल', 'kshetrapal', 'shetrpal'], url: 'shetrapal.html', label: 'Shetrapal Residency' }
+        ];
+        function buildKeywords(name, id) {
+            const stopLatin = new Set(['residency','rezidency','project','projects','plot','plots','colony','scheme','the','sirohi','rajasthan','near','road','phase','property','properties','land','new']);
+            const stopHindi = new Set(['रेजीडेंसी','रेजिडेंसी','रेजीडेन्सी','रेजिडेन्सी','प्रोजेक्ट','प्लॉट','प्लॉट्स','कॉलोनी','प्रॉपर्टी']);
+            const tokens = ((id || '') + ' ' + (name || '')).toLowerCase().replace(/[^a-z0-9ऀ-ॿ]+/g, ' ').split(/\s+/).filter(Boolean);
+            const kws = [];
+            tokens.forEach(t => { const lat = /[a-z0-9]/.test(t); if (lat) { if (t.length >= 3 && !stopLatin.has(t)) kws.push(t); } else { if (t.length >= 3 && !stopHindi.has(t)) kws.push(t); } });
+            return Array.from(new Set(kws));
+        }
+        function cleanLabel(name) { const m = String(name || '').match(/\(([^)]+)\)/); return (m ? m[1] : String(name || '')).trim(); }
+        function detectProject(text) {
+            if (!text) return null;
+            const low = String(text).toLowerCase();
+            for (const p of chatProjects) { if ((p.keywords || []).some(kw => kw && low.includes(String(kw).toLowerCase()))) return p; }
+            return null;
+        }
+        let lastMapUrl = null;
+        function appendMapButton(p) {
+            if (!p || !p.url || p.url === lastMapUrl) return;
+            lastMapUrl = p.url;
+            const row = document.createElement('div');
+            row.className = 'flex items-start';
+            const a = document.createElement('a');
+            a.href = p.url;
+            a.className = 'inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition-colors';
+            a.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg> 🗺️ ' + p.label + ' – लाइव मैप देखें';
+            row.appendChild(a);
+            messages.appendChild(row);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        fetch(PROJECTS_WEBHOOK, { headers: { 'Cache-Control': 'no-cache' } }).then(r => r.ok ? r.json() : []).then(projects => {
+            if (Array.isArray(projects)) {
+                projects.filter(p => p && p.isActive !== false && p.isActive !== 'false').forEach(p => {
+                    if (p.id && p.name) { const k = buildKeywords(p.name, p.id); if (k.length) chatProjects.push({ keywords: k, url: 'project-map.html?project=' + encodeURIComponent(p.id), label: cleanLabel(p.name) }); }
+                });
+            }
+        }).catch(() => {});
+
+        // ---- rotating suggestions ----
+        const SUGGESTIONS = [
+            { label: '🏘️ उपलब्ध प्लॉट्स', text: 'उपलब्ध प्लॉट्स दिखाएं' },
+            { label: '💰 कीमत & पेमेंट प्लान', text: 'कीमत और पेमेंट प्लान बताएं' },
+            { label: '📅 साइट विजिट बुक करें', text: 'मुझे साइट विजिट बुक करनी है' },
+            { label: '🏦 लोन / EMI सुविधा', text: 'लोन या EMI की सुविधा है क्या?' },
+            { label: '📍 नज़दीकी प्रोजेक्ट', text: 'मेरे नज़दीकी प्रोजेक्ट कौन से हैं?' },
+            { label: '📄 पट्टा / रजिस्ट्री', text: 'पट्टा और रजिस्ट्री प्रोसेस क्या है?' },
+            { label: '🔑 किराये की प्रॉपर्टी', text: 'किराये की प्रॉपर्टी दिखाएं' },
+            { label: '📈 इन्वेस्टमेंट प्लॉट', text: 'इन्वेस्टमेंट के लिए बेस्ट प्लॉट कौन सा है?' },
+            { label: '🎁 ऑफर / डिस्काउंट', text: 'अभी कोई ऑफर या डिस्काउंट चल रहा है?' },
+            { label: '👤 एजेंट से बात करें', text: 'मुझे किसी एजेंट से बात करनी है' }
+        ];
+        let off = 0;
+        function renderSuggestions() {
+            quick.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const s = SUGGESTIONS[(off + i) % SUGGESTIONS.length];
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-full transition-colors';
+                b.textContent = s.label;
+                b.addEventListener('click', () => { input.value = s.text; send(); });
+                quick.appendChild(b);
+            }
+            off = (off + 3) % SUGGESTIONS.length;
+        }
+
+        async function send() {
+            const text = input.value.trim();
+            if (!text) return;
+            appendMessage(text, true);
+            input.value = '';
+            const typing = document.createElement('div');
+            typing.className = 'flex items-start text-xs text-slate-400 ml-2 mt-1';
+            typing.textContent = 'typing...';
+            messages.appendChild(typing);
+            messages.scrollTop = messages.scrollHeight;
+            try {
+                const res = await fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'Broker Today Chat Widget', message: text, page: location.pathname, timestamp: new Date().toISOString() }) });
+                typing.remove();
+                if (res.ok) {
+                    const data = await res.json();
+                    const reply = data.reply || 'Thanks for reaching out! We received your message.';
+                    appendMessage(reply, false);
+                    let proj = data.mapUrl ? { url: data.mapUrl, label: data.projectName || 'प्रोजेक्ट' } : null;
+                    proj = proj || detectProject(text) || detectProject(reply);
+                    if (proj) appendMapButton(proj);
+                } else {
+                    appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
+                }
+            } catch (e) {
+                typing.remove();
+                appendMessage('Network error. Please try again later.', false);
+                const proj = detectProject(text);
+                if (proj) appendMapButton(proj);
+            } finally {
+                renderSuggestions();
+            }
+        }
+
+        sendBtn.addEventListener('click', send);
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') send(); });
+        renderSuggestions();
+    })();
+    </script>
+    <!-- ===== END CHAT WIDGET ===== -->
 
     <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
@@ -1270,15 +1415,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
 
         // --- 8. CHAT WIDGET LOGIC ---
-        const chatToggle = document.getElementById('chat-toggle');
-        const chatClose = document.getElementById('chat-close');
-        const chatWindow = document.getElementById('chat-window');
-        const chatInput = document.getElementById('chat-input');
-        const chatSend = document.getElementById('chat-send');
-        const chatMessages = document.getElementById('chat-messages');
-
-        chatToggle.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
-        chatClose.addEventListener('click', () => chatWindow.classList.add('hidden'));
+        // (legacy chat widget bindings removed — replaced by the shared widget at end of body)
 
         function appendMessage(text, isUser = false) {
             const msgDiv = document.createElement('div');
@@ -1338,10 +1475,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             }
         }
 
-        chatSend.addEventListener('click', sendChatMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendChatMessage();
-        });
+        // (legacy chat send bindings removed — replaced by the shared widget at end of body)
 
         // Fetch password from database
         async function fetchPagePassword() {

@@ -282,9 +282,18 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             </svg>
         </button>
 
-        <div id="chat-window" class="hidden w-80 max-h-96 bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col mt-4 overflow-hidden transform origin-bottom-right transition-all duration-300">
+        <div id="chat-window" class="hidden w-[90vw] max-w-sm sm:w-96 h-[70vh] sm:h-[540px] max-h-[80vh] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col mt-4 overflow-hidden transform origin-bottom-right transition-all duration-300">
             <div class="bg-blue-600 text-white p-4 flex justify-between items-center rounded-t-2xl">
-                <h4 class="font-bold">Broker Today Support</h4>
+                <div>
+                    <h4 class="font-bold leading-tight">Broker Today Support</h4>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"></span>
+                        </span>
+                        <span class="text-xs font-semibold text-green-200">Live</span>
+                    </div>
+                </div>
                 <button id="chat-close" class="text-white hover:text-blue-200 focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -292,7 +301,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 </button>
             </div>
             
-            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3 h-64">
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3">
                 <div class="flex items-start">
                     <div class="bg-white border border-slate-200 text-slate-700 text-sm p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
                         नमस्ते! मैं Broker Today का डिजिटल असिस्टेंट हूँ। मैं आपकी कैसे मदद कर सकता हूँ?
@@ -300,6 +309,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 </div>
             </div>
 
+            <div id="chat-quick" class="px-3 pt-3 bg-white flex flex-wrap gap-2"></div>
             <div class="p-3 bg-white border-t border-slate-100 flex items-center">
                 <input type="text" id="chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
                 <button id="chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
@@ -429,6 +439,82 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // --- LIVE-MAP LINK when a project is discussed in chat ---
+        // Seeded with the two hardcoded projects; dynamic projects are added in loadDynamicProjects().
+        let chatProjects = [
+            { keywords: ['aerocity', 'एरोसिटी', 'aero city'], url: 'aerocity.html', label: 'Aerocity Residency' },
+            { keywords: ['shetrapal', 'क्षेत्रपाल', 'kshetrapal', 'shetrpal'], url: 'shetrapal.html', label: 'Shetrapal Residency' }
+        ];
+        // Build distinctive keywords from a project's name + id slug (drops common words like "residency")
+        function buildProjectKeywords(name, id) {
+            const stopLatin = new Set(['residency', 'rezidency', 'project', 'projects', 'plot', 'plots', 'colony', 'scheme', 'the', 'sirohi', 'rajasthan', 'near', 'road', 'phase', 'property', 'properties', 'land', 'new']);
+            const stopHindi = new Set(['रेजीडेंसी', 'रेजिडेंसी', 'रेजीडेन्सी', 'रेजिडेन्सी', 'प्रोजेक्ट', 'प्लॉट', 'प्लॉट्स', 'कॉलोनी', 'प्रॉपर्टी']);
+            const tokens = ((id || '') + ' ' + (name || '')).toLowerCase().replace(/[^a-z0-9ऀ-ॿ]+/g, ' ').split(/\s+/).filter(Boolean);
+            const kws = [];
+            tokens.forEach(t => {
+                const isLatin = /[a-z0-9]/.test(t);
+                if (isLatin) { if (t.length >= 3 && !stopLatin.has(t)) kws.push(t); }
+                else { if (t.length >= 3 && !stopHindi.has(t)) kws.push(t); }
+            });
+            return Array.from(new Set(kws));
+        }
+        function cleanProjectLabel(name) {
+            const m = String(name || '').match(/\(([^)]+)\)/);
+            return (m ? m[1] : String(name || '')).trim();
+        }
+        function detectProject(text) {
+            if (!text) return null;
+            const low = String(text).toLowerCase();
+            for (const p of chatProjects) {
+                if ((p.keywords || []).some(kw => kw && low.includes(String(kw).toLowerCase()))) return p;
+            }
+            return null;
+        }
+        let lastMapProjectUrl = null;
+        function appendMapButton(project) {
+            if (!project || !project.url) return;
+            if (project.url === lastMapProjectUrl) return; // avoid repeating the same button back-to-back
+            lastMapProjectUrl = project.url;
+            const wrap = document.createElement('div');
+            wrap.className = 'flex items-start';
+            wrap.innerHTML = `<a href="${project.url}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                🗺️ ${project.label} – लाइव मैप देखें
+            </a>`;
+            chatMessages.appendChild(wrap);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // --- TAP-AND-USE QUICK QUESTIONS (always visible, rotate each turn) ---
+        const CHAT_SUGGESTIONS = [
+            { label: '🏘️ उपलब्ध प्लॉट्स', text: 'उपलब्ध प्लॉट्स दिखाएं' },
+            { label: '💰 कीमत & पेमेंट प्लान', text: 'कीमत और पेमेंट प्लान बताएं' },
+            { label: '📅 साइट विजिट बुक करें', text: 'मुझे साइट विजिट बुक करनी है' },
+            { label: '🏦 लोन / EMI सुविधा', text: 'लोन या EMI की सुविधा है क्या?' },
+            { label: '📍 नज़दीकी प्रोजेक्ट', text: 'मेरे नज़दीकी प्रोजेक्ट कौन से हैं?' },
+            { label: '📄 पट्टा / रजिस्ट्री', text: 'पट्टा और रजिस्ट्री प्रोसेस क्या है?' },
+            { label: '🔑 किराये की प्रॉपर्टी', text: 'किराये की प्रॉपर्टी दिखाएं' },
+            { label: '📈 इन्वेस्टमेंट प्लॉट', text: 'इन्वेस्टमेंट के लिए बेस्ट प्लॉट कौन सा है?' },
+            { label: '🎁 ऑफर / डिस्काउंट', text: 'अभी कोई ऑफर या डिस्काउंट चल रहा है?' },
+            { label: '👤 एजेंट से बात करें', text: 'मुझे किसी एजेंट से बात करनी है' }
+        ];
+        let chatSuggestOffset = 0;
+        function renderQuickSuggestions() {
+            const bar = document.getElementById('chat-quick');
+            if (!bar) return;
+            const picks = [];
+            for (let i = 0; i < 3; i++) picks.push(CHAT_SUGGESTIONS[(chatSuggestOffset + i) % CHAT_SUGGESTIONS.length]);
+            chatSuggestOffset = (chatSuggestOffset + 3) % CHAT_SUGGESTIONS.length;
+            bar.innerHTML = picks.map(s =>
+                `<button type="button" onclick="sendQuick('${s.text.replace(/'/g, "\\'")}')" class="text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-full transition-colors">${s.label}</button>`
+            ).join('');
+        }
+
+        function sendQuick(text) {
+            chatInput.value = text;
+            sendMessage();
+        }
+
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
@@ -461,6 +547,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     const data = await response.json();
                     const replyText = data.reply || 'Thanks for reaching out! We received your message.';
                     appendMessage(replyText, false);
+                    // Offer a live-map button if a project was discussed (backend link wins, else detect)
+                    let proj = (data.mapUrl) ? { url: data.mapUrl, label: data.projectName || 'प्रोजेक्ट' } : null;
+                    proj = proj || detectProject(text) || detectProject(replyText);
+                    if (proj) appendMapButton(proj);
                 } else {
                     appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
                 }
@@ -468,8 +558,16 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 console.error('Chat Error:', error);
                 document.getElementById(typingId).remove();
                 appendMessage('Network error. Please try again later.', false);
+                const proj = detectProject(text);
+                if (proj) appendMapButton(proj);
+            } finally {
+                // Always offer a fresh set of suggestions after each exchange
+                renderQuickSuggestions();
             }
         }
+
+        // Show the first set of suggestions right away
+        renderQuickSuggestions();
 
         chatSend.addEventListener('click', sendMessage);
         chatInput.addEventListener('keypress', (e) => {
@@ -546,10 +644,18 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 container.innerHTML = '';
                 
                 // Filter only active projects
-                const activeProjects = Array.isArray(projects) 
+                const activeProjects = Array.isArray(projects)
                     ? projects.filter(project => project.isActive !== false && project.isActive !== 'false')
                     : [];
-                
+
+                // Make dynamic projects discoverable by the chat live-map detector
+                activeProjects.forEach(p => {
+                    if (p && p.id && p.name) {
+                        const kws = buildProjectKeywords(p.name, p.id);
+                        if (kws.length) chatProjects.push({ keywords: kws, url: `project-map.html?project=${encodeURIComponent(p.id)}`, label: cleanProjectLabel(p.name) });
+                    }
+                });
+
                 // Render each active dynamic project
                 if (activeProjects.length > 0) {
                     activeProjects.forEach(project => {
