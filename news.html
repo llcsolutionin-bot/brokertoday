@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>न्यूज़ अपडेट्स | Broker Today</title>
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #FF6D5A; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation Bar -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
+        <div class="container mx-auto max-w-6xl flex items-center gap-3">
+            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            </a>
+        </div>
+    </nav>
+
+    <!-- ===== SITE MENU (Hamburger Drawer) — shared across all pages ===== -->
+    <div id="mainMenuOverlay" onclick="closeMainMenu()" class="hidden fixed inset-0 bg-black/50 z-[90]"></div>
+    <aside id="mainMenu" class="hidden fixed top-0 right-0 h-full w-72 max-w-[80%] bg-slate-900 text-white z-[100] shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b border-slate-700">
+            <span class="text-lg font-extrabold tracking-tight">मेन्यू (Menu)</span>
+            <button onclick="closeMainMenu()" aria-label="बंद करें" class="p-1.5 hover:bg-slate-700 rounded-md text-xl leading-none">✕</button>
+        </div>
+        <nav class="flex flex-col p-3 gap-1.5 overflow-y-auto">
+            <a href="index.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">🏠 होम (Home)</a>
+            <a href="news.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">📰 न्यूज़ अपडेट्स (News Updates)</a>
+            <a href="rentals.html?type=rent" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">किराये की प्रॉपर्टी (Rentals)</a>
+            <a href="rentals.html?type=sell" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी बेचें (Sell Property)</a>
+            <a href="agents.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी एक्सपर्ट्स (Property Experts)</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">लीगल एक्सपर्ट्स (Legal Experts)</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">बैंकिंग एक्सपर्ट्स (Banking Experts)</a>
+        </nav>
+        <!-- Theme selector — real Light / Dark experience. The logo color is never themed. -->
+        <div class="mt-auto p-4 border-t border-slate-700">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">थीम चुनें (Theme)</p>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-xl leading-none">🖥️</span>
+                    <span class="text-[10px] text-slate-300">System</span>
+                </button>
+                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-xl leading-none">☀️</span>
+                    <span class="text-[10px] text-slate-300">Light</span>
+                </button>
+                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-xl leading-none">🌙</span>
+                    <span class="text-[10px] text-slate-300">Dark</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm text-slate-400">
+                <svg class="w-4 h-4 text-[#FF6D5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Location: Sirohi
+            </div>
+        </div>
+    </aside>
+    <script>
+        function toggleMainMenu() {
+            document.getElementById('mainMenu').classList.toggle('hidden');
+            document.getElementById('mainMenuOverlay').classList.toggle('hidden');
+        }
+        function closeMainMenu() {
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('mainMenuOverlay').classList.add('hidden');
+        }
+
+        // --- BROKER TODAY THEME (Light / Dark / System). Logo color is NEVER themed. ---
+        (function () {
+            const css = `
+:root{--brand:#FF6D5A;--brand-dark:#F04E38;--brand-ring:#FF8A7A;}
+
+/* Brand accent (coral) for primary actions — identical in every theme */
+.bg-blue-600,.bg-blue-500,.bg-green-600,.bg-green-500,.bg-indigo-600,.bg-indigo-500{background-color:var(--brand)!important;}
+.hover\\:bg-blue-700:hover,.hover\\:bg-blue-600:hover,.hover\\:bg-green-700:hover,.hover\\:bg-green-600:hover,.hover\\:bg-indigo-700:hover,.hover\\:bg-black:hover{background-color:var(--brand-dark)!important;}
+.text-\\[\\#FF6D5A\\]{color:var(--brand)!important;}
+.focus\\:border-blue-500:focus,.focus\\:border-indigo-500:focus{border-color:var(--brand)!important;}
+.focus\\:ring-blue-500:focus{--tw-ring-color:var(--brand-ring)!important;}
+.from-blue-600,.from-green-600{--tw-gradient-from:var(--brand)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important;}
+.to-indigo-600,.to-emerald-600{--tw-gradient-to:var(--brand-dark)!important;}
+
+/* DARK THEME — surfaces, text, borders, inputs */
+html[data-theme="dark"] body{background-color:#0B1220!important;color:#E2E8F0!important;}
+html[data-theme="dark"] .bg-white{background-color:#1E293B!important;}
+html[data-theme="dark"] .bg-slate-50{background-color:#0F172A!important;}
+html[data-theme="dark"] .bg-slate-100{background-color:#334155!important;}
+html[data-theme="dark"] .bg-slate-200{background-color:#475569!important;}
+html[data-theme="dark"] .text-slate-900,html[data-theme="dark"] .text-slate-800,html[data-theme="dark"] .text-slate-700{color:#E2E8F0!important;}
+html[data-theme="dark"] .text-slate-600,html[data-theme="dark"] .text-slate-500{color:#94A3B8!important;}
+html[data-theme="dark"] .border-slate-100,html[data-theme="dark"] .border-slate-200,html[data-theme="dark"] .border-slate-300{border-color:#334155!important;}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background-color:#0F172A!important;color:#E2E8F0!important;border-color:#334155!important;}
+html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-theme="dark"] .shadow-2xl{box-shadow:0 10px 30px rgba(0,0,0,.55)!important;}
+`;
+            const style = document.createElement('style');
+            style.textContent = css;
+            document.head.appendChild(style);
+        })();
+
+        const _btDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
+        function applySavedTheme() {
+            const stored = localStorage.getItem('bt_theme') || 'system';
+            const useDark = stored === 'dark' || (stored === 'system' && _btDarkMQL.matches);
+            if (useDark) document.documentElement.setAttribute('data-theme', 'dark');
+            else document.documentElement.removeAttribute('data-theme');
+            document.querySelectorAll('.theme-opt').forEach(function (b) {
+                const active = b.getAttribute('data-theme-value') === stored;
+                b.classList.toggle('ring-2', active);
+                b.classList.toggle('ring-white', active);
+            });
+        }
+        function setTheme(t) {
+            localStorage.setItem('bt_theme', t);
+            applySavedTheme();
+        }
+        if (_btDarkMQL.addEventListener) {
+            _btDarkMQL.addEventListener('change', function () {
+                if ((localStorage.getItem('bt_theme') || 'system') === 'system') applySavedTheme();
+            });
+        }
+        applySavedTheme();
+    </script>
+    <!-- ===== END SITE MENU ===== -->
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-10">
+        <div class="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-orange-200">न्यूज़ और अपडेट्स</h1>
+                <p class="text-orange-200 mt-1 text-sm">सिरोही रियल एस्टेट और प्रोजेक्ट्स से जुड़ी ताज़ा खबरें।</p>
+            </div>
+            <div>
+                <button id="btnAdminLogin" onclick="openPasswordModal()" class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                    <span>🔒 एडमिन एक्सेस</span>
+                </button>
+                <div id="adminControls" class="hidden flex gap-2">
+                    <button onclick="openNewsModal()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                        <span>➕ नई न्यूज़ जोड़ें</span>
+                    </button>
+                    <button onclick="exitAdminMode()" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                        <span>✖ एडमिन मोड बंद करें</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- News List -->
+    <main class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
+        <div id="loadingState" class="flex justify-center py-16"><div class="loader"></div></div>
+        <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="emptyState" class="hidden text-center py-20">
+            <span class="text-6xl mb-4 block">📰</span>
+            <h3 class="text-xl font-bold text-slate-700">अभी कोई न्यूज़ नहीं है</h3>
+            <p class="text-slate-500">जैसे ही कोई अपडेट आएगी, यहाँ दिखाई देगी।</p>
+        </div>
+    </main>
+
+    <!-- Admin Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative">
+            <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="font-bold text-lg mb-4">एडमिन सुरक्षा जांच</h3>
+            <p class="text-xs text-slate-500 mb-4">न्यूज़ जोड़ने, एडिट या डिलीट करने के लिए पासवर्ड डालें।</p>
+            <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500" onkeydown="if(event.key==='Enter')verifyPassword()">
+            <button onclick="verifyPassword()" class="bg-indigo-600 text-white font-bold w-full py-3 rounded-lg hover:bg-indigo-700">एडमिन मोड अनलॉक करें</button>
+        </div>
+    </div>
+
+    <!-- News Form Modal (admin only) -->
+    <div id="newsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden p-4 overflow-y-auto flex items-start justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-2xl w-full my-8 max-h-[90vh] overflow-y-auto relative">
+            <div class="flex items-start justify-between mb-5">
+                <h3 class="text-xl font-bold text-indigo-700" id="newsModalTitle">नई न्यूज़ जोड़ें</h3>
+                <button type="button" onclick="closeModal('newsModal')" aria-label="Close" class="shrink-0 text-slate-400 hover:text-slate-700 text-2xl leading-none p-1 -mt-1 -mr-1">✕</button>
+            </div>
+
+            <form id="newsForm" class="space-y-4">
+                <input type="hidden" id="newsUid">
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">शीर्षक (Title)</label>
+                    <input type="text" id="newsTitle" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">विवरण (अधिकतम 250 शब्द / Max 250 words)</label>
+                    <textarea id="newsDescription" required rows="5" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                    <p id="wordCounter" class="text-xs text-slate-500 mt-1">0 / 250 शब्द</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">इमेज (Image — optional)</label>
+                    <input type="file" id="newsImageFile" accept="image/*" class="w-full border-2 border-slate-300 p-2 rounded-lg focus:outline-none focus:border-blue-500">
+                    <div id="newsImagePreview" class="mt-2"></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">PDF लिंक (PDF URL — optional)</label>
+                    <input type="url" id="newsPdfUrl" placeholder="https://.../document.pdf" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">किसी होस्ट किए गए PDF का लिंक पेस्ट करें (Google Drive / hosted link).</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">वेरिफिकेशन URL (Verification link — optional)</label>
+                    <input type="url" id="newsVerifyUrl" placeholder="https://..." class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">यह न्यूज़ किन प्रोजेक्ट्स से संबंधित है? (एक या अधिक चुनें)</label>
+                    <div id="newsProjectCheckboxes" class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-44 overflow-y-auto">
+                        <span class="text-sm text-slate-500">Loading projects...</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">न्यूज़ सुरक्षित करें</button>
+                    <button type="button" onclick="closeModal('newsModal')" class="flex-1 bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-3 rounded-lg transition-colors">रद्द करें</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIG =====
+        const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
+        const WEBHOOK_GET_PROJECTS = 'https://llcsolution.duckdns.org/webhook/f66e2891-a8cb-4729-a659-2a85496512a0';
+        const IMGBB_API_KEY = 'a31e91458ccc1c4896125f42c4c3d7f8';
+
+        // TODO: create these n8n endpoints and paste the URLs here.
+        // Until then the page works offline using localStorage as the store.
+        const WEBHOOK_GET_NEWS = '';
+        const WEBHOOK_SAVE_NEWS = '';
+
+        const DEFAULT_NEWS_PASSWORD = 'Mela@2026';
+        const LEGACY_PROJECTS = ['Aerocity Residency', 'Shetrapal Residency'];
+
+        let CURRENT_PAGE_PASSWORD = DEFAULT_NEWS_PASSWORD;
+        let isAdmin = false;
+        let newsList = [];
+        let allProjects = [];
+
+        // ===== PASSWORD (centralised DB with fallback) =====
+        async function fetchPagePassword() {
+            try {
+                const res = await fetch(WEBHOOK_GET_PASSWORDS, { method: 'GET', headers: { 'Cache-Control': 'no-cache' } });
+                if (!res.ok) throw new Error('pwd fetch failed');
+                const arr = await res.json();
+                if (Array.isArray(arr)) {
+                    const row = arr.find(item => item.id === 'news');
+                    if (row && row.password) CURRENT_PAGE_PASSWORD = row.password;
+                }
+            } catch (e) {
+                CURRENT_PAGE_PASSWORD = DEFAULT_NEWS_PASSWORD;
+            }
+        }
+
+        function openPasswordModal() {
+            document.getElementById('adminPwdInput').value = '';
+            document.getElementById('passwordModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('adminPwdInput').focus(), 50);
+        }
+        function verifyPassword() {
+            if (document.getElementById('adminPwdInput').value === CURRENT_PAGE_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('btnAdminLogin').classList.add('hidden');
+                document.getElementById('adminControls').classList.remove('hidden');
+                closeModal('passwordModal');
+                renderNews();
+            } else {
+                alert('गलत पासवर्ड!');
+            }
+        }
+        function exitAdminMode() {
+            isAdmin = false;
+            document.getElementById('adminControls').classList.add('hidden');
+            document.getElementById('btnAdminLogin').classList.remove('hidden');
+            renderNews();
+        }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // ===== PROJECTS (for multiselect) =====
+        async function fetchProjects() {
+            let dynamic = [];
+            try {
+                const res = await fetch(WEBHOOK_GET_PROJECTS, { method: 'GET', headers: { 'Cache-Control': 'no-cache' } });
+                if (res.ok) {
+                    const projects = await res.json();
+                    if (Array.isArray(projects)) dynamic = projects.map(p => p.name).filter(Boolean);
+                }
+            } catch (e) { /* ignore — fall back to legacy only */ }
+            allProjects = [...LEGACY_PROJECTS, ...dynamic];
+        }
+
+        // ===== NEWS DATA =====
+        async function loadNews() {
+            // Try the webhook first, fall back to localStorage cache
+            if (WEBHOOK_GET_NEWS) {
+                try {
+                    const res = await fetch(`${WEBHOOK_GET_NEWS}?t=${new Date().getTime()}`, { method: 'GET', headers: { 'Cache-Control': 'no-cache' } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        let parsed = Array.isArray(data) ? data : (data.myField || []);
+                        newsList = parsed.filter(n => n && (n.title || n.description));
+                        localStorage.setItem('broker_news', JSON.stringify(newsList));
+                        return;
+                    }
+                } catch (e) { /* fall through */ }
+            }
+            newsList = JSON.parse(localStorage.getItem('broker_news') || '[]');
+        }
+
+        function parseProjects(value) {
+            if (Array.isArray(value)) return value;
+            if (typeof value === 'string') {
+                const clean = value.replace(/[\[\]"]/g, '');
+                return clean.split(',').map(p => p.trim()).filter(Boolean);
+            }
+            return [];
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            if (isNaN(d)) return '';
+            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function renderNews() {
+            const grid = document.getElementById('newsGrid');
+            const empty = document.getElementById('emptyState');
+            document.getElementById('loadingState').classList.add('hidden');
+
+            if (!newsList || newsList.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            // newest first
+            const items = [...newsList].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+            grid.innerHTML = items.map(news => {
+                const projects = parseProjects(news.projects);
+                const badges = projects.length
+                    ? `<div class="mt-3 flex flex-wrap gap-1">${projects.map(p => `<span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-medium">${escapeHtml(p)}</span>`).join('')}</div>`
+                    : '';
+                const image = news.imageUrl
+                    ? `<img src="${escapeHtml(news.imageUrl)}" class="w-full h-44 object-cover" onerror="this.style.display='none'">`
+                    : `<div class="w-full h-44 bg-gradient-to-br from-orange-100 to-rose-50 flex items-center justify-center text-4xl">📰</div>`;
+                const links = [];
+                if (news.verifyUrl) links.push(`<a href="${escapeHtml(news.verifyUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs font-semibold">✅ Verify</a>`);
+                if (news.pdfUrl) links.push(`<a href="${escapeHtml(news.pdfUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-red-600 hover:underline text-xs font-semibold">📄 PDF</a>`);
+                const linksHtml = links.length ? `<div class="mt-3 flex gap-4">${links.join('')}</div>` : '';
+                const controls = isAdmin
+                    ? `<div class="mt-4 flex gap-2 border-t pt-3">
+                            <button onclick='openNewsModal(${JSON.stringify(news)})' class="flex-1 bg-indigo-50 text-indigo-700 text-sm font-bold py-2 rounded">एडिट</button>
+                            <button onclick="deleteNews('${escapeHtml(news.uid)}')" class="flex-1 bg-red-50 text-red-600 text-sm font-bold py-2 rounded">डिलीट</button>
+                       </div>`
+                    : '';
+
+                return `
+                    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
+                        ${image}
+                        <div class="p-5 flex flex-col flex-1">
+                            <div class="text-xs text-slate-400 font-semibold mb-1">${formatDate(news.date)}</div>
+                            <h3 class="text-lg font-bold text-slate-800 leading-snug">${escapeHtml(news.title)}</h3>
+                            <p class="text-sm text-slate-600 mt-2 whitespace-pre-line flex-1">${escapeHtml(news.description)}</p>
+                            ${badges}
+                            ${linksHtml}
+                            ${controls}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== ADD / EDIT =====
+        function countWords(str) { return (str.trim().match(/\S+/g) || []).length; }
+
+        function openNewsModal(news = null) {
+            document.getElementById('newsForm').reset();
+            document.getElementById('newsImagePreview').innerHTML = '';
+
+            // Build project checkboxes
+            const box = document.getElementById('newsProjectCheckboxes');
+            box.innerHTML = allProjects.length
+                ? allProjects.map(p => `
+                    <label class="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
+                        <input type="checkbox" value="${escapeHtml(p)}" class="news-project-cb w-4 h-4 text-indigo-600 border-slate-300 rounded">
+                        <span>${escapeHtml(p)}</span>
+                    </label>`).join('')
+                : '<span class="text-sm text-slate-500">कोई प्रोजेक्ट नहीं मिला</span>';
+
+            if (news) {
+                document.getElementById('newsModalTitle').textContent = 'न्यूज़ एडिट करें';
+                document.getElementById('newsUid').value = news.uid;
+                document.getElementById('newsTitle').value = news.title || '';
+                document.getElementById('newsDescription').value = news.description || '';
+                document.getElementById('newsPdfUrl').value = news.pdfUrl || '';
+                document.getElementById('newsVerifyUrl').value = news.verifyUrl || '';
+                if (news.imageUrl) {
+                    document.getElementById('newsImagePreview').innerHTML = `<img src="${escapeHtml(news.imageUrl)}" class="w-24 h-24 object-cover rounded-lg border border-slate-200"><p class="text-[11px] text-slate-500 mt-1">नई फोटो चुनने पर यह बदल जाएगी</p>`;
+                }
+                const saved = parseProjects(news.projects);
+                document.querySelectorAll('.news-project-cb').forEach(cb => { if (saved.includes(cb.value)) cb.checked = true; });
+            } else {
+                document.getElementById('newsModalTitle').textContent = 'नई न्यूज़ जोड़ें';
+                document.getElementById('newsUid').value = '';
+            }
+            updateWordCounter();
+            document.getElementById('newsModal').classList.remove('hidden');
+        }
+
+        function updateWordCounter() {
+            const n = countWords(document.getElementById('newsDescription').value);
+            const el = document.getElementById('wordCounter');
+            el.textContent = `${n} / 250 शब्द`;
+            el.className = 'text-xs mt-1 ' + (n > 250 ? 'text-red-500 font-bold' : 'text-slate-500');
+        }
+
+        async function uploadImageToImgBB(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            const res = await fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_API_KEY, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) return data.data.url;
+            throw new Error('Image upload failed');
+        }
+
+        document.getElementById('newsForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const desc = document.getElementById('newsDescription').value;
+            if (countWords(desc) > 250) { alert('विवरण 250 शब्दों से अधिक है। कृपया छोटा करें।'); return; }
+
+            const btn = this.querySelector('button[type="submit"]');
+            const original = btn.innerText;
+            btn.disabled = true; btn.innerText = 'सुरक्षित किया जा रहा है...';
+
+            try {
+                const uid = document.getElementById('newsUid').value || `news_${new Date().getTime()}`;
+                const existing = newsList.find(n => n.uid === uid);
+
+                // Image: upload new file if chosen, else keep existing
+                let imageUrl = existing ? (existing.imageUrl || '') : '';
+                const file = document.getElementById('newsImageFile').files[0];
+                if (file) {
+                    btn.innerText = 'इमेज अपलोड हो रही है...';
+                    try { imageUrl = await uploadImageToImgBB(file); } catch (err) { alert('इमेज अपलोड नहीं हो पाई, बाकी जानकारी सेव होगी।'); }
+                    btn.innerText = 'सुरक्षित किया जा रहा है...';
+                }
+
+                const projects = Array.from(document.querySelectorAll('.news-project-cb:checked')).map(cb => cb.value);
+
+                const data = {
+                    uid,
+                    title: document.getElementById('newsTitle').value,
+                    description: desc,
+                    imageUrl,
+                    pdfUrl: document.getElementById('newsPdfUrl').value,
+                    verifyUrl: document.getElementById('newsVerifyUrl').value,
+                    projects,
+                    date: existing ? (existing.date || new Date().toISOString()) : new Date().toISOString(),
+                    action: 'save'
+                };
+
+                const idx = newsList.findIndex(n => n.uid === uid);
+                if (idx >= 0) newsList[idx] = data; else newsList.push(data);
+                localStorage.setItem('broker_news', JSON.stringify(newsList));
+                renderNews();
+
+                if (WEBHOOK_SAVE_NEWS) {
+                    try { await fetch(WEBHOOK_SAVE_NEWS, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); } catch (err) { /* cached locally */ }
+                }
+                closeModal('newsModal');
+            } catch (err) {
+                console.error(err);
+                alert('न्यूज़ सेव करने में समस्या आई।');
+            } finally {
+                btn.disabled = false; btn.innerText = original;
+            }
+        });
+
+        async function deleteNews(uid) {
+            if (!confirm('क्या आप इस न्यूज़ को हटाना चाहते हैं?')) return;
+            newsList = newsList.filter(n => n.uid !== uid);
+            localStorage.setItem('broker_news', JSON.stringify(newsList));
+            renderNews();
+            if (WEBHOOK_SAVE_NEWS) {
+                try { await fetch(WEBHOOK_SAVE_NEWS, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid, action: 'delete' }) }); } catch (err) { /* cached locally */ }
+            }
+        }
+
+        // ===== INIT =====
+        document.getElementById('newsDescription').addEventListener('input', updateWordCounter);
+        document.getElementById('newsImageFile').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const prev = document.getElementById('newsImagePreview');
+            if (file) prev.innerHTML = `<img src="${URL.createObjectURL(file)}" class="w-24 h-24 object-cover rounded-lg border border-slate-200">`;
+        });
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await Promise.all([fetchPagePassword(), fetchProjects()]);
+            await loadNews();
+            renderNews();
+        });
+    </script>
+</body>
+</html>
