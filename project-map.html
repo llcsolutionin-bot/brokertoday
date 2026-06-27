@@ -587,8 +587,25 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         const quick = document.getElementById('bt-chat-quick');
         if (!toggle || !win) return;
 
-        toggle.addEventListener('click', () => win.classList.toggle('hidden'));
-        closeBtn.addEventListener('click', () => win.classList.add('hidden'));
+        const widget = document.getElementById('bt-chat-widget');
+        function adjustChatViewport() {
+            const vv = window.visualViewport;
+            if (!vv || !widget) return;
+            if (win.classList.contains('hidden')) { widget.style.bottom = ''; win.style.maxHeight = ''; return; }
+            const bottomGap = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+            widget.style.bottom = (bottomGap > 0 ? bottomGap + 12 : 24) + 'px';
+            win.style.maxHeight = (vv.height - 24) + 'px';
+            messages.scrollTop = messages.scrollHeight;
+        }
+        function openChat() { win.classList.remove('hidden'); setTimeout(adjustChatViewport, 50); }
+        function closeChat() { win.classList.add('hidden'); if (widget) widget.style.bottom = ''; win.style.maxHeight = ''; }
+        toggle.addEventListener('click', () => { if (win.classList.contains('hidden')) openChat(); else closeChat(); });
+        closeBtn.addEventListener('click', closeChat);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', adjustChatViewport);
+            window.visualViewport.addEventListener('scroll', adjustChatViewport);
+        }
+        input.addEventListener('focus', () => setTimeout(adjustChatViewport, 100));
 
         function appendMessage(text, isUser) {
             const row = document.createElement('div');

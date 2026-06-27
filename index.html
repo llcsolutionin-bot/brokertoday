@@ -419,8 +419,25 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
         const N8N_CHAT_WEBHOOK_URL = 'https://llcsolution.duckdns.org/webhook/7750d216-8bb4-4030-9b30-aeba85986268-widget';
 
-        chatToggle.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
-        chatClose.addEventListener('click', () => chatWindow.classList.add('hidden'));
+        const chatWidgetEl = document.getElementById('chat-widget');
+        function adjustChatViewport() {
+            const vv = window.visualViewport;
+            if (!vv || !chatWidgetEl) return;
+            if (chatWindow.classList.contains('hidden')) { chatWidgetEl.style.bottom = ''; chatWindow.style.maxHeight = ''; return; }
+            const bottomGap = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+            chatWidgetEl.style.bottom = (bottomGap > 0 ? bottomGap + 12 : 24) + 'px';
+            chatWindow.style.maxHeight = (vv.height - 24) + 'px';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        function openChat() { chatWindow.classList.remove('hidden'); setTimeout(adjustChatViewport, 50); }
+        function closeChat() { chatWindow.classList.add('hidden'); if (chatWidgetEl) chatWidgetEl.style.bottom = ''; chatWindow.style.maxHeight = ''; }
+        chatToggle.addEventListener('click', () => { if (chatWindow.classList.contains('hidden')) openChat(); else closeChat(); });
+        chatClose.addEventListener('click', closeChat);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', adjustChatViewport);
+            window.visualViewport.addEventListener('scroll', adjustChatViewport);
+        }
+        chatInput.addEventListener('focus', () => setTimeout(adjustChatViewport, 100));
 
         function appendMessage(text, isUser = false) {
             const msgDiv = document.createElement('div');
