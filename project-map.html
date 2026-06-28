@@ -1635,7 +1635,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             } else {
                 agentList.innerHTML = filteredAgents.map(agent => `
                     <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-2 rounded">
-                        <input type="checkbox" name="selectedAgents" value="${agent.phone}" class="w-4 h-4">
+                        <input type="checkbox" name="selectedAgents" value="${agent.phone}" data-name="${agent.name}" class="w-4 h-4">
                         <span class="text-sm font-semibold">${agent.name}</span>
                         <span class="text-xs text-slate-500">${agent.rating || ''}</span>
                     </label>
@@ -1654,7 +1654,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             const name = document.getElementById('cName').value;
             const phone = document.getElementById('cPhone').value;
             const plotNo = document.getElementById('cPlotNo').value;
-            const selectedAgents = Array.from(document.querySelectorAll('input[name="selectedAgents"]:checked')).map(cb => cb.value);
+            const selectedBoxes = Array.from(document.querySelectorAll('input[name="selectedAgents"]:checked'));
+            const selectedAgents = selectedBoxes.map(cb => cb.value);
+            const selectedAgentNames = selectedBoxes.map(cb => cb.dataset.name || '');
             if (selectedAgents.length === 0) {
                 alert('कृपया कम से कम एक एजेंट चुनें (Please select at least one agent)');
                 return;
@@ -1665,6 +1667,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 projectName: PROJECT_NAME,
                 projectId: PROJECT_ID,
                 plotNo: plotNo,
+                agentNames: selectedAgentNames,
+                agentName: selectedAgentNames.join(', '),
                 agentPhones: selectedAgents,
                 timestamp: new Date().toISOString()
             };
