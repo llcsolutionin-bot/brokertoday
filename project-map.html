@@ -396,6 +396,106 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             </div>
         </div>
 
+        <!-- ===== PROJECT GALLERY (under the live map) ===== -->
+        <style>#app-container.admin-active #btGalleryAdmin{display:block !important;}</style>
+        <section id="btGallery" class="mt-8 hidden">
+            <h3 class="text-xl font-bold text-slate-800 mb-3">📸 प्रोजेक्ट गैलरी</h3>
+            <div class="relative bg-slate-100 rounded-2xl overflow-hidden">
+                <div id="btGalleryTrack" class="flex transition-transform duration-500 ease-in-out"></div>
+                <button type="button" onclick="galleryMove(-1)" id="btGalleryPrev" class="hidden absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white w-10 h-10 rounded-full shadow flex items-center justify-center text-2xl text-slate-700">‹</button>
+                <button type="button" onclick="galleryMove(1)" id="btGalleryNext" class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white w-10 h-10 rounded-full shadow flex items-center justify-center text-2xl text-slate-700">›</button>
+                <div id="btGalleryDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5"></div>
+            </div>
+        </section>
+        <section id="btGalleryAdmin" class="mt-6 bg-white border-2 border-indigo-300 rounded-2xl p-5 shadow-lg" style="display:none;">
+            <h3 class="text-lg font-bold text-indigo-700 mb-1">गैलरी प्रबंधन (Manage Gallery)</h3>
+            <p class="text-xs text-slate-500 mb-3">अधिकतम 10 फोटो — डिवाइस से चुनें या कैमरा से क्लिक करें।</p>
+            <input type="file" id="btGalleryDevice" accept="image/*" multiple class="hidden">
+            <input type="file" id="btGalleryCamera" accept="image/*" capture="environment" class="hidden">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <button type="button" onclick="document.getElementById('btGalleryDevice').click()" class="flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-indigo-500 text-slate-600 hover:text-indigo-600 font-semibold py-3 rounded-lg transition-colors">📁 डिवाइस से (Device)</button>
+                <button type="button" onclick="document.getElementById('btGalleryCamera').click()" class="flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-indigo-500 text-slate-600 hover:text-indigo-600 font-semibold py-3 rounded-lg transition-colors">📷 कैमरा (Camera)</button>
+            </div>
+            <p id="btGalleryHint" class="text-xs text-slate-500 mb-2">0/10 फोटो</p>
+            <div id="btGalleryThumbs" class="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4"></div>
+            <button type="button" id="btGallerySaveBtn" onclick="saveGallery()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">गैलरी सेव करें (Save Gallery)</button>
+        </section>
+        <script>
+        (function () {
+            const GET_RATINGS = 'https://llcsolution.duckdns.org/webhook/f90d273a-d252-492d-8a61-1fa278a7d5e1';
+            const SAVE_GALLERY = 'https://llcsolution.duckdns.org/webhook/a0e816ce-e78b-4e52-a2fe-4c298cc4ed0c';
+            const IMGBB_KEY = 'a31e91458ccc1c4896125f42c4c3d7f8';
+            const MAX = 10;
+            let pid = '', images = [], idx = 0;
+            function $(id) { return document.getElementById(id); }
+            function renderDots() { const d = $('btGalleryDots'); if (d) d.innerHTML = images.map((_, i) => '<span class="w-2 h-2 rounded-full ' + (i === idx ? 'bg-white' : 'bg-white/50') + '"></span>').join(''); }
+            function renderSlider() {
+                const section = $('btGallery'), track = $('btGalleryTrack');
+                if (!section || !track) return;
+                if (!images.length) { section.classList.add('hidden'); return; }
+                section.classList.remove('hidden');
+                track.innerHTML = images.map(u => '<div class="w-full flex-shrink-0"><img src="' + u + '" class="w-full h-64 sm:h-96 object-contain bg-slate-100"></div>').join('');
+                if (idx >= images.length) idx = 0;
+                track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+                const multi = images.length > 1;
+                $('btGalleryPrev').classList.toggle('hidden', !multi);
+                $('btGalleryNext').classList.toggle('hidden', !multi);
+                renderDots();
+            }
+            function renderThumbs() {
+                const thumbs = $('btGalleryThumbs'), hint = $('btGalleryHint');
+                if (!thumbs) return;
+                thumbs.innerHTML = images.map((u, i) => '<div class="relative"><img src="' + u + '" class="w-full h-20 object-cover rounded-lg border border-slate-200"><button type="button" onclick="galleryRemove(' + i + ')" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center shadow">✖</button></div>').join('');
+                if (hint) hint.textContent = images.length + '/' + MAX + ' फोटो';
+            }
+            async function uploadToImgBB(file) {
+                const fd = new FormData(); fd.append('image', file);
+                const res = await fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_KEY, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) return data.data.url;
+                throw new Error('upload failed');
+            }
+            async function addFiles(fileList) {
+                const files = Array.from(fileList || []);
+                const room = MAX - images.length;
+                if (room <= 0) { alert('अधिकतम 10 फोटो (Max 10).'); return; }
+                const hint = $('btGalleryHint'); if (hint) hint.textContent = 'अपलोड हो रहा है... (Uploading)';
+                for (const f of files.slice(0, room)) { try { const url = await uploadToImgBB(f); if (url) images.push(url); } catch (e) {} }
+                renderThumbs(); renderSlider();
+            }
+            window.galleryMove = function (dir) { if (!images.length) return; idx = (idx + dir + images.length) % images.length; $('btGalleryTrack').style.transform = 'translateX(-' + (idx * 100) + '%)'; renderDots(); };
+            window.galleryRemove = function (i) { images.splice(i, 1); renderThumbs(); renderSlider(); };
+            window.saveGallery = async function () {
+                const btn = $('btGallerySaveBtn'); const orig = btn.textContent;
+                btn.disabled = true; btn.textContent = 'सेव हो रहा है...';
+                try {
+                    await fetch(SAVE_GALLERY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: pid, galleryImages: images.join(',') }) });
+                    alert('गैलरी सेव हो गई! (Saved)');
+                    renderSlider();
+                } catch (e) { alert('सेव नहीं हो पाई। दोबारा प्रयास करें।'); }
+                finally { btn.disabled = false; btn.textContent = orig; }
+            };
+            window.initGallery = async function (projectId) {
+                pid = projectId;
+                try {
+                    const res = await fetch(GET_RATINGS + '?t=' + Date.now(), { headers: { 'Cache-Control': 'no-cache' } });
+                    if (res.ok) {
+                        const arr = await res.json();
+                        const row = Array.isArray(arr) ? arr.find(r => String(r.projectId) === String(pid)) : null;
+                        if (row && row.galleryImages) images = String(row.galleryImages).split(',').map(s => s.trim()).filter(Boolean).slice(0, MAX);
+                    }
+                } catch (e) {}
+                renderSlider(); renderThumbs();
+            };
+            document.addEventListener('DOMContentLoaded', function () {
+                const dev = $('btGalleryDevice'), cam = $('btGalleryCamera');
+                if (dev) dev.addEventListener('change', function (e) { addFiles(e.target.files); e.target.value = ''; });
+                if (cam) cam.addEventListener('change', function (e) { addFiles(e.target.files); e.target.value = ''; });
+            });
+        })();
+        </script>
+        <!-- ===== END PROJECT GALLERY ===== -->
+
         <!-- Project Details Section -->
         <div class="mt-12 grid md:grid-cols-2 gap-8">
             <!-- Location & Details -->
@@ -912,6 +1012,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         fetch('https://llcsolution.duckdns.org/webhook/be035b52-6658-4287-b05a-f7ebcf73139a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: PROJECT_ID }) }).catch(function () {});
                     }
                 } catch (e) {}
+
+                // Load this project's image gallery (under the live map)
+                if (window.initGallery) initGallery(PROJECT_ID);
 
                 // Apply theme colors
                 const theme = themeColors[PROJECT_DATA.themeColor] || themeColors.indigo;
