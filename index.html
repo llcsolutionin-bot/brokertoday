@@ -46,7 +46,27 @@
             50% { transform: scale(1.07); text-shadow: 0 0 9px rgba(234,88,12,0.65); }
         }
         .bt-interest { animation: bt-interest-glow 1.3s ease-in-out infinite; transform-origin: left center; }
-        @media (prefers-reduced-motion: reduce) { .bt-stars span, .bt-interest { animation: none !important; } }
+
+        /* Golden shiny Verified badge — always bright & animated */
+        @keyframes bt-verified-shine {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        @keyframes bt-verified-glow {
+            0%, 100% { box-shadow: 0 0 6px rgba(245,158,11,0.55), 0 1px 3px rgba(0,0,0,0.25); }
+            50%      { box-shadow: 0 0 16px rgba(245,158,11,0.95), 0 1px 3px rgba(0,0,0,0.3); }
+        }
+        .bt-verified {
+            color: #4a2c00 !important;
+            background: linear-gradient(110deg, #fcd34d 0%, #f59e0b 20%, #fffbeb 42%, #fbbf24 55%, #f59e0b 75%, #fcd34d 100%);
+            background-size: 220% 100%;
+            border: 1px solid rgba(180,120,10,0.55);
+            animation: bt-verified-shine 2.6s linear infinite, bt-verified-glow 2s ease-in-out infinite;
+        }
+        .bt-verified svg { color: #7a4a00; }
+        @media (prefers-reduced-motion: reduce) {
+            .bt-stars span, .bt-interest, .bt-verified { animation: none !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
@@ -193,7 +213,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             <!-- Property Card 1 -->
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden flex flex-col cursor-pointer" onclick="window.location.href='aerocity.html'">
                 <div class="h-48 bg-gradient-to-br from-indigo-100 to-blue-50 relative overflow-hidden bg-cover bg-center" style="background-image: url('aerocity-cover.jpg');">
-                    <div class="absolute top-4 left-4 inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm text-blue-700 text-xs px-3 py-1.5 rounded-full font-bold shadow-sm">
+                    <div class="bt-verified absolute top-4 left-4 inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-bold">
                         <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                         Verified
                     </div>
@@ -231,7 +251,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             <!-- Property Card 2 - Shetrapal Residency -->
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden flex flex-col cursor-pointer" onclick="window.location.href='shetrapal.html'">
                 <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-50 relative overflow-hidden bg-cover bg-center" style="background-image: url('shetrapal-cover.jpg');">
-                    <div class="absolute top-4 left-4 inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm text-blue-700 text-xs px-3 py-1.5 rounded-full font-bold shadow-sm">
+                    <div class="bt-verified absolute top-4 left-4 inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-bold">
                         <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                         Verified
                     </div>
@@ -846,7 +866,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             // Verified badge (admin-controlled per project) — shown top-left, replaces the tagline badge
             const isVerified = project.verified === true || project.verified === 'true' || project.verified === 'TRUE';
             const topBadge = isVerified
-                ? '<div class="absolute top-4 left-4 inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm text-blue-700 text-xs px-3 py-1.5 rounded-full font-bold shadow-sm"><svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Verified</div>'
+                ? '<div class="bt-verified absolute top-4 left-4 inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-bold"><svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Verified</div>'
                 : '<div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-' + theme.badge + ' text-xs px-3 py-1.5 rounded-full font-bold uppercase tracking-wider shadow-sm">नया प्रोजेक्ट</div>';
 
             card.innerHTML = `
