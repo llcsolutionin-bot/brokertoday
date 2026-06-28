@@ -220,7 +220,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp नंबर (+91)</label>
-                        <input type="tel" id="ownerWhatsapp" required maxlength="10" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                        <input type="tel" id="ownerWhatsapp" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                     </div>
                     <button id="btnSendOTP" onclick="sendOTP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
                         OTP भेजें
@@ -258,7 +258,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp नंबर (+91)</label>
-                    <input type="tel" id="customerWhatsapp" required maxlength="10" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input type="tel" id="customerWhatsapp" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
                     WhatsApp पर संपर्क करें
@@ -638,10 +638,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         // Send OTP
         async function sendOTP() {
             const name = document.getElementById('ownerName').value.trim();
-            const phone = document.getElementById('ownerWhatsapp').value.trim();
-            
-            if (!name || !phone || phone.length !== 10) {
-                alert('कृपया सही जानकारी दर्ज करें');
+            const phone = document.getElementById('ownerWhatsapp').value.replace(/\D/g, '');
+
+            if (!name || !/^[6-9]\d{9}$/.test(phone)) {
+                alert('कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें (Please enter a valid 10-digit mobile number).');
                 return;
             }
             
@@ -1075,8 +1075,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             
             const propertyId = document.getElementById('contactPropertyId').value;
             const customerName = document.getElementById('customerName').value;
-            const customerWhatsapp = '+91' + document.getElementById('customerWhatsapp').value;
-            
+            const customerDigits = document.getElementById('customerWhatsapp').value.replace(/\D/g, '');
+            if (!/^[6-9]\d{9}$/.test(customerDigits)) {
+                alert('कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें (Please enter a valid 10-digit mobile number).');
+                return;
+            }
+            const customerWhatsapp = '+91' + customerDigits;
+
             try {
                 await fetch(API_CONTACT_OWNER, {
                     method: 'POST',

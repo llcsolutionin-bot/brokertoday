@@ -647,7 +647,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" style="border-color: var(--theme-color);">
                 </div>
                 <div>
-                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" style="border-color: var(--theme-color);">
+                    <input type="tel" id="cPhone" placeholder="10 अंकों का WhatsApp नंबर" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" style="border-color: var(--theme-color);">
                 </div>
                 
                 <div>
@@ -1652,8 +1652,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('cName').value;
-            const phone = document.getElementById('cPhone').value;
+            const phone = document.getElementById('cPhone').value.replace(/\D/g, '');
             const plotNo = document.getElementById('cPlotNo').value;
+            if (!/^[6-9]\d{9}$/.test(phone)) {
+                alert('कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें (Please enter a valid 10-digit mobile number).');
+                return;
+            }
             const selectedBoxes = Array.from(document.querySelectorAll('input[name="selectedAgents"]:checked'));
             const selectedAgents = selectedBoxes.map(cb => cb.value);
             const selectedAgentNames = selectedBoxes.map(cb => cb.dataset.name || '');

@@ -321,7 +321,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <select id="countryCode" class="w-1/3 sm:w-1/4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm cursor-pointer font-medium text-slate-700">
                             <option value="+91" selected>🇮🇳 +91</option>
                         </select>
-                        <input type="tel" id="phone" placeholder="9876543210" required maxlength="10" class="flex-1 w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
+                        <input type="tel" id="phone" placeholder="9876543210" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="flex-1 w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
                     </div>
                     <p id="phoneError" class="text-xs text-red-500 mt-1.5 font-medium ml-1 hidden">कृपया सही 10 अंकों का नंबर दर्ज करें।</p>
                 </div>
@@ -439,7 +439,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             e.preventDefault();
             
             // Final validation check before submitting
-            if (countryCodeSelect.value === '+91' && phoneInput.value.length !== 10) {
+            if (countryCodeSelect.value === '+91' && !/^[6-9]\d{9}$/.test(phoneInput.value)) {
                 phoneError.classList.remove('hidden');
                 phoneInput.focus();
                 return; // Stop submission

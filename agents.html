@@ -202,7 +202,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">व्हाट्सएप / फोन नंबर</label>
-                    <input type="tel" id="aPhone" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input type="tel" id="aPhone" required maxlength="13" inputmode="numeric" placeholder="10 अंकों का मोबाइल नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <p class="text-[11px] text-slate-400 mt-1">सिर्फ 10 अंकों का मोबाइल नंबर (देश कोड 91 अपने आप जुड़ जाएगा)</p>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">स्टार रेटिंग (1 से 5)</label>
@@ -374,12 +375,21 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
         document.getElementById('agentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            // Normalize phone to "91" + 10-digit mobile so WhatsApp messages don't fail
+            let digits = document.getElementById('aPhone').value.replace(/\D/g, '');
+            if (digits.length === 10) digits = '91' + digits;          // bare 10-digit → add country code
+            const core = digits.slice(-10);                            // last 10 = the mobile number
+            if (!(digits.length === 12 && digits.startsWith('91') && /^[6-9]\d{9}$/.test(core))) {
+                alert('कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें (Please enter a valid 10-digit mobile number).');
+                return;
+            }
+            const normalizedPhone = '91' + core;
             const btn = this.querySelector('button[type="submit"]'); btn.innerText = "सुरक्षित किया जा रहा है...";
             const uid = document.getElementById('agentUid').value || `ag_${new Date().getTime()}`;
             const selectedProj = Array.from(document.querySelectorAll('.project-selector-cb:checked')).map(cb => cb.value);
 
             const newAgentData = {
-                uid: uid, name: document.getElementById('aName').value, phone: document.getElementById('aPhone').value,
+                uid: uid, name: document.getElementById('aName').value, phone: normalizedPhone,
                 rating: document.getElementById('aRating').value, projects: selectedProj, action: 'save'
             };
 

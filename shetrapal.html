@@ -702,7 +702,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
-                    <input type="tel" id="cPhone" placeholder="WhatsApp Number" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-amber-500">
+                    <input type="tel" id="cPhone" placeholder="10 अंकों का WhatsApp नंबर" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-amber-500">
                 </div>
                 
                 <div>
@@ -1541,6 +1541,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         let selectedRating = 0;
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            const phoneVal = document.getElementById('cPhone').value.replace(/\D/g, '');
+            if (!/^[6-9]\d{9}$/.test(phoneVal)) {
+                alert('कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें (Please enter a valid 10-digit mobile number).');
+                return;
+            }
             const checkboxes = document.querySelectorAll('.agent-checkbox:checked');
             const selectedAgents = Array.from(checkboxes).map(cb => cb.value);
             if (selectedAgents.length === 0) {
@@ -1553,7 +1558,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 projectName: PROJECT_NAME,
                 plotNo: document.getElementById('cPlotNo').value,
                 name: document.getElementById('cName').value,
-                phone: document.getElementById('cPhone').value,
+                phone: phoneVal,
                 assignedAgents: selectedAgents
             };
             selectedRating = 0;
