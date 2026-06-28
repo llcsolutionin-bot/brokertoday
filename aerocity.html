@@ -821,6 +821,24 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     </script>
     <!-- ===== END CHAT WIDGET ===== -->
 
+    <!-- Rating Modal (shown after Contact Agent, before sending the enquiry) -->
+    <div id="ratingModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[75] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center relative">
+            <button onclick="closeModal('ratingModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">✖</button>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">इस प्रोजेक्ट को रेटिंग दें</h3>
+            <p class="text-sm text-slate-500 mb-4">Rate this project before we connect you</p>
+            <div id="ratingStars" class="flex justify-center gap-2 mb-5 text-4xl text-slate-300 select-none">
+                <span data-v="1" class="cursor-pointer transition-transform hover:scale-110">★</span>
+                <span data-v="2" class="cursor-pointer transition-transform hover:scale-110">★</span>
+                <span data-v="3" class="cursor-pointer transition-transform hover:scale-110">★</span>
+                <span data-v="4" class="cursor-pointer transition-transform hover:scale-110">★</span>
+                <span data-v="5" class="cursor-pointer transition-transform hover:scale-110">★</span>
+            </div>
+            <button id="ratingSubmitBtn" onclick="submitRatingAndInquiry()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">भेजें (Submit)</button>
+            <button type="button" onclick="submitRatingAndInquiry(0)" class="mt-2 text-xs text-slate-400 hover:text-slate-600">बिना रेटिंग के भेजें (Skip)</button>
+        </div>
+    </div>
+
     <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
         // --- 1. CONFIGURATION & WEBHOOKS ---
@@ -1387,50 +1405,61 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             fixModalZoom('contactModal');
         }
 
-        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+        // Contact-Agent → collect details, then ask for a project rating before sending
+        let pendingInquiryPayload = null;
+        let selectedRating = 0;
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const btn = this.querySelector('button[type="submit"]');
-            btn.innerText = "Sending...";
-
             const checkboxes = document.querySelectorAll('.agent-checkbox:checked');
             const selectedAgents = Array.from(checkboxes).map(cb => cb.value);
-
             if (selectedAgents.length === 0) {
                 alert("कृपया कम से कम एक एजेंट चुनें।");
-                btn.innerText = "Send Inquiry on WhatsApp";
                 return;
             }
-            
-            const payload = {
+            pendingInquiryPayload = {
                 source: "Live Map Direct Inquiry",
+                projectId: 'aerocity',
                 projectName: PROJECT_NAME,
                 plotNo: document.getElementById('cPlotNo').value,
                 name: document.getElementById('cName').value,
                 phone: document.getElementById('cPhone').value,
                 assignedAgents: selectedAgents
             };
+            selectedRating = 0;
+            document.querySelectorAll('#ratingStars span').forEach(s => { s.classList.add('text-slate-300'); s.classList.remove('text-yellow-400'); });
+            closeModal('contactModal');
+            document.getElementById('ratingModal').classList.remove('hidden');
+        });
 
+        // Rating stars interaction
+        (function () {
+            const stars = document.querySelectorAll('#ratingStars span');
+            function paint(v) { stars.forEach(s => { const on = parseInt(s.dataset.v) <= v; s.classList.toggle('text-yellow-400', on); s.classList.toggle('text-slate-300', !on); }); }
+            stars.forEach(s => {
+                s.addEventListener('mouseenter', () => paint(parseInt(s.dataset.v)));
+                s.addEventListener('click', () => { selectedRating = parseInt(s.dataset.v); paint(selectedRating); });
+            });
+            const wrap = document.getElementById('ratingStars');
+            if (wrap) wrap.addEventListener('mouseleave', () => paint(selectedRating));
+        })();
+
+        async function submitRatingAndInquiry(forceRating) {
+            const rating = (typeof forceRating === 'number') ? forceRating : selectedRating;
+            if (!pendingInquiryPayload) { closeModal('ratingModal'); return; }
+            const payload = Object.assign({}, pendingInquiryPayload, { rating: rating });
+            const btn = document.getElementById('ratingSubmitBtn');
+            const orig = btn.innerText; btn.disabled = true; btn.innerText = 'भेजा जा रहा है...';
             try {
-                const response = await fetch(WEBHOOK_INQUIRY, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (response.ok) {
-                    document.getElementById('formSuccess').classList.remove('hidden');
-                    setTimeout(() => {
-                        document.getElementById('formSuccess').classList.add('hidden');
-                        closeModal('contactModal');
-                        btn.innerText = "Send Inquiry on WhatsApp";
-                        this.reset();
-                    }, 3000);
-                }
+                await fetch(WEBHOOK_INQUIRY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                closeModal('ratingModal');
+                alert('धन्यवाद! आपकी जानकारी भेज दी गई है। (Thank you!)');
+                const cf = document.getElementById('contactForm'); if (cf) cf.reset();
             } catch (error) {
                 alert('त्रुटि। दोबारा प्रयास करें।');
-                btn.innerText = "Send Inquiry on WhatsApp";
+            } finally {
+                btn.disabled = false; btn.innerText = orig; pendingInquiryPayload = null;
             }
-        });
+        }
 
         // --- 7. ADMIN SECURITY ---
 

@@ -172,6 +172,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 
                 <div class="p-8 flex-1 flex flex-col">
                     <h3 class="text-2xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">Aerocity Residency</h3>
+                    <div id="rating-aerocity"></div>
                     <p class="text-slate-500 text-sm mt-2 flex items-center gap-1.5 font-medium">
                         <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         Sirohi Airstrip के पास, Khasra No. 2572/449 & 440
@@ -208,6 +209,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 
                 <div class="p-8 flex-1 flex flex-col">
                     <h3 class="text-2xl font-bold text-slate-800 group-hover:text-amber-600 transition-colors">Shetrapal Residency (क्षेत्रपाल रेजिडेन्सी)</h3>
+                    <div id="rating-shetrapal"></div>
                     <p class="text-slate-500 text-sm mt-2 flex items-center gap-1.5 font-medium">
                         <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         Sirohi to Mandar Main Road, Near Veer Bavaji Mandir
@@ -757,6 +759,35 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             }).join('') + '</div>';
         }
 
+        // --- PROJECT RATINGS (average stars on cards) ---
+        const WEBHOOK_GET_RATINGS = 'https://llcsolution.duckdns.org/webhook/f90d273a-d252-492d-8a61-1fa278a7d5e1';
+        let ratingsById = {};
+        function starsHtml(avg) {
+            const full = Math.round(avg || 0);
+            let s = '';
+            for (let i = 1; i <= 5; i++) s += '<span class="' + (i <= full ? 'text-yellow-400' : 'text-slate-300') + '">★</span>';
+            return s;
+        }
+        function ratingBlock(projectId) {
+            const r = ratingsById[projectId];
+            if (!r || !r.count) {
+                return '<div class="flex items-center gap-1.5 mt-2 text-base"><span class="text-slate-300">★★★★★</span><span class="text-xs text-slate-400 font-medium">(अभी कोई रेटिंग नहीं)</span></div>';
+            }
+            return '<div class="flex items-center gap-1.5 mt-2 text-base">' + starsHtml(r.avg) + '<span class="text-xs text-slate-500 font-semibold">' + r.avg.toFixed(1) + ' (' + r.count + ')</span></div>';
+        }
+        async function fetchRatings() {
+            try {
+                const res = await fetch(WEBHOOK_GET_RATINGS, { headers: { 'Cache-Control': 'no-cache' } });
+                if (res.ok) {
+                    const arr = await res.json();
+                    if (Array.isArray(arr)) arr.forEach(function (r) {
+                        const sum = parseFloat(r.ratingSum) || 0, count = parseFloat(r.ratingCount) || 0;
+                        if (r.projectId) ratingsById[r.projectId] = { sum: sum, count: count, avg: count ? sum / count : 0 };
+                    });
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         function createProjectCard(project) {
             const card = document.createElement('div');
             card.className = 'bg-white rounded-2xl shadow-lg border border-slate-100 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden flex flex-col cursor-pointer';
@@ -794,6 +825,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 
                 <div class="p-8 flex-1 flex flex-col">
                     <h3 class="text-2xl font-bold text-slate-800 group-hover:text-${theme.badge} transition-colors">${project.name}${verifiedBadge}</h3>
+                    ${ratingBlock(project.id)}
                     <p class="text-slate-500 text-sm mt-2 flex items-center gap-1.5 font-medium">
                         📍 ${project.address || 'Address not specified'}
                     </p>
@@ -815,7 +847,14 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
 
         // Load dynamic projects on page load
-        window.addEventListener('DOMContentLoaded', loadDynamicProjects);
+        window.addEventListener('DOMContentLoaded', async function () {
+            await fetchRatings();
+            const aero = document.getElementById('rating-aerocity');
+            const shet = document.getElementById('rating-shetrapal');
+            if (aero) aero.innerHTML = ratingBlock('aerocity');
+            if (shet) shet.innerHTML = ratingBlock('shetrapal');
+            loadDynamicProjects();
+        });
     </script>
 </body>
 </html>
