@@ -852,6 +852,18 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         const WEBHOOK_GET_AGENTS = "https://llcsolution.duckdns.org/webhook/5fd43c0e-7e1b-4d25-805c-92c867adeadega";
         const N8N_CHAT_WEBHOOK_URL = 'https://llcsolution.duckdns.org/webhook/7750d216-8bb4-4030-9b30-aeba85986268-widget';
 
+        // --- Record a visit (interest) once per browser session ---
+        const ADD_VISIT_WEBHOOK = 'https://llcsolution.duckdns.org/webhook/be035b52-6658-4287-b05a-f7ebcf73139a';
+        (function () {
+            const pid = 'aerocity';
+            try {
+                if (!sessionStorage.getItem('bt_visited_' + pid)) {
+                    sessionStorage.setItem('bt_visited_' + pid, '1');
+                    fetch(ADD_VISIT_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: pid }) }).catch(function () {});
+                }
+            } catch (e) {}
+        })();
+
         let isAdmin = false;
         let activePlots = []; 
         let activeAgents = [];

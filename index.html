@@ -769,11 +769,14 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             return s;
         }
         function ratingBlock(projectId) {
-            const r = ratingsById[projectId];
-            if (!r || !r.count) {
-                return '<div class="flex items-center gap-1.5 mt-2 text-base"><span class="text-slate-300">★★★★★</span><span class="text-xs text-slate-400 font-medium">(अभी कोई रेटिंग नहीं)</span></div>';
-            }
-            return '<div class="flex items-center gap-1.5 mt-2 text-base">' + starsHtml(r.avg) + '<span class="text-xs text-slate-500 font-semibold">' + r.avg.toFixed(1) + ' (' + r.count + ')</span></div>';
+            const r = ratingsById[projectId] || {};
+            const count = r.count || 0;
+            const visits = r.visits || 0;
+            const starsPart = count
+                ? starsHtml(r.avg) + '<span class="text-xs text-slate-500 font-semibold">' + r.avg.toFixed(1) + ' (' + count + ')</span>'
+                : '<span class="text-slate-300">★★★★★</span><span class="text-xs text-slate-400 font-medium">(अभी कोई रेटिंग नहीं)</span>';
+            const visitsPart = '<span class="inline-flex items-center gap-1 text-xs text-slate-500 font-medium"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>' + visits + ' interested</span>';
+            return '<div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-base">' + starsPart + visitsPart + '</div>';
         }
         async function fetchRatings() {
             try {
@@ -782,7 +785,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     const arr = await res.json();
                     if (Array.isArray(arr)) arr.forEach(function (r) {
                         const sum = parseFloat(r.ratingSum) || 0, count = parseFloat(r.ratingCount) || 0;
-                        if (r.projectId) ratingsById[r.projectId] = { sum: sum, count: count, avg: count ? sum / count : 0 };
+                        if (r.projectId) ratingsById[r.projectId] = { sum: sum, count: count, avg: count ? sum / count : 0, visits: parseFloat(r.visitCount) || 0 };
                     });
                 }
             } catch (e) { /* ignore */ }

@@ -904,7 +904,15 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 }
 
                 PROJECT_NAME = PROJECT_DATA.name;
-                
+
+                // Record a visit (interest) once per browser session
+                try {
+                    if (PROJECT_ID && !sessionStorage.getItem('bt_visited_' + PROJECT_ID)) {
+                        sessionStorage.setItem('bt_visited_' + PROJECT_ID, '1');
+                        fetch('https://llcsolution.duckdns.org/webhook/be035b52-6658-4287-b05a-f7ebcf73139a', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: PROJECT_ID }) }).catch(function () {});
+                    }
+                } catch (e) {}
+
                 // Apply theme colors
                 const theme = themeColors[PROJECT_DATA.themeColor] || themeColors.indigo;
                 document.documentElement.style.setProperty('--theme-color', theme.color);
