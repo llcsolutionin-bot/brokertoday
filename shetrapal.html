@@ -219,18 +219,24 @@
 
     <!-- Navigation Bar -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
-        <div class="container mx-auto max-w-6xl flex items-center gap-3">
-            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
+        <div class="container mx-auto max-w-6xl flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                        <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+                </a>
+            </div>
+            <button onclick="btShare(location.href, document.title)" title="Share" class="flex items-center gap-1.5 bg-slate-800 hover:bg-blue-600 border border-slate-600 text-white text-xs font-bold px-3 py-2 rounded-md transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                <span class="hidden sm:inline">Share</span>
             </button>
-            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
-                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
-            </a>
         </div>
     </nav>
 
@@ -281,6 +287,19 @@
         function closeMainMenu() {
             document.getElementById('mainMenu').classList.add('hidden');
             document.getElementById('mainMenuOverlay').classList.add('hidden');
+        }
+
+        // --- SHARE (native share sheet → WhatsApp/Insta/FB; link points to the live map page) ---
+        function btShare(url, title) {
+            const shareUrl = new URL(url, location.href).href;
+            const shareTitle = title || 'Broker Today';
+            const shareText = (title ? title + ' — ' : '') + 'Broker Today पर देखें';
+            if (navigator.share) {
+                navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(function () {});
+            } else {
+                try { navigator.clipboard.writeText(shareUrl); } catch (e) {}
+                window.prompt('इस लिंक को कॉपी करके शेयर करें (Copy & share this link):', shareUrl);
+            }
         }
 
         // --- BROKER TODAY THEME (Light / Dark / System). Logo color is NEVER themed. ---
