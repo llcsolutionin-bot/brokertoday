@@ -15,6 +15,23 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         /* Firefox */
         input[type=number] { -moz-appearance: textfield; }
+
+        /* Attention animations for rating stars + interest count on cards */
+        @keyframes bt-sparkle {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(250,204,21,0)); }
+            50% { transform: scale(1.25); filter: drop-shadow(0 0 5px rgba(250,204,21,0.95)); }
+        }
+        .bt-stars span.text-yellow-400 { display: inline-block; animation: bt-sparkle 1.8s ease-in-out infinite; }
+        .bt-stars span:nth-child(2) { animation-delay: .15s; }
+        .bt-stars span:nth-child(3) { animation-delay: .30s; }
+        .bt-stars span:nth-child(4) { animation-delay: .45s; }
+        .bt-stars span:nth-child(5) { animation-delay: .60s; }
+        @keyframes bt-interest-glow {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 0 rgba(234,88,12,0); }
+            50% { transform: scale(1.07); text-shadow: 0 0 9px rgba(234,88,12,0.65); }
+        }
+        .bt-interest { animation: bt-interest-glow 1.3s ease-in-out infinite; transform-origin: left center; }
+        @media (prefers-reduced-motion: reduce) { .bt-stars span, .bt-interest { animation: none !important; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
@@ -773,9 +790,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             const count = r.count || 0;
             const visits = r.visits || 0;
             const starsPart = count
-                ? starsHtml(r.avg) + '<span class="text-xs text-slate-500 font-semibold">' + r.avg.toFixed(1) + ' (' + count + ')</span>'
+                ? '<span class="bt-stars inline-flex">' + starsHtml(r.avg) + '</span><span class="text-xs text-slate-500 font-semibold">' + r.avg.toFixed(1) + ' (' + count + ')</span>'
                 : '<span class="text-slate-300">★★★★★</span><span class="text-xs text-slate-400 font-medium">(अभी कोई रेटिंग नहीं)</span>';
-            const visitsPart = '<span class="inline-flex items-center gap-1 text-xs text-slate-500 font-medium"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>' + visits + ' interested</span>';
+            const visitsPart = '<span class="bt-interest inline-flex items-center gap-1 text-xs font-bold text-orange-600">🔥 ' + visits + ' लोगों ने रुचि दिखाई</span>';
             return '<div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-base">' + starsPart + visitsPart + '</div>';
         }
         async function fetchRatings() {
