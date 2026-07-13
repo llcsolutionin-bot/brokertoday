@@ -265,6 +265,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <button type="button" class="rcpt-tab px-3 py-1.5 rounded-full text-sm font-semibold border" data-tab="saved" onclick="switchRcptTab('saved')">📇 Saved contacts</button>
                         <button type="button" class="rcpt-tab px-3 py-1.5 rounded-full text-sm font-semibold border" data-tab="upload" onclick="switchRcptTab('upload')">📄 Upload CSV/Excel</button>
                         <button type="button" class="rcpt-tab px-3 py-1.5 rounded-full text-sm font-semibold border" data-tab="manual" onclick="switchRcptTab('manual')">⌨️ Paste numbers</button>
+                        <button type="button" class="rcpt-tab px-3 py-1.5 rounded-full text-sm font-semibold border" data-tab="phone" onclick="switchRcptTab('phone')">📱 My phone contacts</button>
                     </div>
 
                     <!-- Saved -->
@@ -287,6 +288,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <div class="rcpt-pane hidden" data-tab="manual">
                         <textarea id="manualNumbers" rows="5" placeholder="One number per line, or comma-separated&#10;9876543210, 9123456780" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
                         <button type="button" onclick="addManual()" class="mt-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-sm">Add numbers</button>
+                    </div>
+
+                    <!-- Phone contacts (Contact Picker API — mobile Chrome) -->
+                    <div class="rcpt-pane hidden" data-tab="phone">
+                        <button type="button" onclick="pickPhoneContacts()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-lg flex items-center gap-2">📱 Pick from my contacts</button>
+                        <p class="text-xs text-slate-400 mt-2">Opens your phone's address book so you can tick multiple contacts. Works on Chrome for Android (HTTPS). On unsupported devices (desktop / iPhone), use Upload or Paste.</p>
+                        <p id="phoneContactsMsg" class="text-sm font-semibold mt-2"></p>
                     </div>
 
                     <div class="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-3">
@@ -652,6 +660,33 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         document.getElementById('manualNumbers').value = '';
         WSTATE.invalidCount = bad; refreshRecipients();
     }
+    // Pick multiple numbers straight from the device address book (Contact Picker API — mobile Chrome, HTTPS).
+    async function pickPhoneContacts() {
+        const msg = document.getElementById('phoneContactsMsg');
+        if (!('contacts' in navigator) || !navigator.contacts || !navigator.contacts.select) {
+            msg.textContent = '⚠️ This device/browser can’t open contacts. Use “My phone contacts” on Chrome for Android, or use Upload / Paste.';
+            msg.className = 'text-sm font-semibold mt-2 text-amber-600';
+            return;
+        }
+        msg.textContent = 'Opening contacts…'; msg.className = 'text-sm font-semibold mt-2 text-slate-500';
+        try {
+            const picked = await navigator.contacts.select(['tel'], { multiple: true });
+            let added = 0, bad = 0;
+            picked.forEach(c => (c.tel || []).forEach(t => {
+                const n = normalizeIN(t);
+                if (n) { if (!WSTATE.recipients.has(n)) added++; WSTATE.recipients.add(n); }
+                else if (t) bad++;
+            }));
+            WSTATE.invalidCount = bad;
+            msg.textContent = added ? `✅ Added ${added} number(s)` + (bad ? `, skipped ${bad} invalid.` : '.') : 'No valid numbers in the selected contacts.';
+            msg.className = 'text-sm font-semibold mt-2 ' + (added ? 'text-green-600' : 'text-amber-600');
+            refreshRecipients();
+        } catch (e) {
+            msg.textContent = 'Contact picker was cancelled.';
+            msg.className = 'text-sm font-semibold mt-2 text-slate-500';
+        }
+    }
+
     function handleFile(input) {
         const file = input.files[0]; if (!file) return;
         const msg = document.getElementById('fileMsg'); msg.textContent = 'Reading…'; msg.className = 'text-sm font-semibold mt-2 text-slate-500';
