@@ -80,6 +80,20 @@
                 </button>
             </form>
 
+            <!-- OTP Form (step 2 — 2FA) -->
+            <form id="otpForm" class="space-y-6 hidden">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Enter OTP</label>
+                    <p class="text-xs text-slate-500 mb-2">A one-time code was sent to the admin WhatsApp number. <button type="button" onclick="adminBackToPassword()" class="text-indigo-600 font-semibold">start over</button></p>
+                    <input type="text" id="adminOtpInput" inputmode="numeric" maxlength="6" placeholder="••••••" required
+                        class="w-full text-center text-2xl tracking-[0.5em] font-bold border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl">
+                    <span id="otpBtnText">Verify & Enter</span>
+                    <span id="otpBtnLoader" class="hidden"><div class="loader mx-auto"></div></span>
+                </button>
+            </form>
+
             <div id="errorMessage" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center font-semibold">
                 ❌ Incorrect password. Access denied.
             </div>
@@ -736,7 +750,7 @@
         async function loadMarketing() {
             document.getElementById('mktUsers').innerHTML = '<div class="loader"></div>';
             try {
-                const r = await fetch(MKT.users, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_PASSWORD }) });
+                const r = await fetch(MKT.users, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_TOKEN }) });
                 const d = await r.json().catch(() => ({}));
                 MKT_DATA = { users: d.users || [], onboardRequests: d.onboardRequests || [], campaigns: d.campaigns || [] };
             } catch (e) { MKT_DATA = { users: [], onboardRequests: [], campaigns: [] }; }
@@ -747,7 +761,7 @@
         // Pull the list of APPROVED templates from Meta (via n8n) so admin picks instead of typing.
         async function loadMetaTemplates() {
             try {
-                const r = await fetch(MKT.metaTemplates, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_PASSWORD }) });
+                const r = await fetch(MKT.metaTemplates, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_TOKEN }) });
                 const d = await r.json().catch(() => ({}));
                 META_TEMPLATES = Array.isArray(d.templates) ? d.templates : [];
             } catch (e) { META_TEMPLATES = []; }
@@ -804,7 +818,7 @@
 
         async function billAction(campaignId, action) {
             try {
-                const r = await fetch(MKT.billing, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_PASSWORD, campaignId, action }) });
+                const r = await fetch(MKT.billing, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_TOKEN, campaignId, action }) });
                 const d = await r.json().catch(() => ({}));
                 if (r.ok && d.ok !== false) loadMarketing(); else alert(d.error || 'Action failed.');
             } catch (e) { alert('Network error.'); }
@@ -882,7 +896,7 @@
                 const name = parts.length > 1 ? parts.slice(0, -1).join(', ') : '';
                 return { name, phone: num };
             }).filter(Boolean);
-            const payload = { adminKey: ADMIN_PASSWORD, phone, name: document.getElementById('euName').value.trim(), business: document.getElementById('euBusiness').value.trim(), templates, contacts };
+            const payload = { adminKey: ADMIN_TOKEN, phone, name: document.getElementById('euName').value.trim(), business: document.getElementById('euBusiness').value.trim(), templates, contacts };
             const btn = document.getElementById('euSaveBtn'); btn.disabled = true; btn.textContent = 'Saving…';
             const msg = document.getElementById('euMsg');
             try {
@@ -896,6 +910,9 @@
     </script>
 
     <script>
+        // Server-side admin login — 2FA. admin-login validates password + sends OTP; admin-verify checks OTP + returns token.
+        const ADMIN_LOGIN = 'https://llcsolution.duckdns.org/webhook/admin-login';
+        const ADMIN_VERIFY = 'https://llcsolution.duckdns.org/webhook/admin-verify';
         // Webhook URLs for password management
         const WEBHOOK_GET_PASSWORDS = 'https://llcsolution.duckdns.org/webhook/601041d3-727e-47d7-953a-789e41b6c6da';
         const WEBHOOK_POST_PASSWORD = 'https://llcsolution.duckdns.org/webhook/a9a0edf7-0502-41bc-8152-151c534b7ea0';
@@ -930,8 +947,7 @@
                 return passwordsArray;
             } catch (error) {
                 console.error('Error fetching passwords:', error);
-                // Fallback to default admin password
-                PASSWORDS = { admin: "Goal@2030" };
+                PASSWORDS = {};
                 return [];
             }
         }
@@ -949,45 +965,85 @@
             }
         }
 
-        // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        let ADMIN_LOGIN_ID = ''; // binds the password step to the OTP step
+        const _adminErr = (msg) => {
+            const em = document.getElementById('errorMessage');
+            em.textContent = msg; em.classList.remove('hidden');
+        };
+
+        // STEP 1 — password. Validated server-side; on success n8n sends an OTP to the admin WhatsApp.
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const password = document.getElementById('passwordInput').value;
             const btnText = document.getElementById('btnText');
             const btnLoader = document.getElementById('btnLoader');
-            const errorMessage = document.getElementById('errorMessage');
-            
-            // Show loader
-            btnText.classList.add('hidden');
-            btnLoader.classList.remove('hidden');
-            errorMessage.classList.add('hidden');
-            
-            // Simulate authentication delay
-            setTimeout(() => {
-                // Only accept super admin password
-                if (password === PASSWORDS.admin) {
-                    // Success - show dashboard
-                    document.getElementById('passwordModal').classList.add('hidden');
-                    document.getElementById('adminDashboard').classList.remove('hidden');
-                    
-                    // Store session
-                    sessionStorage.setItem('admin_authenticated', 'true');
+            document.getElementById('errorMessage').classList.add('hidden');
+            btnText.classList.add('hidden'); btnLoader.classList.remove('hidden');
+
+            const reset = () => { btnText.classList.remove('hidden'); btnLoader.classList.add('hidden'); };
+            try {
+                const r = await fetch(ADMIN_LOGIN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
+                const data = await r.json().catch(() => ({}));
+                reset();
+                if (r.ok && data.ok === true) {
+                    // password correct → OTP sent → show step 2
+                    ADMIN_LOGIN_ID = data.loginId || '';
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('otpForm').classList.remove('hidden');
+                    document.getElementById('adminOtpInput').focus();
                 } else {
-                    // Failed - show error
-                    errorMessage.classList.remove('hidden');
-                    btnText.classList.remove('hidden');
-                    btnLoader.classList.add('hidden');
+                    _adminErr(data.error || '❌ Incorrect password. Access denied.');
                     document.getElementById('passwordInput').value = '';
                     document.getElementById('passwordInput').focus();
                 }
-            }, 800);
+            } catch (err) { reset(); _adminErr('Network error. Please try again.'); }
         });
 
-        // Logout function
+        // STEP 2 — OTP. Verified server-side; returns the session token.
+        document.getElementById('adminOtpInput').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
+        document.getElementById('otpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const otp = document.getElementById('adminOtpInput').value;
+            const btnText = document.getElementById('otpBtnText');
+            const btnLoader = document.getElementById('otpBtnLoader');
+            document.getElementById('errorMessage').classList.add('hidden');
+            btnText.classList.add('hidden'); btnLoader.classList.remove('hidden');
+
+            const reset = () => { btnText.classList.remove('hidden'); btnLoader.classList.add('hidden'); };
+            try {
+                const r = await fetch(ADMIN_VERIFY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp, loginId: ADMIN_LOGIN_ID }) });
+                const data = await r.json().catch(() => ({}));
+                reset();
+                if (r.ok && data.ok === true && data.token) {
+                    ADMIN_TOKEN = data.token;
+                    sessionStorage.setItem('admin_token', data.token);
+                    document.getElementById('adminOtpInput').value = '';
+                    document.getElementById('passwordModal').classList.add('hidden');
+                    document.getElementById('adminDashboard').classList.remove('hidden');
+                    fetchPasswords();
+                    loadProjectsList();
+                } else {
+                    _adminErr(data.error || 'Incorrect or expired OTP.');
+                    document.getElementById('adminOtpInput').value = '';
+                    document.getElementById('adminOtpInput').focus();
+                }
+            } catch (err) { reset(); _adminErr('Network error. Please try again.'); }
+        });
+
+        // back to password step
+        function adminBackToPassword() {
+            document.getElementById('otpForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('adminOtpInput').value = '';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
+        }
+
+        // Logout — clears the session token
         function logout() {
-            sessionStorage.removeItem('admin_authenticated');
-            // Navigate to home page
+            sessionStorage.removeItem('admin_token');
+            ADMIN_TOKEN = '';
             window.location.href = 'index.html';
         }
 
@@ -1080,14 +1136,13 @@
             }
         });
 
-        // Check if already authenticated and fetch passwords
+        // Restore session on load — only an unexpired token (validated server-side per request) grants access.
         window.onload = async function() {
-            // Fetch passwords from database
-            await fetchPasswords();
-            
-            if (sessionStorage.getItem('admin_authenticated') === 'true') {
+            ADMIN_TOKEN = sessionStorage.getItem('admin_token') || '';
+            if (ADMIN_TOKEN) {
                 document.getElementById('passwordModal').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
+                fetchPasswords();
                 loadProjectsList();
             }
         };
@@ -1095,7 +1150,8 @@
         // --- MANAGE PROJECTS LOGIC ---
         const WEBHOOK_GET_PROJECTS = 'https://llcsolution.duckdns.org/webhook/f66e2891-a8cb-4729-a659-2a85496512a0';
         const WEBHOOK_DELETE_PROJECT = 'https://llcsolution.duckdns.org/webhook/b8c452a7-1656-4547-a068-a4cf6b2ddbe8';
-        const ADMIN_PASSWORD = 'Goal@2030'; // Universal admin password for all dynamic projects
+        // Session token from admin-login (server-side auth). Sent as adminKey; n8n validates it against AdminSessions.
+        let ADMIN_TOKEN = sessionStorage.getItem('admin_token') || '';
 
         async function loadProjectsList() {
             const container = document.getElementById('projectsListContainer');
