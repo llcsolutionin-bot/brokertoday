@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broker Today | Marketing — Bulk WhatsApp</title>
+
+    <!-- Open Graph / social share preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Broker Today">
+    <meta property="og:title" content="Broker Today Marketing — Bulk WhatsApp Campaigns">
+    <meta property="og:description" content="Login with your phone, pick a template and send verified bulk WhatsApp marketing messages. Live dashboard & transparent billing.">
+    <meta property="og:url" content="https://brokertoday.in/marketing.html">
+    <meta property="og:image" content="https://brokertoday.in/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS — parse uploaded .xlsx / .xls / .csv contact files in-browser -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .loader { border: 3px solid #e2e8f0; border-top-color: var(--brand, #FF6D5A); border-radius: 50%; width: 28px; height: 28px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Step wizard connector */
+        .step-dot.active { background: var(--brand, #FF6D5A); color: #fff; }
+        .step-dot.done { background: #16a34a; color: #fff; }
+        .otp-cell { letter-spacing: .5em; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Navigation Bar (shared skeleton) -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
+        <div class="container mx-auto max-w-6xl flex items-center gap-3">
+            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            </a>
+            <span class="ml-auto hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/40 px-3 py-1.5 rounded-full">
+                📣 Marketing
+            </span>
+        </div>
+    </nav>
+
+    <!-- ===== SITE MENU (Hamburger Drawer) — shared across all pages ===== -->
+    <div id="mainMenuOverlay" onclick="closeMainMenu()" class="hidden fixed inset-0 bg-black/50 z-[90]"></div>
+    <aside id="mainMenu" class="hidden fixed top-0 right-0 h-full w-72 max-w-[80%] bg-slate-900 text-white z-[100] shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b border-slate-700">
+            <span class="text-lg font-extrabold tracking-tight">मेन्यू (Menu)</span>
+            <button onclick="closeMainMenu()" aria-label="बंद करें" class="p-1.5 hover:bg-slate-700 rounded-md text-xl leading-none">✕</button>
+        </div>
+        <nav class="flex flex-col p-3 gap-1.5 overflow-y-auto">
+            <a href="index.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">🏠 होम (Home)</a>
+            <a href="news.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">📰 न्यूज़ अपडेट्स (News Updates)</a>
+            <a href="rentals.html?type=rent" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">किराये की प्रॉपर्टी (Rentals)</a>
+            <a href="rentals.html?type=sell" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी बेचें (Sell Property)</a>
+            <a href="agents.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी एक्सपर्ट्स (Property Experts)</a>
+            <a href="marketing.html" class="px-4 py-3 rounded-lg bg-blue-600 border border-blue-400 text-white font-semibold tracking-wide transition-all">📣 मार्केटिंग (Marketing)</a>
+        </nav>
+        <div class="mt-auto p-4 border-t border-slate-700">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">थीम चुनें (Theme)</p>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-xl leading-none">🖥️</span><span class="text-[10px] text-slate-300">System</span></button>
+                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-xl leading-none">☀️</span><span class="text-[10px] text-slate-300">Light</span></button>
+                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-xl leading-none">🌙</span><span class="text-[10px] text-slate-300">Dark</span></button>
+            </div>
+        </div>
+    </aside>
+    <script>
+        function toggleMainMenu() { document.getElementById('mainMenu').classList.toggle('hidden'); document.getElementById('mainMenuOverlay').classList.toggle('hidden'); }
+        function closeMainMenu() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('mainMenuOverlay').classList.add('hidden'); }
+        // --- BROKER TODAY THEME (Light / Dark / System) ---
+        (function () {
+            const css = `
+:root{--brand:#FF6D5A;--brand-dark:#F04E38;--brand-ring:#FF8A7A;}
+.bg-blue-600,.bg-blue-500,.bg-green-600,.bg-green-500,.bg-indigo-600,.bg-indigo-500{background-color:var(--brand)!important;}
+.hover\\:bg-blue-700:hover,.hover\\:bg-blue-600:hover,.hover\\:bg-green-700:hover,.hover\\:bg-green-600:hover,.hover\\:bg-indigo-700:hover,.hover\\:bg-black:hover{background-color:var(--brand-dark)!important;}
+.text-\\[\\#FF6D5A\\]{color:var(--brand)!important;}
+.focus\\:border-blue-500:focus,.focus\\:border-indigo-500:focus{border-color:var(--brand)!important;}
+.focus\\:ring-blue-500:focus{--tw-ring-color:var(--brand-ring)!important;}
+html[data-theme="dark"] body{background-color:#0B1220!important;color:#E2E8F0!important;}
+html[data-theme="dark"] .bg-white{background-color:#1E293B!important;}
+html[data-theme="dark"] .bg-slate-50{background-color:#0F172A!important;}
+html[data-theme="dark"] .bg-slate-100{background-color:#334155!important;}
+html[data-theme="dark"] .bg-slate-200{background-color:#475569!important;}
+html[data-theme="dark"] .text-slate-900,html[data-theme="dark"] .text-slate-800,html[data-theme="dark"] .text-slate-700{color:#E2E8F0!important;}
+html[data-theme="dark"] .text-slate-600,html[data-theme="dark"] .text-slate-500{color:#94A3B8!important;}
+html[data-theme="dark"] .border-slate-100,html[data-theme="dark"] .border-slate-200,html[data-theme="dark"] .border-slate-300{border-color:#334155!important;}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background-color:#0F172A!important;color:#E2E8F0!important;border-color:#334155!important;}
+html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-theme="dark"] .shadow-2xl{box-shadow:0 10px 30px rgba(0,0,0,.55)!important;}
+`;
+            const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+        })();
+        const _btDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
+        function applySavedTheme() {
+            const stored = localStorage.getItem('bt_theme') || 'system';
+            const useDark = stored === 'dark' || (stored === 'system' && _btDarkMQL.matches);
+            if (useDark) document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme');
+            document.querySelectorAll('.theme-opt').forEach(function (b) { const active = b.getAttribute('data-theme-value') === stored; b.classList.toggle('ring-2', active); b.classList.toggle('ring-white', active); });
+        }
+        function setTheme(t) { localStorage.setItem('bt_theme', t); applySavedTheme(); }
+        if (_btDarkMQL.addEventListener) { _btDarkMQL.addEventListener('change', function () { if ((localStorage.getItem('bt_theme') || 'system') === 'system') applySavedTheme(); }); }
+        applySavedTheme();
+    </script>
+    <!-- ===== END SITE MENU ===== -->
+
+    <!-- ============ LOGIN GATE ============ -->
+    <section id="loginGate" class="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-10">
+        <div class="w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+                <div class="text-center mb-6">
+                    <div class="mx-auto w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-3xl mb-3">📣</div>
+                    <h2 class="text-2xl font-extrabold text-slate-800">Marketing Login</h2>
+                    <p class="text-slate-500 text-sm mt-1">अपना 10-अंकों का WhatsApp नंबर डालें और OTP से लॉगिन करें</p>
+                </div>
+
+                <!-- Phone step -->
+                <form id="phoneForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp Number</label>
+                        <div class="flex items-stretch rounded-lg border border-slate-300 focus-within:border-blue-500 overflow-hidden">
+                            <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
+                            <input type="tel" id="phoneInput" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="sendOtpBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <span id="sendOtpText">Send OTP</span>
+                    </button>
+                </form>
+
+                <!-- OTP step -->
+                <form id="otpForm" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Enter OTP</label>
+                        <p class="text-xs text-slate-500 mb-2">OTP sent on WhatsApp to <span id="otpTargetPhone" class="font-bold"></span> · <button type="button" onclick="editPhone()" class="text-blue-600 font-semibold">change</button></p>
+                        <input type="text" id="otpInput" inputmode="numeric" maxlength="6" placeholder="••••••" class="otp-cell w-full text-center text-2xl font-bold px-4 py-3 rounded-lg border border-slate-300 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <button type="submit" id="verifyOtpBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">Verify & Login</button>
+                    <p class="text-center text-sm text-slate-500">Didn't get it? <button type="button" id="resendBtn" onclick="resendOtp()" class="text-blue-600 font-semibold disabled:text-slate-400" disabled>Resend</button> <span id="resendTimer" class="text-slate-400"></span></p>
+                </form>
+
+                <p id="loginError" class="hidden mt-4 text-center text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg py-2 px-3"></p>
+            </div>
+
+            <!-- Onboarding CTA -->
+            <div class="text-center mt-6">
+                <p class="text-slate-500 text-sm">New to Broker Today Marketing?</p>
+                <button onclick="openOnboard()" class="mt-1 text-blue-600 font-bold hover:underline">Onboard your business →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ APP (after login) ============ -->
+    <main id="app" class="hidden container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Account header -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-800" id="acctName">Welcome</h2>
+                <p class="text-slate-500 text-sm" id="acctMeta">—</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="loadAccount()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-sm">🔄 Refresh</button>
+                <button onclick="logout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-sm">Logout</button>
+            </div>
+        </div>
+
+        <!-- Billing summary -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Campaigns</p>
+                <p class="text-2xl font-extrabold text-slate-800" id="statCampaigns">0</p>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Messages Sent</p>
+                <p class="text-2xl font-extrabold text-slate-800" id="statSent">0</p>
+            </div>
+            <div class="bg-white rounded-xl border border-amber-200 shadow-sm p-4">
+                <p class="text-xs font-bold text-amber-500 uppercase tracking-wider">Amount Due (incl. GST)</p>
+                <p class="text-2xl font-extrabold text-amber-600" id="statDue">₹0</p>
+            </div>
+            <div class="bg-white rounded-xl border border-green-200 shadow-sm p-4">
+                <p class="text-xs font-bold text-green-600 uppercase tracking-wider">Paid + Waived</p>
+                <p class="text-2xl font-extrabold text-green-600" id="statPaid">₹0</p>
+            </div>
+        </div>
+
+        <!-- New campaign -->
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-slate-800">Your Campaigns</h3>
+            <button onclick="startWizard()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-lg shadow-md flex items-center gap-2">
+                <span class="text-lg leading-none">＋</span> New Campaign
+            </button>
+        </div>
+
+        <!-- Pending-setup notice (no templates yet) -->
+        <div id="noTemplatesNotice" class="hidden bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 mb-4 text-sm">
+            ⏳ Your account has no approved templates yet. Our team will contact you to prepare and bind your WhatsApp templates. You can still explore the dashboard.
+        </div>
+
+        <!-- Campaigns table -->
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                        <tr>
+                            <th class="text-left px-4 py-3 font-bold">Campaign</th>
+                            <th class="text-left px-4 py-3 font-bold">Template</th>
+                            <th class="text-center px-4 py-3 font-bold">Recipients</th>
+                            <th class="text-center px-4 py-3 font-bold">Sent / Deliv / Read / Fail</th>
+                            <th class="text-right px-4 py-3 font-bold">Amount (incl. GST)</th>
+                            <th class="text-center px-4 py-3 font-bold">Billing</th>
+                        </tr>
+                    </thead>
+                    <tbody id="campaignRows">
+                        <tr><td colspan="6" class="px-4 py-10 text-center text-slate-400"><div class="loader mx-auto"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p class="text-xs text-slate-400 mt-3">Billing is per-template price × recipients + 18% GST. Amount stays <b>Unpaid</b> until our admin marks it Paid or waives it. Dashboard updates live from delivery reports.</p>
+    </main>
+
+    <!-- ============ WIZARD MODAL ============ -->
+    <div id="wizard" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] flex items-start justify-center p-3 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-6">
+            <!-- Wizard header + stepper -->
+            <div class="flex items-center justify-between p-5 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800">New Bulk Campaign</h3>
+                <button onclick="closeWizard()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+            </div>
+            <div class="flex items-center justify-between px-5 py-4 gap-1">
+                <!-- steps 1..5 -->
+                <template id="stepperTpl"></template>
+                <div class="flex-1 flex items-center justify-between" id="stepper"></div>
+            </div>
+
+            <div class="p-5 pt-0 min-h-[280px]">
+                <!-- STEP 1: Name -->
+                <div class="wstep" data-step="1">
+                    <h4 class="font-bold text-slate-800 mb-1">Step 1 — Campaign Name</h4>
+                    <p class="text-sm text-slate-500 mb-4">Today's date is added automatically. Add a short label so you can find it later.</p>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Campaign name</label>
+                    <div class="flex items-stretch rounded-lg border border-slate-300 focus-within:border-blue-500 overflow-hidden">
+                        <span id="datePrefix" class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300 whitespace-nowrap"></span>
+                        <input type="text" id="campaignLabel" placeholder="e.g. Diwali Offer" class="flex-1 px-4 py-3 focus:outline-none">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">This exact name becomes the record sheet header for this campaign.</p>
+                </div>
+
+                <!-- STEP 2: Recipients -->
+                <div class="wstep hidden" data-step="2">
+                    <h4 class="font-bold text-slate-800 mb-1">Step 2 — Recipients</h4>
+                    <p class="text-sm text-slate-500 mb-3">Pick saved contacts, upload a CSV/Excel, or paste numbers. We keep only valid 10-digit numbers and add <b>+91</b> automatically.</p>
+                    <div class="flex gap-2 mb-3 flex-wrap">
+                        <button type="button" class="rcpt-tab px-3 py-1.5 rounded-full text-sm font-semibold border" data-tab="saved" onclick="switchRcptTab('saved')">📇 Saved contacts</button>
+                        <button type="button" class="rcpt-tab px-3 py-1.5 rounded-full text-sm font-semibold border" data-tab="upload" onclick="switchRcptTab('upload')">📄 Upload CSV/Excel</button>
+                        <button type="button" class="rcpt-tab px-3 py-1.5 rounded-full text-sm font-semibold border" data-tab="manual" onclick="switchRcptTab('manual')">⌨️ Paste numbers</button>
+                    </div>
+
+                    <!-- Saved -->
+                    <div class="rcpt-pane" data-tab="saved">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2"><input type="checkbox" id="selectAllContacts" onchange="toggleAllContacts(this)"> Select all</label>
+                            <span class="text-xs text-slate-500">or pick top <input type="number" id="topN" min="1" class="w-20 px-2 py-1 border border-slate-300 rounded" placeholder="N"> <button type="button" onclick="selectTopN()" class="text-blue-600 font-semibold">apply</button></span>
+                        </div>
+                        <div id="contactList" class="max-h-52 overflow-y-auto border border-slate-200 rounded-lg divide-y divide-slate-100"></div>
+                    </div>
+
+                    <!-- Upload -->
+                    <div class="rcpt-pane hidden" data-tab="upload">
+                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFile(this)" class="block w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-600 file:text-white file:font-semibold hover:file:bg-green-700">
+                        <p class="text-xs text-slate-400 mt-2">Any column with phone numbers works. Numbers can be 10-digit, +91…, 91…, or 0-prefixed — we normalise them.</p>
+                        <p id="fileMsg" class="text-sm font-semibold mt-2"></p>
+                    </div>
+
+                    <!-- Manual -->
+                    <div class="rcpt-pane hidden" data-tab="manual">
+                        <textarea id="manualNumbers" rows="5" placeholder="One number per line, or comma-separated&#10;9876543210, 9123456780" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                        <button type="button" onclick="addManual()" class="mt-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-sm">Add numbers</button>
+                    </div>
+
+                    <div class="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-bold text-slate-700">Recipients selected: <span id="rcptCount" class="text-green-600">0</span></p>
+                            <button type="button" onclick="clearRecipients()" class="text-xs text-red-600 font-semibold">Clear all</button>
+                        </div>
+                        <div id="rcptChips" class="flex flex-wrap gap-1.5 mt-2 max-h-24 overflow-y-auto"></div>
+                        <p id="rcptInvalid" class="text-xs text-amber-600 mt-1"></p>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Template -->
+                <div class="wstep hidden" data-step="3">
+                    <h4 class="font-bold text-slate-800 mb-1">Step 3 — Choose Template</h4>
+                    <p class="text-sm text-slate-500 mb-3">Select one approved template, then fill its values. Its per-message price is shown.</p>
+                    <div id="templateList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                    <div id="tplParams" class="mt-4"></div>
+                </div>
+
+                <!-- STEP 4: Test -->
+                <div class="wstep hidden" data-step="4">
+                    <h4 class="font-bold text-slate-800 mb-1">Step 4 — Send a Test</h4>
+                    <p class="text-sm text-slate-500 mb-3">This is the exact message that will be sent. Send it to one number to confirm before the bulk send.</p>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-4">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Final message preview</p>
+                        <p id="testPreview" class="text-sm text-slate-700 whitespace-pre-wrap">—</p>
+                    </div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Test WhatsApp number</label>
+                    <div class="flex items-stretch rounded-lg border border-slate-300 focus-within:border-blue-500 overflow-hidden max-w-xs">
+                        <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
+                        <input type="tel" id="testNumber" inputmode="numeric" maxlength="10" placeholder="10-digit" class="flex-1 px-4 py-3 focus:outline-none">
+                    </div>
+                    <button type="button" id="testSendBtn" onclick="sendTest()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-lg">Send test message</button>
+                    <p id="testMsg" class="text-sm font-semibold mt-3"></p>
+                    <label class="flex items-center gap-2 mt-4 text-sm font-semibold text-slate-700">
+                        <input type="checkbox" id="testConfirmed"> I received the test and the template looks correct.
+                    </label>
+                </div>
+
+                <!-- STEP 5: Review & Send -->
+                <div class="wstep hidden" data-step="5">
+                    <h4 class="font-bold text-slate-800 mb-1">Step 5 — Review & Send</h4>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-500">Campaign</span><span class="font-bold" id="rvName">—</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Template</span><span class="font-bold" id="rvTemplate">—</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Recipients</span><span class="font-bold" id="rvCount">0</span></div>
+                        <hr class="border-slate-200">
+                        <div class="flex justify-between"><span class="text-slate-500">Price / message</span><span id="rvUnit">₹0</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Subtotal</span><span id="rvSubtotal">₹0</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">GST (18%)</span><span id="rvGst">₹0</span></div>
+                        <div class="flex justify-between text-base"><span class="font-bold text-slate-800">Total</span><span class="font-extrabold text-green-600" id="rvTotal">₹0</span></div>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 mt-3">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Message being sent</p>
+                        <p id="rvPreview" class="text-sm text-slate-700 whitespace-pre-wrap">—</p>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">By sending, you agree the above amount will be billed (payable after sending; admin may waive).</p>
+                    <div id="sendResult" class="hidden mt-4 bg-green-50 border border-green-200 text-green-800 rounded-lg p-4 text-sm font-semibold"></div>
+                </div>
+            </div>
+
+            <!-- Wizard footer -->
+            <div class="flex items-center justify-between p-5 border-t border-slate-100">
+                <button type="button" id="wizBack" onclick="wizPrev()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-5 py-2.5 rounded-lg">Back</button>
+                <button type="button" id="wizNext" onclick="wizNext()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ ONBOARDING MODAL ============ -->
+    <div id="onboard" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="flex items-center justify-between p-5 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800">Onboard your business</h3>
+                <button onclick="closeOnboard()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+            </div>
+            <form id="onboardForm" class="p-5 space-y-4">
+                <p class="text-sm text-slate-500">Tell us about your business. Our team will contact you to set up and bind your WhatsApp templates.</p>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">Your name</label><input type="text" id="obName" required class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"></div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">WhatsApp number</label>
+                    <div class="flex items-stretch rounded-lg border border-slate-300 focus-within:border-blue-500 overflow-hidden">
+                        <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
+                        <input type="tel" id="obPhone" inputmode="numeric" maxlength="10" required class="flex-1 px-4 py-2.5 focus:outline-none">
+                    </div>
+                </div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">Business name</label><input type="text" id="obBusiness" required class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"></div>
+                <div><label class="block text-sm font-bold text-slate-700 mb-1">What do you need? (description)</label><textarea id="obDesc" rows="3" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea></div>
+                <button type="submit" id="obSubmit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Submit request</button>
+                <p id="obMsg" class="hidden text-center text-sm font-semibold"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    // ============================================================
+    //  MARKETING FRONTEND  —  talks ONLY to n8n webhooks
+    //  See MARKETING_WEBHOOKS.md for the full request/response spec.
+    // ============================================================
+    const N8N = 'https://llcsolution.duckdns.org/webhook';
+    const WH = {
+        otpSend:  N8N + '/mkt-otp-send',
+        otpVerify:N8N + '/mkt-otp-verify',
+        account:  N8N + '/mkt-account',
+        testSend: N8N + '/mkt-test-send',
+        send:     N8N + '/mkt-send',
+        onboard:  N8N + '/mkt-onboard'
+    };
+    const GST_RATE = 0.18;
+
+    // ---- session ----
+    function getToken() { return localStorage.getItem('mkt_token') || ''; }
+    function getPhone() { return localStorage.getItem('mkt_phone') || ''; }
+    function setSession(token, phone) { localStorage.setItem('mkt_token', token); localStorage.setItem('mkt_phone', phone); }
+    function logout() { localStorage.removeItem('mkt_token'); localStorage.removeItem('mkt_phone'); ACCOUNT = null; showGate(); }
+
+    let ACCOUNT = null; // { user, templates, contacts, campaigns, billing }
+
+    // ---- helpers ----
+    const inr = n => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    function digits(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
+    // Normalise ANY Indian number to a canonical +91XXXXXXXXXX. Returns null if invalid.
+    function normalizeIN(raw) {
+        let d = digits(raw);
+        if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+        else if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+        else if (d.length === 13 && d.startsWith('091')) d = d.slice(3);
+        if (d.length === 10 && /^[6-9]/.test(d)) return '+91' + d;
+        return null;
+    }
+    function todayStr() {
+        const dt = new Date();
+        const p = n => String(n).padStart(2, '0');
+        return dt.getFullYear() + '-' + p(dt.getMonth() + 1) + '-' + p(dt.getDate());
+    }
+    function showError(msg) { const e = document.getElementById('loginError'); e.textContent = msg; e.classList.remove('hidden'); }
+    function hideError() { document.getElementById('loginError').classList.add('hidden'); }
+
+    // ============ LOGIN ============
+    document.getElementById('phoneInput').addEventListener('input', e => { e.target.value = digits(e.target.value).slice(0, 10); });
+    document.getElementById('otpInput').addEventListener('input', e => { e.target.value = digits(e.target.value).slice(0, 6); });
+    ['obPhone', 'testNumber'].forEach(id => document.getElementById(id).addEventListener('input', e => { e.target.value = digits(e.target.value).slice(0, 10); }));
+
+    let PENDING_PHONE = '';
+    let resendInterval = null;
+
+    document.getElementById('phoneForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        hideError();
+        const p = document.getElementById('phoneInput').value;
+        if (!/^[6-9]\d{9}$/.test(p)) return showError('Enter a valid 10-digit mobile number.');
+        const btn = document.getElementById('sendOtpBtn'); btn.disabled = true;
+        document.getElementById('sendOtpText').textContent = 'Sending…';
+        try {
+            const r = await fetch(WH.otpSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: p }) });
+            const data = await r.json().catch(() => ({}));
+            if (r.ok && data.ok !== false) {
+                PENDING_PHONE = p;
+                document.getElementById('otpTargetPhone').textContent = '+91 ' + p;
+                document.getElementById('phoneForm').classList.add('hidden');
+                document.getElementById('otpForm').classList.remove('hidden');
+                document.getElementById('otpInput').focus();
+                startResendTimer();
+            } else { showError(data.error || 'Could not send OTP. Try again.'); }
+        } catch (err) { showError('Network error. Please try again.'); }
+        finally { btn.disabled = false; document.getElementById('sendOtpText').textContent = 'Send OTP'; }
+    });
+
+    function startResendTimer() {
+        let t = 30; const btn = document.getElementById('resendBtn'); const lbl = document.getElementById('resendTimer');
+        btn.disabled = true; lbl.textContent = '(' + t + 's)';
+        clearInterval(resendInterval);
+        resendInterval = setInterval(() => { t--; lbl.textContent = t > 0 ? '(' + t + 's)' : ''; if (t <= 0) { clearInterval(resendInterval); btn.disabled = false; } }, 1000);
+    }
+    async function resendOtp() { if (!PENDING_PHONE) return; document.getElementById('phoneInput').value = PENDING_PHONE; try { await fetch(WH.otpSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: PENDING_PHONE }) }); } catch (e) {} startResendTimer(); }
+    function editPhone() { document.getElementById('otpForm').classList.add('hidden'); document.getElementById('phoneForm').classList.remove('hidden'); hideError(); clearInterval(resendInterval); }
+
+    document.getElementById('otpForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        hideError();
+        const otp = document.getElementById('otpInput').value;
+        if (otp.length < 4) return showError('Enter the OTP you received.');
+        const btn = document.getElementById('verifyOtpBtn'); btn.disabled = true; btn.textContent = 'Verifying…';
+        try {
+            const r = await fetch(WH.otpVerify, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: PENDING_PHONE, otp }) });
+            const data = await r.json().catch(() => ({}));
+            if (r.ok && data.ok !== false && data.token) {
+                setSession(data.token, PENDING_PHONE);
+                clearInterval(resendInterval);
+                await loadAccount();
+                showApp();
+            } else { showError(data.error || 'Incorrect or expired OTP.'); }
+        } catch (err) { showError('Network error. Please try again.'); }
+        finally { btn.disabled = false; btn.textContent = 'Verify & Login'; }
+    });
+
+    function showGate() { document.getElementById('app').classList.add('hidden'); document.getElementById('loginGate').classList.remove('hidden'); document.getElementById('otpForm').classList.add('hidden'); document.getElementById('phoneForm').classList.remove('hidden'); }
+    function showApp() { document.getElementById('loginGate').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); }
+
+    // ============ ACCOUNT / DASHBOARD ============
+    async function loadAccount() {
+        try {
+            const r = await fetch(WH.account, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: getPhone(), token: getToken() }) });
+            if (r.status === 401) { logout(); return; }
+            const data = await r.json().catch(() => ({}));
+            if (data.ok === false) { logout(); return; }
+            ACCOUNT = {
+                user: data.user || { phone: getPhone() },
+                templates: Array.isArray(data.templates) ? data.templates : [],
+                contacts: Array.isArray(data.contacts) ? data.contacts : [],
+                campaigns: Array.isArray(data.campaigns) ? data.campaigns : [],
+                billing: data.billing || {}
+            };
+            renderDashboard();
+        } catch (err) {
+            // keep whatever we have; show empty state
+            if (!ACCOUNT) ACCOUNT = { user: { phone: getPhone() }, templates: [], contacts: [], campaigns: [], billing: {} };
+            renderDashboard();
+        }
+    }
+
+    function renderDashboard() {
+        const u = ACCOUNT.user || {};
+        document.getElementById('acctName').textContent = u.business || u.name || ('+91 ' + getPhone());
+        document.getElementById('acctMeta').textContent = [u.name, '+91 ' + (u.phone || getPhone())].filter(Boolean).join(' · ');
+        document.getElementById('noTemplatesNotice').classList.toggle('hidden', ACCOUNT.templates.length > 0);
+
+        const camps = ACCOUNT.campaigns;
+        document.getElementById('statCampaigns').textContent = camps.length;
+        let sent = 0, due = 0, settled = 0;
+        camps.forEach(c => {
+            sent += Number(c.sentCount || 0);
+            const total = Number(c.total != null ? c.total : computeTotal(c.unitPrice, c.recipientCount).total);
+            if (c.paymentStatus === 'paid' || c.paymentStatus === 'waived') settled += total; else due += total;
+        });
+        document.getElementById('statSent').textContent = sent.toLocaleString('en-IN');
+        document.getElementById('statDue').textContent = inr(due);
+        document.getElementById('statPaid').textContent = inr(settled);
+
+        const tbody = document.getElementById('campaignRows');
+        if (!camps.length) { tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-10 text-center text-slate-400">No campaigns yet. Click “New Campaign” to start.</td></tr>'; return; }
+        tbody.innerHTML = camps.map(c => {
+            const t = c.total != null ? c.total : computeTotal(c.unitPrice, c.recipientCount).total;
+            const badge = billingBadge(c.paymentStatus);
+            return `<tr class="border-t border-slate-100">
+                <td class="px-4 py-3 font-semibold text-slate-800">${esc(c.name)}<div class="text-xs text-slate-400 font-normal">${esc(c.createdAt || '')}</div></td>
+                <td class="px-4 py-3 text-slate-600">${esc(c.templateName || '—')}</td>
+                <td class="px-4 py-3 text-center">${c.recipientCount || 0}</td>
+                <td class="px-4 py-3 text-center text-xs"><span class="text-slate-700 font-semibold">${c.sentCount || 0}</span> / <span class="text-blue-600">${c.deliveredCount || 0}</span> / <span class="text-green-600">${c.readCount || 0}</span> / <span class="text-red-500">${c.failedCount || 0}</span></td>
+                <td class="px-4 py-3 text-right font-bold text-slate-800">${inr(t)}</td>
+                <td class="px-4 py-3 text-center">${badge}</td>
+            </tr>`;
+        }).join('');
+    }
+    function billingBadge(s) {
+        if (s === 'paid') return '<span class="inline-block bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Paid</span>';
+        if (s === 'waived') return '<span class="inline-block bg-slate-200 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">Waived</span>';
+        return '<span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">Unpaid</span>';
+    }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+    function computeTotal(unit, count) { const subtotal = (Number(unit) || 0) * (Number(count) || 0); const gst = subtotal * GST_RATE; return { subtotal, gst, total: subtotal + gst }; }
+
+    // ============ WIZARD ============
+    let WSTATE = { step: 1, recipients: new Set(), invalidCount: 0, templateId: null, params: {} };
+
+    // Parse {{1}}, {{2}} placeholders from a template body; return sorted unique numbers as strings.
+    function templateVars(t) {
+        const s = (t && t.preview) || '';
+        return [...new Set((s.match(/\{\{\s*\d+\s*\}\}/g) || []).map(x => x.replace(/\D/g, '')))].sort((a, b) => a - b);
+    }
+    // Substitute entered values into the body; leave {{n}} visible where still blank.
+    function resolvePreview(t, params) {
+        return ((t && t.preview) || '').replace(/\{\{\s*(\d+)\s*\}\}/g, (m, n) => (params && params[n] != null && params[n] !== '') ? params[n] : ('{{' + n + '}}'));
+    }
+    // Ordered array of parameter values for the current template (for the webhook payload).
+    function paramsArray() { return templateVars(currentTemplate()).map(n => (WSTATE.params[n] || '')); }
+
+    function renderStepper() {
+        const labels = ['Name', 'Recipients', 'Template', 'Test', 'Send'];
+        document.getElementById('stepper').innerHTML = labels.map((l, i) => {
+            const n = i + 1; const cls = n < WSTATE.step ? 'done' : (n === WSTATE.step ? 'active' : '');
+            return `<div class="flex items-center ${i < 4 ? 'flex-1' : ''}">
+                <div class="flex flex-col items-center">
+                    <div class="step-dot ${cls} w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-slate-200 text-slate-500">${n < WSTATE.step ? '✓' : n}</div>
+                    <span class="text-[10px] mt-1 ${n === WSTATE.step ? 'text-slate-800 font-bold' : 'text-slate-400'}">${l}</span>
+                </div>
+                ${i < 4 ? '<div class="flex-1 h-0.5 bg-slate-200 mx-1"></div>' : ''}
+            </div>`;
+        }).join('');
+    }
+
+    function startWizard() {
+        WSTATE = { step: 1, recipients: new Set(), invalidCount: 0, templateId: null, params: {} };
+        document.getElementById('campaignLabel').value = '';
+        document.getElementById('datePrefix').textContent = todayStr() + ' — ';
+        document.getElementById('testNumber').value = '';
+        document.getElementById('testConfirmed').checked = false;
+        document.getElementById('testMsg').textContent = '';
+        document.getElementById('sendResult').classList.add('hidden');
+        renderContacts();
+        renderTemplates();
+        renderTplParams();
+        switchRcptTab('saved');
+        gotoStep(1);
+        document.getElementById('wizard').classList.remove('hidden');
+    }
+    function closeWizard() { document.getElementById('wizard').classList.add('hidden'); }
+
+    function gotoStep(n) {
+        WSTATE.step = n;
+        document.querySelectorAll('.wstep').forEach(el => el.classList.toggle('hidden', Number(el.dataset.step) !== n));
+        document.getElementById('wizBack').classList.toggle('invisible', n === 1);
+        const next = document.getElementById('wizNext');
+        next.textContent = n === 5 ? 'Send now 🚀' : 'Next →';
+        next.className = (n === 5 ? 'bg-green-600 hover:bg-green-700' : 'bg-green-600 hover:bg-green-700') + ' text-white font-bold px-6 py-2.5 rounded-lg';
+        if (n === 4) { const p = document.getElementById('testPreview'); if (p) p.textContent = resolvePreview(currentTemplate(), WSTATE.params) || '—'; }
+        if (n === 5) renderReview();
+        renderStepper();
+    }
+    function wizPrev() { if (WSTATE.step > 1) gotoStep(WSTATE.step - 1); }
+    async function wizNext() {
+        const s = WSTATE.step;
+        if (s === 1) { if (!document.getElementById('campaignLabel').value.trim()) return alert('Please add a campaign label.'); }
+        if (s === 2) { if (WSTATE.recipients.size === 0) return alert('Add at least one recipient.'); }
+        if (s === 3) {
+            if (!WSTATE.templateId) return alert('Select a template.');
+            const vars = templateVars(currentTemplate());
+            if (vars.some(n => !String(WSTATE.params[n] || '').trim())) return alert('Please fill every template value (' + vars.map(n => '{{' + n + '}}').join(', ') + ').');
+        }
+        if (s === 4) { if (!document.getElementById('testConfirmed').checked) return alert('Please send a test and tick the confirmation box.'); }
+        if (s === 5) { return doSend(); }
+        gotoStep(s + 1);
+    }
+
+    // ---- Step 2: recipients ----
+    function switchRcptTab(tab) {
+        document.querySelectorAll('.rcpt-tab').forEach(b => { const on = b.dataset.tab === tab; b.classList.toggle('bg-green-600', on); b.classList.toggle('text-white', on); b.classList.toggle('border-green-600', on); b.classList.toggle('text-slate-600', !on); b.classList.toggle('border-slate-300', !on); });
+        document.querySelectorAll('.rcpt-pane').forEach(p => p.classList.toggle('hidden', p.dataset.tab !== tab));
+    }
+    function renderContacts() {
+        const list = document.getElementById('contactList');
+        const cs = ACCOUNT ? ACCOUNT.contacts : [];
+        if (!cs.length) { list.innerHTML = '<p class="text-sm text-slate-400 p-3">No saved contacts. Your admin can load contacts, or use Upload / Paste.</p>'; return; }
+        list.innerHTML = cs.map((c, i) => {
+            const num = normalizeIN(c.phone); if (!num) return '';
+            return `<label class="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer">
+                <input type="checkbox" class="contact-cb" data-num="${num}" onchange="onContactToggle(this)">
+                <span class="text-sm"><span class="font-semibold text-slate-700">${esc(c.name || 'Contact')}</span> <span class="text-slate-400">${num}</span></span>
+            </label>`;
+        }).join('');
+    }
+    function onContactToggle(cb) { if (cb.checked) WSTATE.recipients.add(cb.dataset.num); else WSTATE.recipients.delete(cb.dataset.num); refreshRecipients(); }
+    function toggleAllContacts(master) { document.querySelectorAll('.contact-cb').forEach(cb => { cb.checked = master.checked; if (master.checked) WSTATE.recipients.add(cb.dataset.num); else WSTATE.recipients.delete(cb.dataset.num); }); refreshRecipients(); }
+    function selectTopN() {
+        const n = parseInt(document.getElementById('topN').value, 10); if (!n) return;
+        const cbs = Array.from(document.querySelectorAll('.contact-cb'));
+        cbs.forEach((cb, i) => { const on = i < n; cb.checked = on; if (on) WSTATE.recipients.add(cb.dataset.num); else WSTATE.recipients.delete(cb.dataset.num); });
+        refreshRecipients();
+    }
+    function addManual() {
+        const raw = document.getElementById('manualNumbers').value.split(/[\s,;]+/).filter(Boolean);
+        let bad = 0; raw.forEach(x => { const n = normalizeIN(x); if (n) WSTATE.recipients.add(n); else bad++; });
+        document.getElementById('manualNumbers').value = '';
+        WSTATE.invalidCount = bad; refreshRecipients();
+    }
+    function handleFile(input) {
+        const file = input.files[0]; if (!file) return;
+        const msg = document.getElementById('fileMsg'); msg.textContent = 'Reading…'; msg.className = 'text-sm font-semibold mt-2 text-slate-500';
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const wb = XLSX.read(e.target.result, { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+                let added = 0, bad = 0;
+                rows.forEach(row => row.forEach(cell => { const n = normalizeIN(cell); if (n) { if (!WSTATE.recipients.has(n)) added++; WSTATE.recipients.add(n); } else if (String(cell || '').match(/\d/)) bad++; }));
+                WSTATE.invalidCount = bad;
+                msg.textContent = `✅ Added ${added} valid number(s)` + (bad ? `, skipped ${bad} invalid.` : '.');
+                msg.className = 'text-sm font-semibold mt-2 text-green-600';
+                refreshRecipients();
+            } catch (err) { msg.textContent = 'Could not read file. Use CSV or Excel with phone numbers.'; msg.className = 'text-sm font-semibold mt-2 text-red-600'; }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+    function clearRecipients() { WSTATE.recipients.clear(); WSTATE.invalidCount = 0; document.querySelectorAll('.contact-cb').forEach(cb => cb.checked = false); const m = document.getElementById('selectAllContacts'); if (m) m.checked = false; refreshRecipients(); }
+    function refreshRecipients() {
+        document.getElementById('rcptCount').textContent = WSTATE.recipients.size;
+        const chips = document.getElementById('rcptChips');
+        const arr = Array.from(WSTATE.recipients);
+        chips.innerHTML = arr.slice(0, 60).map(n => `<span class="inline-flex items-center gap-1 bg-white border border-slate-200 text-xs px-2 py-1 rounded-full">${n}<button type="button" onclick="removeRecipient('${n}')" class="text-red-400 hover:text-red-600">✕</button></span>`).join('') + (arr.length > 60 ? `<span class="text-xs text-slate-400 px-2 py-1">+${arr.length - 60} more</span>` : '');
+        document.getElementById('rcptInvalid').textContent = WSTATE.invalidCount ? `${WSTATE.invalidCount} entr${WSTATE.invalidCount === 1 ? 'y was' : 'ies were'} skipped (not valid 10-digit India numbers).` : '';
+    }
+    function removeRecipient(n) { WSTATE.recipients.delete(n); const cb = document.querySelector('.contact-cb[data-num="' + n + '"]'); if (cb) cb.checked = false; refreshRecipients(); }
+
+    // ---- Step 3: template ----
+    function currentTemplate() { return (ACCOUNT.templates || []).find(t => String(t.id) === String(WSTATE.templateId)); }
+    function renderTemplates() {
+        const list = document.getElementById('templateList');
+        const ts = ACCOUNT ? ACCOUNT.templates : [];
+        if (!ts.length) { list.innerHTML = '<p class="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3">No approved templates on your account yet. Please contact us to set one up.</p>'; return; }
+        list.innerHTML = ts.map(t => `
+            <label class="block border rounded-lg p-3 cursor-pointer hover:border-green-400 ${String(t.id) === String(WSTATE.templateId) ? 'border-green-500 bg-green-50' : 'border-slate-200'}">
+                <div class="flex items-start gap-3">
+                    <input type="radio" name="tpl" class="mt-1" value="${esc(t.id)}" ${String(t.id) === String(WSTATE.templateId) ? 'checked' : ''} onchange="selectTemplate('${esc(t.id)}')">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-800">${esc(t.name)}</span>
+                            <span class="text-sm font-bold text-green-600">${inr(t.price)}/msg</span>
+                        </div>
+                        <div class="text-xs text-slate-400 mb-1">${esc(t.language || '')} ${t.category ? '· ' + esc(t.category) : ''}</div>
+                        <p class="text-sm text-slate-600 whitespace-pre-wrap">${esc(t.preview || '')}</p>
+                    </div>
+                </div>
+            </label>`).join('');
+    }
+    function selectTemplate(id) { WSTATE.templateId = id; WSTATE.params = {}; renderTemplates(); renderTplParams(); }
+
+    // Preview of the selected template + one input per {{n}} variable, with a live-substituted preview.
+    function renderTplParams() {
+        const box = document.getElementById('tplParams');
+        const t = currentTemplate();
+        if (!t) { box.innerHTML = ''; return; }
+        const vars = templateVars(t);
+        const inputs = vars.map(n => `
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold text-slate-500 w-10 shrink-0">{{${n}}}</span>
+                <input data-var="${n}" value="${esc(WSTATE.params[n] || '')}" oninput="onParamInput(this)" placeholder="value for {{${n}}}" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+            </div>`).join('');
+        box.innerHTML = `
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Message preview</p>
+                <p id="tplPreviewLive" class="text-sm text-slate-700 whitespace-pre-wrap">${esc(resolvePreview(t, WSTATE.params))}</p>
+            </div>
+            ${vars.length ? `<div class="mt-3"><p class="text-sm font-bold text-slate-700 mb-2">Fill template values</p>${inputs}</div>` : '<p class="text-xs text-slate-400 mt-2">This template has no variables to fill.</p>'}`;
+    }
+    function onParamInput(el) {
+        WSTATE.params[el.dataset.var] = el.value;
+        const live = document.getElementById('tplPreviewLive');
+        if (live) live.textContent = resolvePreview(currentTemplate(), WSTATE.params);
+    }
+
+    // ---- Step 4: test ----
+    async function sendTest() {
+        const num = normalizeIN(document.getElementById('testNumber').value);
+        const msg = document.getElementById('testMsg');
+        if (!num) { msg.textContent = 'Enter a valid 10-digit number.'; msg.className = 'text-sm font-semibold mt-3 text-red-600'; return; }
+        if (!WSTATE.templateId) { msg.textContent = 'Go back and pick a template first.'; msg.className = 'text-sm font-semibold mt-3 text-red-600'; return; }
+        const btn = document.getElementById('testSendBtn'); btn.disabled = true; msg.textContent = 'Sending test…'; msg.className = 'text-sm font-semibold mt-3 text-slate-500';
+        try {
+            const r = await fetch(WH.testSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: getPhone(), token: getToken(), templateId: WSTATE.templateId, testNumber: num, params: paramsArray() }) });
+            const data = await r.json().catch(() => ({}));
+            if (r.ok && data.ok !== false) { msg.textContent = '✅ Test sent to ' + num + '. Check WhatsApp, then tick the box below.'; msg.className = 'text-sm font-semibold mt-3 text-green-600'; }
+            else { msg.textContent = data.error || 'Test failed to send.'; msg.className = 'text-sm font-semibold mt-3 text-red-600'; }
+        } catch (e) { msg.textContent = 'Network error sending test.'; msg.className = 'text-sm font-semibold mt-3 text-red-600'; }
+        finally { btn.disabled = false; }
+    }
+
+    // ---- Step 5: review + send ----
+    function fullName() { return (document.getElementById('datePrefix').textContent + document.getElementById('campaignLabel').value.trim()); }
+    function renderReview() {
+        const t = currentTemplate() || {}; const count = WSTATE.recipients.size;
+        const { subtotal, gst, total } = computeTotal(t.price, count);
+        document.getElementById('rvName').textContent = fullName();
+        document.getElementById('rvTemplate').textContent = t.name || '—';
+        document.getElementById('rvCount').textContent = count;
+        document.getElementById('rvUnit').textContent = inr(t.price);
+        document.getElementById('rvSubtotal').textContent = inr(subtotal);
+        document.getElementById('rvGst').textContent = inr(gst);
+        document.getElementById('rvTotal').textContent = inr(total);
+        const pv = document.getElementById('rvPreview'); if (pv) pv.textContent = resolvePreview(t, WSTATE.params) || '—';
+    }
+    async function doSend() {
+        const next = document.getElementById('wizNext'); next.disabled = true; next.textContent = 'Sending…';
+        const payload = { phone: getPhone(), token: getToken(), campaignName: fullName(), templateId: WSTATE.templateId, recipients: Array.from(WSTATE.recipients), params: paramsArray() };
+        try {
+            const r = await fetch(WH.send, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await r.json().catch(() => ({}));
+            if (r.ok && data.ok !== false) {
+                const res = document.getElementById('sendResult');
+                res.innerHTML = `🚀 Campaign queued! ${data.recipientCount || WSTATE.recipients.size} messages are being sent. Billed amount: <b>${inr(data.total != null ? data.total : computeTotal((currentTemplate() || {}).price, WSTATE.recipients.size).total)}</b> (Unpaid). Track progress on your dashboard.`;
+                res.classList.remove('hidden');
+                next.classList.add('hidden'); document.getElementById('wizBack').classList.add('hidden');
+                await loadAccount();
+                setTimeout(closeWizard, 2600);
+            } else { alert(data.error || 'Send failed. Please try again.'); next.disabled = false; next.textContent = 'Send now 🚀'; }
+        } catch (e) { alert('Network error while sending.'); next.disabled = false; next.textContent = 'Send now 🚀'; }
+    }
+
+    // ============ ONBOARDING ============
+    function openOnboard() { document.getElementById('onboard').classList.remove('hidden'); }
+    function closeOnboard() { document.getElementById('onboard').classList.add('hidden'); }
+    document.getElementById('onboardForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const phone = document.getElementById('obPhone').value;
+        const msg = document.getElementById('obMsg');
+        if (!/^[6-9]\d{9}$/.test(phone)) { msg.textContent = 'Enter a valid 10-digit number.'; msg.className = 'text-center text-sm font-semibold text-red-600'; msg.classList.remove('hidden'); return; }
+        const btn = document.getElementById('obSubmit'); btn.disabled = true; btn.textContent = 'Submitting…';
+        try {
+            const r = await fetch(WH.onboard, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('obName').value.trim(), phone, business: document.getElementById('obBusiness').value.trim(), description: document.getElementById('obDesc').value.trim() }) });
+            const data = await r.json().catch(() => ({}));
+            if (r.ok && data.ok !== false) { msg.textContent = '✅ Thanks! Our team will contact you shortly.'; msg.className = 'text-center text-sm font-semibold text-green-600'; document.getElementById('onboardForm').reset(); }
+            else { msg.textContent = data.error || 'Could not submit. Try again.'; msg.className = 'text-center text-sm font-semibold text-red-600'; }
+            msg.classList.remove('hidden');
+        } catch (err) { msg.textContent = 'Network error. Please try again.'; msg.className = 'text-center text-sm font-semibold text-red-600'; msg.classList.remove('hidden'); }
+        finally { btn.disabled = false; btn.textContent = 'Submit request'; }
+    });
+
+    // ============ BOOT ============
+    (function boot() {
+        if (getToken() && getPhone()) { showApp(); loadAccount(); }
+        else { showGate(); }
+    })();
+    </script>
+</body>
+</html>

@@ -201,6 +201,20 @@
                         Manage Passwords →
                     </div>
                 </button>
+
+                <!-- Marketing Manager -->
+                <button onclick="openMarketingManager()" class="group block bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl p-6 border-2 border-green-200 hover:border-green-400 transition-all shadow-md hover:shadow-xl text-left w-full">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-green-600 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            📣
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Marketing Manager</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">Users, templates & pricing, contacts, billing, onboarding requests</p>
+                    <div class="flex items-center text-green-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                        Manage Marketing →
+                    </div>
+                </button>
             </div>
 
             <!-- Add New Project Card -->
@@ -632,6 +646,254 @@
             </form>
         </div>
     </div>
+
+    <!-- ============ MARKETING MANAGER MODAL ============ -->
+    <div id="marketingModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-3 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-6">
+            <div class="flex items-center justify-between p-5 border-b border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800">📣 Marketing Manager</h2>
+                <div class="flex items-center gap-2">
+                    <button onclick="loadMarketing()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-sm">🔄 Refresh</button>
+                    <button onclick="closeMarketingManager()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+                </div>
+            </div>
+            <div class="flex gap-2 px-5 pt-4 border-b border-slate-100">
+                <button class="mkt-tab px-4 py-2 font-semibold text-sm border-b-2" data-tab="users" onclick="mktTab('users')">👥 Users</button>
+                <button class="mkt-tab px-4 py-2 font-semibold text-sm border-b-2" data-tab="onboard" onclick="mktTab('onboard')">📥 Onboarding <span id="obCount" class="ml-1 text-xs bg-amber-100 text-amber-700 rounded-full px-2"></span></button>
+                <button class="mkt-tab px-4 py-2 font-semibold text-sm border-b-2" data-tab="billing" onclick="mktTab('billing')">💳 Billing</button>
+            </div>
+            <div class="p-5">
+                <!-- USERS -->
+                <div class="mkt-pane" data-tab="users">
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="text-sm text-slate-500">Bind approved templates + per-template price, and load contacts, per user.</p>
+                        <button onclick="editUser(null)" class="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm">＋ Add user</button>
+                    </div>
+                    <div id="mktUsers" class="space-y-2"><div class="loader"></div></div>
+                </div>
+                <!-- ONBOARDING -->
+                <div class="mkt-pane hidden" data-tab="onboard">
+                    <div id="mktOnboard" class="space-y-2"><p class="text-slate-400 text-sm">Loading…</p></div>
+                </div>
+                <!-- BILLING -->
+                <div class="mkt-pane hidden" data-tab="billing">
+                    <div id="mktBilling" class="space-y-2"><p class="text-slate-400 text-sm">Loading…</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User editor overlay -->
+    <div id="userEditor" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-start justify-center p-3 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-6">
+            <div class="flex items-center justify-between p-5 border-b border-slate-200">
+                <h3 class="text-xl font-bold text-slate-800" id="userEditorTitle">Edit user</h3>
+                <button onclick="closeUserEditor()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Phone (10-digit)</label><input id="euPhone" maxlength="10" inputmode="numeric" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Name</label><input id="euName" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Business</label><input id="euBusiness" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1"><label class="text-sm font-bold text-slate-700">Templates (with per-message price ₹)</label><button onclick="addTplRow()" class="text-green-600 font-semibold text-sm">＋ Add template</button></div>
+                    <div id="euTemplates" class="space-y-2"></div>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-slate-700 block mb-1">Contacts</label>
+                    <p class="text-xs text-slate-400 mb-1">Paste as <code>Name, 10-digit-number</code> per line (name optional).</p>
+                    <textarea id="euContacts" rows="5" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Amit, 9876500001&#10;9876500002"></textarea>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="saveUser()" id="euSaveBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Save user</button>
+                    <button onclick="closeUserEditor()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-lg">Cancel</button>
+                </div>
+                <p id="euMsg" class="hidden text-center text-sm font-semibold"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ MARKETING MANAGER (admin) ============
+        const MKT_BASE = 'https://llcsolution.duckdns.org/webhook';
+        const MKT = { users: MKT_BASE + '/mkt-admin-users', save: MKT_BASE + '/mkt-admin-save', billing: MKT_BASE + '/mkt-admin-billing', metaTemplates: MKT_BASE + '/mkt-admin-templates' };
+        let MKT_DATA = { users: [], onboardRequests: [], campaigns: [] };
+        let META_TEMPLATES = []; // approved templates pulled live from Meta (WABA)
+        const mInr = n => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        const mEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+        function openMarketingManager() { document.getElementById('marketingModal').classList.remove('hidden'); mktTab('users'); loadMarketing(); }
+        function closeMarketingManager() { document.getElementById('marketingModal').classList.add('hidden'); }
+        function mktTab(tab) {
+            document.querySelectorAll('.mkt-tab').forEach(b => { const on = b.dataset.tab === tab; b.classList.toggle('border-green-600', on); b.classList.toggle('text-green-700', on); b.classList.toggle('border-transparent', !on); b.classList.toggle('text-slate-500', !on); });
+            document.querySelectorAll('.mkt-pane').forEach(p => p.classList.toggle('hidden', p.dataset.tab !== tab));
+        }
+
+        async function loadMarketing() {
+            document.getElementById('mktUsers').innerHTML = '<div class="loader"></div>';
+            try {
+                const r = await fetch(MKT.users, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_PASSWORD }) });
+                const d = await r.json().catch(() => ({}));
+                MKT_DATA = { users: d.users || [], onboardRequests: d.onboardRequests || [], campaigns: d.campaigns || [] };
+            } catch (e) { MKT_DATA = { users: [], onboardRequests: [], campaigns: [] }; }
+            loadMetaTemplates();
+            renderMktUsers(); renderMktOnboard(); renderMktBilling();
+        }
+
+        // Pull the list of APPROVED templates from Meta (via n8n) so admin picks instead of typing.
+        async function loadMetaTemplates() {
+            try {
+                const r = await fetch(MKT.metaTemplates, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_PASSWORD }) });
+                const d = await r.json().catch(() => ({}));
+                META_TEMPLATES = Array.isArray(d.templates) ? d.templates : [];
+            } catch (e) { META_TEMPLATES = []; }
+        }
+
+        function renderMktUsers() {
+            const c = document.getElementById('mktUsers');
+            if (!MKT_DATA.users.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-6 text-center">No users yet. Click “Add user”.</p>'; return; }
+            c.innerHTML = MKT_DATA.users.map((u, i) => `
+                <div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="font-bold text-slate-800 truncate">${mEsc(u.business || u.name || '+91 ' + u.phone)}</p>
+                        <p class="text-xs text-slate-500">+91 ${mEsc(u.phone)} · ${mEsc(u.name || '')}</p>
+                        <p class="text-xs text-slate-400 mt-1">${(u.templates || []).length} template(s) · ${(u.contacts || []).length} contact(s)</p>
+                    </div>
+                    <button onclick="editUser(${i})" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-sm shrink-0">Edit</button>
+                </div>`).join('');
+        }
+
+        function renderMktOnboard() {
+            const c = document.getElementById('mktOnboard'); const reqs = MKT_DATA.onboardRequests || [];
+            document.getElementById('obCount').textContent = reqs.filter(r => (r.status || 'new') === 'new').length || '';
+            if (!reqs.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-6 text-center">No onboarding requests.</p>'; return; }
+            c.innerHTML = reqs.map(r => `
+                <div class="border border-slate-200 rounded-lg p-3 flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="font-bold text-slate-800">${mEsc(r.business || r.name)} <span class="text-xs font-normal text-slate-400">${mEsc(r.createdAt || '')}</span></p>
+                        <p class="text-xs text-slate-500">${mEsc(r.name || '')} · +91 ${mEsc(r.phone)}</p>
+                        <p class="text-sm text-slate-600 mt-1">${mEsc(r.description || '')}</p>
+                    </div>
+                    <button onclick='editUserFromReq(${JSON.stringify(r).replace(/'/g, "&#39;")})' class="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-1.5 rounded-lg text-sm shrink-0">Set up →</button>
+                </div>`).join('');
+        }
+
+        function renderMktBilling() {
+            const c = document.getElementById('mktBilling'); const camps = MKT_DATA.campaigns || [];
+            if (!camps.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-6 text-center">No campaigns yet.</p>'; return; }
+            c.innerHTML = camps.map(c2 => {
+                const st = c2.paymentStatus || 'unpaid';
+                const badge = st === 'paid' ? 'bg-green-100 text-green-700' : st === 'waived' ? 'bg-slate-200 text-slate-600' : 'bg-amber-100 text-amber-700';
+                return `<div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3 flex-wrap">
+                    <div class="min-w-0">
+                        <p class="font-bold text-slate-800 truncate">${mEsc(c2.name)}</p>
+                        <p class="text-xs text-slate-500">+91 ${mEsc(c2.phone || '')} · ${c2.recipientCount || 0} recipients · <span class="font-bold">${mInr(c2.total)}</span> <span class="px-2 py-0.5 rounded-full text-xs font-bold ${badge}">${st}</span></p>
+                    </div>
+                    <div class="flex gap-1.5 shrink-0">
+                        <button onclick="billAction('${mEsc(c2.id)}','mark_paid')" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Mark paid</button>
+                        <button onclick="billAction('${mEsc(c2.id)}','waive')" class="bg-slate-500 hover:bg-slate-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Waive</button>
+                        <button onclick="billAction('${mEsc(c2.id)}','unpaid')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg">Unpaid</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function billAction(campaignId, action) {
+            try {
+                const r = await fetch(MKT.billing, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_PASSWORD, campaignId, action }) });
+                const d = await r.json().catch(() => ({}));
+                if (r.ok && d.ok !== false) loadMarketing(); else alert(d.error || 'Action failed.');
+            } catch (e) { alert('Network error.'); }
+        }
+
+        // ---- user editor ----
+        let EDITING_INDEX = null;
+        function addTplRow(t) {
+            t = t || {};
+            const selId = t.id || '';
+            // Options = live approved templates from Meta. Ensure the already-assigned one stays selectable.
+            let opts = META_TEMPLATES.slice();
+            if (selId && !opts.some(m => m.id === selId)) opts.unshift({ id: selId, name: t.name || selId, language: t.language || '', category: t.category || '', preview: t.preview || '' });
+            const optionsHtml = ['<option value="">— select approved template —</option>']
+                .concat(opts.map(m => `<option value="${mEsc(m.id)}" ${m.id === selId ? 'selected' : ''}>${mEsc(m.name)}${m.language ? ' · ' + mEsc(m.language) : ''}${m.category ? ' (' + mEsc(m.category) + ')' : ''}</option>`)).join('');
+            const wrap = document.createElement('div');
+            wrap.className = 'tpl-row grid grid-cols-12 gap-2 items-center';
+            wrap.innerHTML = `
+                <select class="tpl-select col-span-8 px-2 py-1.5 border border-slate-300 rounded text-sm bg-white" onchange="onTplPick(this)">${optionsHtml}</select>
+                <div class="col-span-3 flex items-stretch rounded border border-slate-300 overflow-hidden">
+                    <span class="px-2 flex items-center bg-slate-100 text-slate-500 text-xs">₹/msg</span>
+                    <input placeholder="0.85" value="${t.price != null ? t.price : ''}" inputmode="decimal" class="tpl-price w-full px-2 py-1.5 text-sm focus:outline-none">
+                </div>
+                <button onclick="this.parentElement.remove()" class="col-span-1 text-red-500 font-bold">✕</button>
+                <p class="tpl-preview-txt col-span-12 text-xs text-slate-400 -mt-1 whitespace-pre-wrap">${mEsc(t.preview || '')}</p>`;
+            document.getElementById('euTemplates').appendChild(wrap);
+        }
+        // Show the selected template's body text as a preview hint.
+        function onTplPick(sel) {
+            const m = META_TEMPLATES.find(x => x.id === sel.value);
+            const p = sel.closest('.tpl-row').querySelector('.tpl-preview-txt');
+            if (p) p.textContent = m ? (m.preview || '') : '';
+        }
+        function openEditor() { document.getElementById('userEditor').classList.remove('hidden'); }
+        function closeUserEditor() { document.getElementById('userEditor').classList.add('hidden'); }
+        function fillEditor(u) {
+            document.getElementById('euTemplates').innerHTML = '';
+            document.getElementById('euPhone').value = u.phone || '';
+            document.getElementById('euName').value = u.name || '';
+            document.getElementById('euBusiness').value = u.business || '';
+            (u.templates || []).forEach(addTplRow);
+            if (!(u.templates || []).length) addTplRow();
+            document.getElementById('euContacts').value = (u.contacts || []).map(c => (c.name ? c.name + ', ' : '') + c.phone).join('\n');
+            document.getElementById('euMsg').classList.add('hidden');
+            openEditor();
+        }
+        function editUser(i) {
+            EDITING_INDEX = i;
+            document.getElementById('userEditorTitle').textContent = i == null ? 'Add user' : 'Edit user';
+            fillEditor(i == null ? {} : MKT_DATA.users[i]);
+        }
+        function editUserFromReq(r) { EDITING_INDEX = null; document.getElementById('userEditorTitle').textContent = 'Set up user'; fillEditor({ phone: r.phone, name: r.name, business: r.business }); }
+
+        async function saveUser() {
+            const phone = (document.getElementById('euPhone').value || '').replace(/\D/g, '').slice(-10);
+            if (!/^[6-9]\d{9}$/.test(phone)) return alert('Enter a valid 10-digit phone.');
+            const templates = Array.from(document.querySelectorAll('#euTemplates .tpl-row')).map(row => {
+                const id = row.querySelector('.tpl-select').value;
+                if (!id) return null;
+                const m = META_TEMPLATES.find(x => x.id === id) || {};
+                return {
+                    id,
+                    name: m.name || id,
+                    language: m.language || '',
+                    category: m.category || '',
+                    preview: m.preview || '',
+                    price: parseFloat(row.querySelector('.tpl-price').value) || 0
+                };
+            }).filter(Boolean);
+            const contacts = (document.getElementById('euContacts').value || '').split('\n').map(line => {
+                const parts = line.split(',').map(s => s.trim()).filter(Boolean);
+                if (!parts.length) return null;
+                const num = (parts[parts.length - 1] || '').replace(/\D/g, '').slice(-10);
+                if (!/^[6-9]\d{9}$/.test(num)) return null;
+                const name = parts.length > 1 ? parts.slice(0, -1).join(', ') : '';
+                return { name, phone: num };
+            }).filter(Boolean);
+            const payload = { adminKey: ADMIN_PASSWORD, phone, name: document.getElementById('euName').value.trim(), business: document.getElementById('euBusiness').value.trim(), templates, contacts };
+            const btn = document.getElementById('euSaveBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+            const msg = document.getElementById('euMsg');
+            try {
+                const r = await fetch(MKT.save, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const d = await r.json().catch(() => ({}));
+                if (r.ok && d.ok !== false) { msg.textContent = '✅ Saved.'; msg.className = 'text-center text-sm font-semibold text-green-600'; msg.classList.remove('hidden'); await loadMarketing(); setTimeout(closeUserEditor, 700); }
+                else { msg.textContent = d.error || 'Save failed.'; msg.className = 'text-center text-sm font-semibold text-red-600'; msg.classList.remove('hidden'); }
+            } catch (e) { msg.textContent = 'Network error.'; msg.className = 'text-center text-sm font-semibold text-red-600'; msg.classList.remove('hidden'); }
+            finally { btn.disabled = false; btn.textContent = 'Save user'; }
+        }
+    </script>
 
     <script>
         // Webhook URLs for password management
@@ -1542,6 +1804,7 @@
             <a href="rentals.html?type=rent" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">किराये की प्रॉपर्टी (Rentals)</a>
             <a href="rentals.html?type=sell" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी बेचें (Sell Property)</a>
             <a href="agents.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी एक्सपर्ट्स (Property Experts)</a>
+            <a href="marketing.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">📣 मार्केटिंग (Marketing)</a>
             <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">लीगल एक्सपर्ट्स (Legal Experts)</a>
             <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">बैंकिंग एक्सपर्ट्स (Banking Experts)</a>
         </nav>
