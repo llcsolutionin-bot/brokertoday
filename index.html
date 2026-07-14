@@ -207,8 +207,146 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     </script>
     <!-- ===== END SITE MENU ===== -->
 
+    <style>
+    html{scroll-behavior:smooth}
+    @keyframes bt-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+    @keyframes bt-aurora{0%{transform:translate(0,0) scale(1)}33%{transform:translate(34px,-22px) scale(1.12)}66%{transform:translate(-22px,20px) scale(.94)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes bt-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .bt-aurora{position:absolute;border-radius:9999px;filter:blur(72px);opacity:.55;animation:bt-aurora 15s ease-in-out infinite;will-change:transform}
+    .bt-grad-text{background:linear-gradient(120deg,#FF6D5A,#ffb199 42%,#FF6D5A);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .bt-marquee-track{display:flex;width:max-content;animation:bt-marquee 26s linear infinite}
+    .bt-reveal{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
+    .bt-reveal.bt-in{opacity:1;transform:none}
+    .bt-noise{background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);background-size:22px 22px}
+    @media (prefers-reduced-motion:reduce){.bt-aurora,.bt-marquee-track{animation:none!important}.bt-reveal{opacity:1;transform:none}}
+    </style>
+
+    <!-- ===== HERO ===== -->
+    <section class="relative overflow-hidden bg-slate-950">
+        <div class="bt-aurora" style="width:440px;height:440px;background:#FF6D5A;top:-90px;left:-70px"></div>
+        <div class="bt-aurora" style="width:380px;height:380px;background:#6366f1;bottom:-120px;right:-50px;animation-delay:-7s"></div>
+        <div class="absolute inset-0 bt-noise"></div>
+        <div class="relative container mx-auto max-w-6xl px-4 py-20 sm:py-28 grid lg:grid-cols-2 gap-12 items-center">
+            <div class="text-white">
+                <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
+                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF6D5A] opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-[#FF6D5A]"></span></span>
+                    सिरोही, राजस्थान · 100% Verified
+                </span>
+                <h1 class="text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight">
+                    प्रॉपर्टी की <span class="bt-grad-text">हर ज़रूरत</span>,<br>एक ही जगह।
+                </h1>
+                <p class="mt-6 text-lg text-slate-300 max-w-lg leading-relaxed">
+                    प्लॉट खरीदें, बेचें और किराये पर दें — लाइव मास्टरप्लान, लीगल-बैंकिंग एक्सपर्ट्स और WhatsApp मार्केटिंग के साथ। Broker Today पर सब कुछ।
+                </p>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a href="#projects" class="group bg-[#FF6D5A] text-white font-bold px-6 py-3.5 rounded-xl transition-all hover:shadow-[0_14px_44px_-12px_#FF6D5A] inline-flex items-center gap-2">🏘️ प्रॉपर्टी देखें <span class="group-hover:translate-x-1 transition-transform">→</span></a>
+                    <a href="#services" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-6 py-3.5 rounded-xl backdrop-blur transition-all">सेवाएँ देखें</a>
+                </div>
+                <div class="mt-10 flex flex-wrap gap-8">
+                    <div><div class="text-3xl font-extrabold text-white"><span class="bt-count" data-to="100">0</span><span class="text-[#FF6D5A]">%</span></div><div class="text-xs text-slate-400 mt-0.5">Verified प्रोजेक्ट्स</div></div>
+                    <div><div class="text-3xl font-extrabold text-white"><span class="bt-count" data-to="24">0</span>×7</div><div class="text-xs text-slate-400 mt-0.5">चैट सपोर्ट</div></div>
+                    <div><div class="text-3xl font-extrabold text-white"><span class="bt-count" data-to="10">0</span>+</div><div class="text-xs text-slate-400 mt-0.5">सेवाएँ एक साथ</div></div>
+                </div>
+            </div>
+            <!-- floating preview cards (decorative, desktop only) -->
+            <div class="relative hidden lg:block h-[430px]" aria-hidden="true">
+                <div class="absolute right-2 top-4 rotate-3">
+                    <div class="w-72 bg-white rounded-2xl shadow-2xl overflow-hidden" style="animation:bt-float 6s ease-in-out infinite">
+                        <div class="h-28 bg-cover bg-center relative" style="background-image:url('aerocity-cover.jpg')"><span class="absolute top-2 left-2 text-[10px] font-extrabold bg-white/90 text-[#FF6D5A] px-2 py-0.5 rounded-full">✓ Verified</span></div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-800">Aerocity Residency</h4>
+                            <div class="text-yellow-400 text-sm mt-0.5">★★★★★ <span class="text-slate-400 text-xs">4.9</span></div>
+                            <div class="mt-3 text-xs font-bold bg-slate-100 text-slate-600 rounded-lg py-2 text-center">मैप देखें →</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute left-0 bottom-6 -rotate-3">
+                    <div class="w-60 bg-white rounded-2xl shadow-2xl p-4" style="animation:bt-float 7s ease-in-out infinite;animation-delay:-2.5s">
+                        <div class="flex items-center gap-2"><span class="text-lg">📣</span><span class="text-xs font-bold text-slate-700">WhatsApp Marketing</span><span class="ml-auto text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">LIVE</span></div>
+                        <div class="mt-3 flex items-end gap-1.5 h-16">
+                            <div class="w-5 rounded-t bg-[#FF6D5A]/40" style="height:40%"></div>
+                            <div class="w-5 rounded-t bg-[#FF6D5A]/60" style="height:65%"></div>
+                            <div class="w-5 rounded-t bg-[#FF6D5A]/80" style="height:85%"></div>
+                            <div class="w-5 rounded-t bg-[#FF6D5A]" style="height:100%"></div>
+                            <div class="w-5 rounded-t bg-[#FF6D5A]/70" style="height:72%"></div>
+                        </div>
+                        <div class="mt-2 text-xs text-slate-500">Delivered <span class="font-bold text-slate-800">96%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- marquee ticker -->
+        <div class="relative border-t border-white/10 bg-white/5 backdrop-blur py-3 overflow-hidden">
+            <div class="bt-marquee-track gap-8 text-white/70 text-sm font-semibold whitespace-nowrap px-4">
+                <span>🏘️ प्लॉट्स &amp; प्रोजेक्ट्स</span><span>🗺️ लाइव मास्टरप्लान</span><span>🔑 किराये की प्रॉपर्टी</span><span>🏷️ प्रॉपर्टी बेचें</span><span>👤 प्रॉपर्टी एक्सपर्ट्स</span><span>📰 न्यूज़ अपडेट्स</span><span>⚖️ लीगल एक्सपर्ट्स</span><span>🏦 बैंकिंग / लोन</span><span>📣 WhatsApp मार्केटिंग</span><span>💬 24×7 सपोर्ट</span>
+                <span>🏘️ प्लॉट्स &amp; प्रोजेक्ट्स</span><span>🗺️ लाइव मास्टरप्लान</span><span>🔑 किराये की प्रॉपर्टी</span><span>🏷️ प्रॉपर्टी बेचें</span><span>👤 प्रॉपर्टी एक्सपर्ट्स</span><span>📰 न्यूज़ अपडेट्स</span><span>⚖️ लीगल एक्सपर्ट्स</span><span>🏦 बैंकिंग / लोन</span><span>📣 WhatsApp मार्केटिंग</span><span>💬 24×7 सपोर्ट</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SERVICES / BENTO ===== -->
+    <section id="services" class="container mx-auto max-w-6xl px-4 py-20">
+        <div class="max-w-2xl mb-12 bt-reveal">
+            <span class="text-[#FF6D5A] font-bold text-sm uppercase tracking-widest">क्या-क्या मिलेगा</span>
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-slate-800 mt-2 tracking-tight">एक प्लेटफॉर्म, <span class="bt-grad-text">पूरी रियल एस्टेट</span></h2>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 auto-rows-[168px] gap-4" style="grid-auto-flow:dense">
+            <a href="marketing.html" class="bt-reveal group col-span-2 row-span-2 rounded-3xl p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-[#FF6D5A] to-[#F04E38] text-white flex flex-col justify-between transition-all hover:shadow-[0_24px_70px_-18px_rgba(240,78,56,.65)]">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full"></div>
+                <div class="absolute right-8 bottom-8 w-24 h-24 bg-white/10 rounded-full"></div>
+                <div class="relative flex items-center justify-between">
+                    <span class="text-5xl">📣</span>
+                    <span class="text-[11px] font-extrabold bg-white text-[#F04E38] px-2.5 py-1 rounded-full">NEW</span>
+                </div>
+                <div class="relative">
+                    <h3 class="text-2xl sm:text-3xl font-extrabold leading-tight">WhatsApp बल्क मार्केटिंग</h3>
+                    <p class="text-white/90 mt-2 max-w-sm">वेरिफाइड टेम्पलेट से हज़ारों ग्राहकों को एक साथ मैसेज — लाइव डैशबोर्ड &amp; बिलिंग।</p>
+                    <span class="inline-flex items-center gap-1 font-bold mt-4 group-hover:gap-2 transition-all">शुरू करें →</span>
+                </div>
+            </a>
+            <a href="#projects" class="bt-reveal group col-span-2 rounded-3xl overflow-hidden relative bg-cover bg-center" style="background-image:url('aerocity-cover.jpg')">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/85 to-slate-900/20 group-hover:from-slate-900/70 transition-all"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end text-white">
+                    <span class="text-2xl">🏘️</span>
+                    <h3 class="text-xl font-bold mt-1">प्लॉट्स &amp; प्रोजेक्ट्स</h3>
+                    <p class="text-sm text-white/80">वेरिफाइड गेटेड कॉलोनी और पट्टे शुदा प्लॉट्स</p>
+                </div>
+            </a>
+            <a href="rentals.html?type=rent" class="bt-reveal group rounded-3xl p-5 bg-white border border-slate-100 hover:border-[#FF6D5A]/40 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <span class="text-3xl">🔑</span><div><h3 class="font-bold text-slate-800">किराये</h3><p class="text-xs text-slate-500 mt-0.5">घर · दुकान · ऑफिस</p></div>
+            </a>
+            <a href="rentals.html?type=sell" class="bt-reveal group rounded-3xl p-5 bg-white border border-slate-100 hover:border-[#FF6D5A]/40 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <span class="text-3xl">🏷️</span><div><h3 class="font-bold text-slate-800">बेचें</h3><p class="text-xs text-slate-500 mt-0.5">मुफ्त लिस्टिंग</p></div>
+            </a>
+            <a href="aerocity.html" class="bt-reveal group col-span-2 rounded-3xl overflow-hidden relative bg-cover bg-center" style="background-image:url('aerocity-map.jpg')">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/85 to-slate-900/10 group-hover:from-slate-900/70 transition-all"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end text-white">
+                    <span class="text-2xl">🗺️</span>
+                    <h3 class="text-xl font-bold mt-1">लाइव मास्टरप्लान</h3>
+                    <p class="text-sm text-white/80">प्रोजेक्ट का लाइव नक्शा — अपना प्लॉट चुनें</p>
+                </div>
+            </a>
+            <a href="agents.html" class="bt-reveal group rounded-3xl p-5 bg-white border border-slate-100 hover:border-[#FF6D5A]/40 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <span class="text-3xl">👤</span><div><h3 class="font-bold text-slate-800">एक्सपर्ट्स</h3><p class="text-xs text-slate-500 mt-0.5">भरोसेमंद एजेंट्स</p></div>
+            </a>
+            <a href="news.html" class="bt-reveal group rounded-3xl p-5 bg-white border border-slate-100 hover:border-[#FF6D5A]/40 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <span class="text-3xl">📰</span><div><h3 class="font-bold text-slate-800">न्यूज़</h3><p class="text-xs text-slate-500 mt-0.5">मार्केट अपडेट</p></div>
+            </a>
+            <button type="button" onclick="var t=document.getElementById('contactTrigger'); if(t) t.click();" class="bt-reveal group text-left rounded-3xl p-5 bg-white border border-slate-100 hover:border-[#FF6D5A]/40 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <span class="text-3xl">⚖️</span><div><h3 class="font-bold text-slate-800">लीगल</h3><p class="text-xs text-slate-500 mt-0.5">पट्टा · रजिस्ट्री</p></div>
+            </button>
+            <button type="button" onclick="var t=document.getElementById('contactTrigger'); if(t) t.click();" class="bt-reveal group text-left rounded-3xl p-5 bg-white border border-slate-100 hover:border-[#FF6D5A]/40 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <span class="text-3xl">🏦</span><div><h3 class="font-bold text-slate-800">बैंकिंग</h3><p class="text-xs text-slate-500 mt-0.5">होम लोन · EMI</p></div>
+            </button>
+        </div>
+    </section>
+
     <!-- Main Content & Property Cards -->
     <main class="container mx-auto px-4 py-12 max-w-6xl">
+        <div id="projects" class="text-center mb-10 scroll-mt-20">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800">हमारे वेरिफाइड प्रोजेक्ट्स</h2>
+            <p class="text-slate-500 mt-3 max-w-2xl mx-auto">Verified projects — लाइव मास्टरप्लान, पट्टे शुदा प्लॉट्स और भरोसेमंद डेवलपर्स के साथ।</p>
+        </div>
         <div class="grid md:grid-cols-2 gap-8 mb-20">
             
             <!-- Property Card 1 -->
@@ -291,6 +429,20 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         <!-- Dynamic Projects Container -->
         <div id="dynamic-projects-list" class="grid md:grid-cols-2 gap-8 mb-20"></div>
 
+        <!-- Get-started CTA band -->
+        <div class="mb-20 bt-reveal relative rounded-3xl overflow-hidden bg-slate-950">
+            <div class="bt-aurora" style="width:300px;height:300px;background:#FF6D5A;top:-60px;right:10%"></div>
+            <div class="absolute inset-0 bt-noise"></div>
+            <div class="relative px-6 sm:px-12 py-14 text-center text-white">
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">अपनी प्रॉपर्टी यात्रा <span class="bt-grad-text">आज शुरू करें</span></h2>
+                <p class="text-slate-300 mt-3 max-w-xl mx-auto">वेरिफाइड प्रोजेक्ट्स देखें या हमारी टीम से सीधे बात करें — कुछ ही सेकंड में।</p>
+                <div class="mt-7 flex flex-wrap gap-3 justify-center">
+                    <a href="#projects" class="bg-[#FF6D5A] text-white font-bold px-6 py-3.5 rounded-xl hover:shadow-[0_14px_44px_-12px_#FF6D5A] transition-all">प्रॉपर्टी देखें</a>
+                    <button type="button" onclick="var t=document.getElementById('contactTrigger'); if(t) t.click();" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-6 py-3.5 rounded-xl backdrop-blur transition-all">💬 संपर्क करें</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Contact Us (form hidden until the button is clicked) -->
         <div id="contactTriggerWrap" class="text-center">
             <button id="contactTrigger" type="button" onclick="document.getElementById('contactCard').classList.remove('hidden'); document.getElementById('contactTriggerWrap').classList.add('hidden'); document.getElementById('contactCard').scrollIntoView({behavior:'smooth', block:'center'});" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-indigo-500/25 transform hover:-translate-y-0.5 transition-all duration-200">
@@ -352,6 +504,73 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             </div>
         </div>
     </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-slate-900 text-slate-300 mt-8">
+        <div class="container mx-auto max-w-6xl px-4 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div>
+                <a href="index.html" class="flex items-center gap-2 mb-4">
+                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="text-xl font-extrabold text-white tracking-tight">Broker Today</span>
+                </a>
+                <p class="text-sm text-slate-400 leading-relaxed">सिरोही, राजस्थान की भरोसेमंद रियल एस्टेट पोर्टल। वेरिफाइड प्रोजेक्ट्स, लाइव मास्टरप्लान और भरोसेमंद ब्रोकर्स।</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">प्रॉपर्टी</h4>
+                <ul class="space-y-2.5 text-sm">
+                    <li><a href="#projects" class="hover:text-[#FF6D5A] transition-colors">वेरिफाइड प्रोजेक्ट्स</a></li>
+                    <li><a href="rentals.html?type=rent" class="hover:text-[#FF6D5A] transition-colors">किराये की प्रॉपर्टी</a></li>
+                    <li><a href="rentals.html?type=sell" class="hover:text-[#FF6D5A] transition-colors">प्रॉपर्टी बेचें</a></li>
+                    <li><a href="aerocity.html" class="hover:text-[#FF6D5A] transition-colors">लाइव मास्टरप्लान</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">सेवाएँ</h4>
+                <ul class="space-y-2.5 text-sm">
+                    <li><a href="agents.html" class="hover:text-[#FF6D5A] transition-colors">प्रॉपर्टी एक्सपर्ट्स</a></li>
+                    <li><a href="news.html" class="hover:text-[#FF6D5A] transition-colors">न्यूज़ अपडेट्स</a></li>
+                    <li><a href="marketing.html" class="hover:text-[#FF6D5A] transition-colors">WhatsApp मार्केटिंग</a></li>
+                    <li><button type="button" onclick="var t=document.getElementById('contactTrigger'); if(t) t.click();" class="hover:text-[#FF6D5A] transition-colors">लीगल & बैंकिंग</button></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">संपर्क</h4>
+                <ul class="space-y-2.5 text-sm">
+                    <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#FF6D5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> सिरोही, राजस्थान</li>
+                    <li><button type="button" onclick="var t=document.getElementById('contactTrigger'); if(t) t.click();" class="inline-flex items-center gap-2 mt-1 bg-[#FF6D5A] hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg transition-opacity">💬 संपर्क करें</button></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 py-5 text-center text-sm text-slate-500">
+            © 2026 Broker Today · सिरोही, राजस्थान · सभी अधिकार सुरक्षित
+        </div>
+    </footer>
+
+    <!-- home animations: scroll-reveal + count-up (isolated, no dependency on other scripts) -->
+    <script>
+    (function () {
+        function run() {
+            var els = document.querySelectorAll('.bt-reveal');
+            if ('IntersectionObserver' in window) {
+                var io = new IntersectionObserver(function (es) {
+                    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('bt-in'); io.unobserve(e.target); } });
+                }, { threshold: 0.12 });
+                els.forEach(function (el, idx) { el.style.transitionDelay = (Math.min(idx, 6) * 60) + 'ms'; io.observe(el); });
+            } else { els.forEach(function (el) { el.classList.add('bt-in'); }); }
+            document.querySelectorAll('.bt-count').forEach(function (el) {
+                var to = parseInt(el.getAttribute('data-to'), 10) || 0, start = null, dur = 1200;
+                function step(t) { if (!start) start = t; var p = Math.min((t - start) / dur, 1); el.textContent = Math.round(p * to); if (p < 1) requestAnimationFrame(step); }
+                if ('IntersectionObserver' in window) {
+                    var o = new IntersectionObserver(function (es) {
+                        es.forEach(function (e) { if (e.isIntersecting) { requestAnimationFrame(step); o.unobserve(e.target); } });
+                    }, { threshold: 0.5 });
+                    o.observe(el);
+                } else { requestAnimationFrame(step); }
+            });
+        }
+        if (document.readyState !== 'loading') run(); else document.addEventListener('DOMContentLoaded', run);
+    })();
+    </script>
 
     <!-- CHAT WIDGET HTML -->
     <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
