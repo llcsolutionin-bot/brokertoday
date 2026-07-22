@@ -93,11 +93,12 @@
         <div class="container mx-auto max-w-6xl px-4 py-3">
             <div class="relative rounded-2xl overflow-hidden bg-slate-900 shadow">
                 <div id="adSlides" class="relative h-24 sm:h-28"></div>
-                <button id="adAddBtn" type="button" onclick="AdApp.openForm()" title="अपना विज्ञापन जोड़ें" class="absolute top-2 right-2 z-20 inline-flex items-center gap-1 bg-[#FF6D5A] hover:opacity-90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
-                    <span class="text-base leading-none">＋</span> <span class="hidden sm:inline">अपना बिज़नेस दिखाएँ</span>
-                </button>
-                <button id="adPrev" type="button" onclick="AdApp.userPrev()" aria-label="पिछला" class="hidden absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white text-xl leading-none items-center justify-center backdrop-blur">‹</button>
-                <button id="adNext" type="button" onclick="AdApp.userNext()" aria-label="अगला" class="hidden absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white text-xl leading-none items-center justify-center backdrop-blur">›</button>
+            </div>
+            <!-- controls BELOW the banner image: arrows at edges, + business centered -->
+            <div class="relative flex items-center justify-center mt-2 min-h-[38px]">
+                <button id="adPrev" type="button" onclick="AdApp.userPrev()" aria-label="पिछला" class="hidden absolute left-0 w-9 h-9 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xl leading-none items-center justify-center shadow-sm">‹</button>
+                <button id="adAddBtn" type="button" onclick="AdApp.openForm()" class="inline-flex items-center gap-1 bg-[#FF6D5A] hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-full shadow"><span class="text-base leading-none">＋</span> अपना बिज़नेस दिखाएँ</button>
+                <button id="adNext" type="button" onclick="AdApp.userNext()" aria-label="अगला" class="hidden absolute right-0 w-9 h-9 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xl leading-none items-center justify-center shadow-sm">›</button>
             </div>
         </div>
     </section>
@@ -693,10 +694,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     '<div class="absolute inset-0 flex items-center justify-center pointer-events-none">' +
                     '<img src="' + u + '" alt="विज्ञापन" class="h-full w-auto max-w-full object-contain">' +
                     '</div>' +
-                    '<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/85 to-transparent px-4 pt-6 pb-1.5 flex items-end justify-between gap-3 pointer-events-none">' +
-                    '<p class="text-white text-xs sm:text-sm font-semibold line-clamp-2 max-w-[68%] drop-shadow">' + esc(a.text || '') + '</p>' +
-                    '<button type="button" onclick="event.stopPropagation(); AdApp.like(\'' + esc(a.id) + '\')" class="pointer-events-auto shrink-0 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur' + (isL ? ' opacity-70' : '') + '">' +
+                    // heart top-right (out of the caption so it never overlaps the text)
+                    '<button type="button" onclick="event.stopPropagation(); AdApp.like(\'' + esc(a.id) + '\')" class="absolute top-2 right-2 z-10 inline-flex items-center gap-1 bg-black/35 hover:bg-black/50 border border-white/25 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur">' +
                     '<span class="ad-heart">' + (isL ? '❤️' : '🤍') + '</span> <span data-like="' + esc(a.id) + '">' + (Number(a.likes) || 0) + '</span></button>' +
+                    // caption full width along the bottom
+                    '<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/85 to-transparent px-4 pt-6 pb-1.5 pointer-events-none">' +
+                    '<p class="text-white text-xs sm:text-sm font-semibold line-clamp-2 drop-shadow">' + esc(a.text || '') + '</p>' +
                     '</div></div>';
             }).join('');
             var multi = ADS.length > 1;
@@ -720,11 +723,15 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         function userNext() { next(); startRotate(); }   // manual arrow/swipe: advance + reset timer
         function userPrev() { prev(); startRotate(); }
         async function like(id) {
-            var l = liked(); if (l.indexOf(id) !== -1) return;
-            l.push(id); localStorage.setItem(LIKED, JSON.stringify(l));
+            var l = liked(); var i = l.indexOf(id); var liking = (i === -1); // toggle: like if not yet, else un-like
+            if (liking) l.push(id); else l.splice(i, 1);
+            localStorage.setItem(LIKED, JSON.stringify(l));
             var el = document.querySelector('[data-like="' + id + '"]');
-            if (el) { el.textContent = (parseInt(el.textContent, 10) || 0) + 1; var btn = el.closest('button'); if (btn) { var h = btn.querySelector('.ad-heart'); if (h) h.textContent = '❤️'; btn.classList.add('opacity-70'); } }
-            try { await fetch(W.like, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }); } catch (e) {}
+            if (el) {
+                el.textContent = Math.max(0, (parseInt(el.textContent, 10) || 0) + (liking ? 1 : -1));
+                var btn = el.closest('button'); if (btn) { var h = btn.querySelector('.ad-heart'); if (h) h.textContent = liking ? '❤️' : '🤍'; }
+            }
+            try { await fetch(W.like, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, delta: liking ? 1 : -1 }) }); } catch (e) {}
         }
 
         // ---------- form ----------
