@@ -886,7 +886,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     var d = await r.json().catch(function () { return {}; });
                     if (r.ok && d.ok !== false) { msg('✅ विज्ञापन जुड़ गया! जल्द ही बैनर में दिखेगा।', true); loadAds(); setTimeout(closeForm, 1800); }
                     else msg(d.error || 'सबमिट नहीं हो सका।', false);
-                } catch (err) { var m = String((err && err.message) || ''); msg(/maintenance|down/i.test(m) ? 'इमेज सर्वर अभी व्यस्त है (ImgBB maintenance)। कृपया थोड़ी देर बाद फिर सबमिट करें।' : 'इमेज अपलोड/सबमिट में समस्या। कृपया फिर कोशिश करें।', false); }
+                } catch (err) { msg('इमेज अभी अपलोड नहीं हो पा रही। कृपया थोड़ी देर बाद फिर कोशिश करें।', false); }
                 finally { busy = false; unspin(b, 'विज्ञापन सबमिट करें'); }
             });
         }
