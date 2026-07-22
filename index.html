@@ -807,9 +807,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             var fd = new FormData();
             fd.append('image', dataUrl.split(',').pop()); // base64 without the data: prefix
             var res = await fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_KEY, { method: 'POST', body: fd });
-            var d = await res.json();
+            var d = await res.json().catch(function () { return {}; });
             if (d && d.success && d.data) return { url: d.data.url, deleteUrl: d.data.delete_url };
-            throw new Error('imgbb upload failed');
+            throw new Error((d && d.error && d.error.message) ? d.error.message : 'upload failed');
         }
         async function onFile(input) {
             var f = input.files && input.files[0]; if (!f) return;
@@ -886,7 +886,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     var d = await r.json().catch(function () { return {}; });
                     if (r.ok && d.ok !== false) { msg('✅ विज्ञापन जुड़ गया! जल्द ही बैनर में दिखेगा।', true); loadAds(); setTimeout(closeForm, 1800); }
                     else msg(d.error || 'सबमिट नहीं हो सका।', false);
-                } catch (err) { msg('इमेज अपलोड/सबमिट में समस्या।', false); }
+                } catch (err) { var m = String((err && err.message) || ''); msg(/maintenance|down/i.test(m) ? 'इमेज सर्वर अभी व्यस्त है (ImgBB maintenance)। कृपया थोड़ी देर बाद फिर सबमिट करें।' : 'इमेज अपलोड/सबमिट में समस्या। कृपया फिर कोशिश करें।', false); }
                 finally { busy = false; unspin(b, 'विज्ञापन सबमिट करें'); }
             });
         }
