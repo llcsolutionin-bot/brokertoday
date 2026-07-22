@@ -585,6 +585,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     })();
     </script>
 
+    <!-- ===== AD IMAGE LIGHTBOX ===== -->
+    <div id="adZoom" class="hidden fixed inset-0 bg-black/90 z-[130] flex items-center justify-center p-4" onclick="AdApp.closeZoom()">
+        <img id="adZoomImg" src="" alt="विज्ञापन" class="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl">
+        <button onclick="AdApp.closeZoom()" aria-label="बंद करें" class="absolute top-4 right-4 text-white/90 hover:text-white text-4xl leading-none">✖</button>
+    </div>
+
     <!-- ===== AD SUBMISSION MODAL ===== -->
     <div id="adModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-start justify-center p-3 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md my-6">
@@ -677,11 +683,19 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             var L = liked();
             wrap.innerHTML = ADS.map(function (a, i) {
                 var isL = L.indexOf(a.id) !== -1;
-                return '<div class="ad-slide absolute inset-0 bg-cover bg-center transition-opacity duration-700 ' + (i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none') + '" style="background-image:url(\'' + esc(a.imageUrl) + '\')">' +
-                    '<div class="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/25 to-slate-900/70"></div>' +
-                    '<div class="absolute inset-0 flex items-center justify-between gap-3 px-4">' +
-                    '<p class="text-white text-sm sm:text-base font-semibold line-clamp-2 max-w-[72%]">' + esc(a.text || '') + '</p>' +
-                    '<button type="button" onclick="AdApp.like(\'' + esc(a.id) + '\')" class="shrink-0 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-sm font-bold px-3 py-1.5 rounded-full backdrop-blur' + (isL ? ' opacity-70' : '') + '">' +
+                var u = esc(a.imageUrl);
+                return '<div class="ad-slide absolute inset-0 transition-opacity duration-700 ' + (i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none') + '">' +
+                    // blurred fill so any aspect ratio looks clean
+                    '<div class="absolute inset-0 bg-center bg-cover blur-xl scale-110" style="background-image:url(\'' + u + '\')"></div>' +
+                    '<div class="absolute inset-0 bg-slate-900/35"></div>' +
+                    // the real image, contained + centered, tap to enlarge
+                    '<div class="absolute inset-0 flex items-center justify-center">' +
+                    '<img src="' + u + '" alt="विज्ञापन" onclick="AdApp.zoom(\'' + u + '\')" class="h-full w-auto max-w-full object-contain cursor-zoom-in">' +
+                    '</div>' +
+                    // caption + like
+                    '<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/85 to-transparent px-4 pt-6 pb-1.5 flex items-end justify-between gap-3">' +
+                    '<p class="text-white text-xs sm:text-sm font-semibold line-clamp-2 max-w-[70%] drop-shadow">' + esc(a.text || '') + '</p>' +
+                    '<button type="button" onclick="AdApp.like(\'' + esc(a.id) + '\')" class="shrink-0 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur' + (isL ? ' opacity-70' : '') + '">' +
                     '<span class="ad-heart">' + (isL ? '❤️' : '🤍') + '</span> <span data-like="' + esc(a.id) + '">' + (Number(a.likes) || 0) + '</span></button>' +
                     '</div></div>';
             }).join('');
@@ -835,8 +849,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             else msg('हटाने में समस्या।', false);
         }
 
+        function zoom(url) { var z = $('adZoom'), im = $('adZoomImg'); if (!z || !im) return; im.src = url; z.classList.remove('hidden'); clearInterval(timer); }
+        function closeZoom() { var z = $('adZoom'); if (z) z.classList.add('hidden'); startRotate(); }
+
         if (document.readyState !== 'loading') init(); else document.addEventListener('DOMContentLoaded', init);
-        return { openForm: openForm, closeForm: closeForm, backToPhone: backToPhone, startReplace: startReplace, onFile: onFile, countWords: countWords, like: like, toggleActive: toggleActive, deleteAd: deleteAd };
+        return { openForm: openForm, closeForm: closeForm, backToPhone: backToPhone, startReplace: startReplace, onFile: onFile, countWords: countWords, like: like, toggleActive: toggleActive, deleteAd: deleteAd, zoom: zoom, closeZoom: closeZoom };
     })();
     </script>
 
