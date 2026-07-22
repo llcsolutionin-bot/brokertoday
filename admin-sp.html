@@ -229,6 +229,20 @@
                         Manage Marketing →
                     </div>
                 </button>
+
+                <!-- Ads Manager -->
+                <button onclick="openAdsManager()" class="group block bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl p-6 border-2 border-orange-200 hover:border-orange-400 transition-all shadow-md hover:shadow-xl text-left w-full">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-orange-500 text-white w-12 h-12 rounded-lg flex items-center justify-center text-2xl">
+                            🖼️
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Ads Manager</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">Moderate business banner ads — keep, deactivate or remove</p>
+                    <div class="flex items-center text-orange-600 font-semibold text-sm group-hover:translate-x-2 transition-transform">
+                        Manage Ads →
+                    </div>
+                </button>
             </div>
 
             <!-- Add New Project Card -->
@@ -660,6 +674,75 @@
             </form>
         </div>
     </div>
+
+    <!-- ============ ADS MANAGER MODAL ============ -->
+    <div id="adsModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-3 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-6">
+            <div class="flex items-center justify-between p-5 border-b border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800">🖼️ Ads Manager</h2>
+                <div class="flex items-center gap-2">
+                    <button onclick="loadAdminAds()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-sm">🔄 Refresh</button>
+                    <button onclick="closeAdsManager()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+                </div>
+            </div>
+            <div class="p-5">
+                <p class="text-sm text-slate-500 mb-4">Business banner ads submitted by users. Deactivate to hide from the site, or delete permanently. Improper/unethical ads should be removed.</p>
+                <div id="adminAdsList" class="grid sm:grid-cols-2 gap-4"><div class="loader"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ ADS MANAGER (admin) ============
+        const ADS_ADMIN = { list: 'https://llcsolution.duckdns.org/webhook/ads-admin-list', action: 'https://llcsolution.duckdns.org/webhook/ads-admin-action' };
+        let ADMIN_ADS = [];
+        const adEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+        function openAdsManager() { document.getElementById('adsModal').classList.remove('hidden'); loadAdminAds(); }
+        function closeAdsManager() { document.getElementById('adsModal').classList.add('hidden'); }
+
+        async function loadAdminAds() {
+            document.getElementById('adminAdsList').innerHTML = '<div class="loader"></div>';
+            try {
+                const r = await fetch(ADS_ADMIN.list, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_TOKEN }) });
+                const d = await r.json().catch(() => ({}));
+                ADMIN_ADS = Array.isArray(d.ads) ? d.ads : (Array.isArray(d) ? d : []);
+            } catch (e) { ADMIN_ADS = []; }
+            renderAdminAds();
+        }
+        function renderAdminAds() {
+            const c = document.getElementById('adminAdsList');
+            if (!ADMIN_ADS.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-8 text-center col-span-2">No ads submitted yet.</p>'; return; }
+            c.innerHTML = ADMIN_ADS.map(a => {
+                const st = a.status || 'active';
+                const badge = st === 'active' ? 'bg-green-100 text-green-700' : (st === 'inactive' ? 'bg-slate-200 text-slate-600' : 'bg-red-100 text-red-700');
+                return `<div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <div class="h-36 bg-cover bg-center bg-slate-100" style="background-image:url('${adEsc(a.imageUrl || '')}')"></div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs text-slate-500">+91 ${adEsc(a.phone || '')}</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold ${badge}">${st}</span>
+                        </div>
+                        <p class="text-sm text-slate-700">${adEsc(a.text || '')}</p>
+                        <p class="text-xs text-slate-400 mt-1">❤ ${Number(a.likes) || 0} · ${adEsc(a.createdAt || '')}</p>
+                        <div class="grid grid-cols-3 gap-1.5 mt-3">
+                            <button onclick="adminAdAction('${adEsc(a.id)}','activate')" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 rounded-lg">Keep</button>
+                            <button onclick="adminAdAction('${adEsc(a.id)}','deactivate')" class="bg-slate-500 hover:bg-slate-600 text-white text-xs font-bold py-1.5 rounded-lg">Hide</button>
+                            <button onclick="adminAdAction('${adEsc(a.id)}','delete')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 rounded-lg">Delete</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        async function adminAdAction(id, action) {
+            if (action === 'delete' && !confirm('Delete this ad permanently?')) return;
+            try {
+                const r = await fetch(ADS_ADMIN.action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_TOKEN, id, action }) });
+                const d = await r.json().catch(() => ({}));
+                if (r.ok && d.ok !== false) loadAdminAds(); else alert(d.error || 'Action failed.');
+            } catch (e) { alert('Network error.'); }
+        }
+    </script>
 
     <!-- ============ MARKETING MANAGER MODAL ============ -->
     <div id="marketingModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-3 overflow-y-auto">

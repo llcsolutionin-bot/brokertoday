@@ -88,6 +88,19 @@
         </div>
     </nav>
 
+    <!-- ===== ADVERTISEMENT BANNER (rotating) ===== -->
+    <section id="adBanner" class="bg-slate-100">
+        <div class="container mx-auto max-w-6xl px-4 py-3">
+            <div class="relative rounded-2xl overflow-hidden bg-slate-900 shadow">
+                <div id="adSlides" class="relative h-24 sm:h-28"></div>
+                <button id="adAddBtn" type="button" onclick="AdApp.openForm()" title="अपना विज्ञापन जोड़ें" class="absolute top-2 right-2 z-20 inline-flex items-center gap-1 bg-[#FF6D5A] hover:opacity-90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
+                    <span class="text-base leading-none">＋</span> <span class="hidden sm:inline">अपना बिज़नेस दिखाएँ</span>
+                </button>
+                <div id="adDots" class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-1.5"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- ===== SITE MENU (Hamburger Drawer) — shared across all pages ===== -->
     <div id="mainMenuOverlay" onclick="closeMainMenu()" class="hidden fixed inset-0 bg-black/50 z-[90]"></div>
     <aside id="mainMenu" class="hidden fixed top-0 right-0 h-full w-72 max-w-[80%] bg-slate-900 text-white z-[100] shadow-2xl flex flex-col">
@@ -569,6 +582,261 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             });
         }
         if (document.readyState !== 'loading') run(); else document.addEventListener('DOMContentLoaded', run);
+    })();
+    </script>
+
+    <!-- ===== AD SUBMISSION MODAL ===== -->
+    <div id="adModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-start justify-center p-3 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md my-6">
+            <div class="flex items-center justify-between p-5 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800">📣 अपना बिज़नेस विज्ञापन</h3>
+                <button onclick="AdApp.closeForm()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+            </div>
+            <div class="p-5">
+                <!-- phone -->
+                <form id="adPhoneForm" class="space-y-4">
+                    <p class="text-sm text-slate-500">अपना 10-अंकों का WhatsApp नंबर डालें। OTP से वेरिफाई करने के बाद आप विज्ञापन जोड़ सकते हैं।</p>
+                    <div class="flex items-stretch rounded-lg border border-slate-300 overflow-hidden focus-within:border-[#FF6D5A]">
+                        <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
+                        <input id="adPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
+                    </div>
+                    <button type="submit" id="adSendOtp" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">OTP भेजें</button>
+                </form>
+                <!-- otp -->
+                <form id="adOtpForm" class="space-y-4 hidden">
+                    <p class="text-sm text-slate-500">OTP भेजा गया <span id="adOtpPhone" class="font-bold"></span> पर · <button type="button" onclick="AdApp.backToPhone()" class="text-[#FF6D5A] font-semibold">बदलें</button></p>
+                    <input id="adOtp" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#FF6D5A]" required>
+                    <button type="submit" id="adVerify" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">वेरिफाई करें</button>
+                </form>
+                <!-- existing ad -->
+                <div id="adExisting" class="space-y-4 hidden">
+                    <p class="text-sm text-slate-500">इस नंबर से पहले से एक विज्ञापन मौजूद है। आप इसे बदल, बंद या हटा सकते हैं।</p>
+                    <div class="rounded-xl overflow-hidden border border-slate-200">
+                        <div id="adExistingImg" class="h-32 bg-cover bg-center bg-slate-100"></div>
+                        <div class="p-3">
+                            <p id="adExistingText" class="text-sm text-slate-700"></p>
+                            <p class="text-xs mt-1 text-slate-500">स्थिति: <span id="adExistingStatus" class="font-bold"></span></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="adToggleBtn" onclick="AdApp.toggleActive()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg text-sm">बंद करें</button>
+                        <button type="button" onclick="AdApp.startReplace()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg text-sm">इमेज बदलें</button>
+                        <button type="button" onclick="AdApp.deleteAd()" class="col-span-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2.5 rounded-lg text-sm">विज्ञापन हमेशा के लिए हटाएँ</button>
+                    </div>
+                </div>
+                <!-- upload -->
+                <form id="adUploadForm" class="space-y-4 hidden">
+                    <div>
+                        <div id="adPreview" class="h-40 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-sm bg-cover bg-center">इमेज चुनें</div>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <button type="button" onclick="document.getElementById('adFileGallery').click()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg text-sm">📁 डिवाइस से</button>
+                            <button type="button" onclick="document.getElementById('adFileCamera').click()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg text-sm">📷 कैमरा</button>
+                        </div>
+                        <input id="adFileGallery" type="file" accept="image/*" class="hidden" onchange="AdApp.onFile(this)">
+                        <input id="adFileCamera" type="file" accept="image/*" capture="environment" class="hidden" onchange="AdApp.onFile(this)">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">विवरण (अधिकतम 140 शब्द)</label>
+                        <textarea id="adText" rows="3" maxlength="1400" oninput="AdApp.countWords()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#FF6D5A]" placeholder="अपने बिज़नेस या इमेज के बारे में लिखें..."></textarea>
+                        <p class="text-xs mt-1"><span id="adWordCount" class="text-slate-400">0</span><span class="text-slate-400">/140 शब्द</span></p>
+                    </div>
+                    <button type="submit" id="adSubmitBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">विज्ञापन सबमिट करें</button>
+                </form>
+                <p id="adMsg" class="hidden mt-4 text-center text-sm font-semibold"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== AD APP SCRIPT (isolated) ===== -->
+    <script>
+    window.AdApp = (function () {
+        var BASE = 'https://llcsolution.duckdns.org/webhook';
+        // OTP REUSES the existing marketing flow (mkt-otp-send / mkt-otp-verify) — no new OTP webhooks.
+        // Token returned by mkt-otp-verify is validated (against the Sessions sheet) by ads-mine/submit/manage.
+        var W = { list: BASE + '/ads-list', otpSend: BASE + '/mkt-otp-send', verify: BASE + '/mkt-otp-verify', mine: BASE + '/ads-mine', submit: BASE + '/ads-submit', like: BASE + '/ads-like', manage: BASE + '/ads-manage' };
+        var IMGBB_KEY = 'a31e91458ccc1c4896125f42c4c3d7f8'; // same key used across the site (aerocity/news/rentals…)
+        var ADS = [], idx = 0, timer = null, token = '', phone = '', existing = null, imgData = '', replaceMode = false;
+        var LIKED = 'bt_ad_liked';
+        function $(id) { return document.getElementById(id); }
+        function digits(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
+        function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+        function liked() { try { return JSON.parse(localStorage.getItem(LIKED) || '[]'); } catch (e) { return []; } }
+
+        // ---------- banner ----------
+        async function loadAds() {
+            try { var r = await fetch(W.list, { headers: { 'Cache-Control': 'no-cache' } }); var d = await r.json().catch(function () { return {}; }); ADS = Array.isArray(d.ads) ? d.ads : (Array.isArray(d) ? d : []); }
+            catch (e) { ADS = []; }
+            renderSlides();
+        }
+        function renderSlides() {
+            var wrap = $('adSlides'), dots = $('adDots'); if (!wrap) return;
+            if (!ADS.length) {
+                wrap.innerHTML = '<button type="button" onclick="AdApp.openForm()" class="absolute inset-0 flex items-center justify-center text-white/90 text-sm font-semibold bg-gradient-to-r from-slate-800 to-slate-900">＋ अपना विज्ञापन यहाँ दिखाएँ — क्लिक करें</button>';
+                dots.innerHTML = ''; return;
+            }
+            var L = liked();
+            wrap.innerHTML = ADS.map(function (a, i) {
+                var isL = L.indexOf(a.id) !== -1;
+                return '<div class="ad-slide absolute inset-0 bg-cover bg-center transition-opacity duration-700 ' + (i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none') + '" style="background-image:url(\'' + esc(a.imageUrl) + '\')">' +
+                    '<div class="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/25 to-slate-900/70"></div>' +
+                    '<div class="absolute inset-0 flex items-center justify-between gap-3 px-4">' +
+                    '<p class="text-white text-sm sm:text-base font-semibold line-clamp-2 max-w-[72%]">' + esc(a.text || '') + '</p>' +
+                    '<button type="button" onclick="AdApp.like(\'' + esc(a.id) + '\')" class="shrink-0 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-sm font-bold px-3 py-1.5 rounded-full backdrop-blur' + (isL ? ' opacity-70' : '') + '">' +
+                    '<span class="ad-heart">' + (isL ? '❤️' : '🤍') + '</span> <span data-like="' + esc(a.id) + '">' + (Number(a.likes) || 0) + '</span></button>' +
+                    '</div></div>';
+            }).join('');
+            dots.innerHTML = ADS.map(function (a, i) { return '<span class="ad-dot w-1.5 h-1.5 rounded-full ' + (i === 0 ? 'bg-white' : 'bg-white/40') + '"></span>'; }).join('');
+            idx = 0; startRotate();
+        }
+        function startRotate() { clearInterval(timer); if (ADS.length < 2) return; timer = setInterval(next, 3000); }
+        function next() {
+            var slides = document.querySelectorAll('#adSlides .ad-slide'), dots = document.querySelectorAll('#adDots .ad-dot');
+            if (!slides.length) return;
+            slides[idx].classList.add('opacity-0', 'pointer-events-none'); slides[idx].classList.remove('opacity-100');
+            if (dots[idx]) { dots[idx].classList.remove('bg-white'); dots[idx].classList.add('bg-white/40'); }
+            idx = (idx + 1) % slides.length;
+            slides[idx].classList.remove('opacity-0', 'pointer-events-none'); slides[idx].classList.add('opacity-100');
+            if (dots[idx]) { dots[idx].classList.add('bg-white'); dots[idx].classList.remove('bg-white/40'); }
+        }
+        async function like(id) {
+            var l = liked(); if (l.indexOf(id) !== -1) return;
+            l.push(id); localStorage.setItem(LIKED, JSON.stringify(l));
+            var el = document.querySelector('[data-like="' + id + '"]');
+            if (el) { el.textContent = (parseInt(el.textContent, 10) || 0) + 1; var btn = el.closest('button'); if (btn) { var h = btn.querySelector('.ad-heart'); if (h) h.textContent = '❤️'; btn.classList.add('opacity-70'); } }
+            try { await fetch(W.like, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }); } catch (e) {}
+        }
+
+        // ---------- form ----------
+        function show(which) { ['adPhoneForm', 'adOtpForm', 'adExisting', 'adUploadForm'].forEach(function (id) { $(id).classList.toggle('hidden', id !== which); }); }
+        function msg(t, ok) { var m = $('adMsg'); m.textContent = t; m.className = 'mt-4 text-center text-sm font-semibold ' + (ok ? 'text-green-600' : 'text-red-600'); m.classList.remove('hidden'); }
+        function hideMsg() { $('adMsg').classList.add('hidden'); }
+        function openForm() { reset(); $('adModal').classList.remove('hidden'); }
+        function closeForm() { $('adModal').classList.add('hidden'); }
+        function reset() {
+            token = ''; phone = ''; existing = null; imgData = ''; replaceMode = false;
+            show('adPhoneForm'); $('adPhone').value = ''; $('adOtp').value = ''; $('adText').value = '';
+            $('adPreview').style.backgroundImage = ''; $('adPreview').textContent = 'इमेज चुनें'; $('adWordCount').textContent = '0'; hideMsg();
+        }
+        function backToPhone() { show('adPhoneForm'); hideMsg(); }
+        function startReplace() { replaceMode = true; imgData = ''; $('adPreview').style.backgroundImage = ''; $('adPreview').textContent = 'नई इमेज चुनें'; $('adText').value = existing ? (existing.text || '') : ''; countWords(); show('adUploadForm'); hideMsg(); }
+        function countWords() {
+            var t = $('adText').value.trim(); var n = t ? t.split(/\s+/).filter(Boolean).length : 0;
+            var c = $('adWordCount'); c.textContent = n; c.className = n > 140 ? 'text-red-500 font-bold' : 'text-slate-400';
+        }
+
+        function resizeImage(file) {
+            return new Promise(function (resolve, reject) {
+                var img = new Image(), url = URL.createObjectURL(file);
+                img.onload = function () {
+                    var w = img.width, h = img.height, MAX = 1280;
+                    if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                    var c = document.createElement('canvas'); c.width = w; c.height = h;
+                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    URL.revokeObjectURL(url);
+                    resolve(c.toDataURL('image/jpeg', 0.82));
+                };
+                img.onerror = reject; img.src = url;
+            });
+        }
+        // Upload the resized base64 straight to ImgBB (same key/approach as the rest of the site).
+        async function uploadImgBB(dataUrl) {
+            var fd = new FormData();
+            fd.append('image', dataUrl.split(',').pop()); // base64 without the data: prefix
+            var res = await fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_KEY, { method: 'POST', body: fd });
+            var d = await res.json();
+            if (d && d.success && d.data) return { url: d.data.url, deleteUrl: d.data.delete_url };
+            throw new Error('imgbb upload failed');
+        }
+        async function onFile(input) {
+            var f = input.files && input.files[0]; if (!f) return;
+            if (!/^image\//.test(f.type)) { msg('कृपया एक इमेज फ़ाइल चुनें।', false); return; }
+            hideMsg();
+            try { imgData = await resizeImage(f); $('adPreview').style.backgroundImage = "url('" + imgData + "')"; $('adPreview').textContent = ''; }
+            catch (e) { msg('इमेज पढ़ने में समस्या।', false); }
+            input.value = '';
+        }
+
+        function init() {
+            loadAds();
+            document.addEventListener('input', function (e) {
+                if (e.target.id === 'adPhone') e.target.value = digits(e.target.value).slice(0, 10);
+                if (e.target.id === 'adOtp') e.target.value = digits(e.target.value).slice(0, 6);
+            });
+            $('adPhoneForm').addEventListener('submit', async function (e) {
+                e.preventDefault(); hideMsg();
+                var p = $('adPhone').value; if (!/^[6-9]\d{9}$/.test(p)) return msg('सही 10-अंकों का नंबर डालें।', false);
+                var b = $('adSendOtp'); b.disabled = true; b.textContent = 'भेज रहे हैं…';
+                try {
+                    var r = await fetch(W.otpSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: p }) });
+                    var d = await r.json().catch(function () { return {}; });
+                    if (r.ok && d.ok !== false) { phone = p; $('adOtpPhone').textContent = '+91 ' + p; show('adOtpForm'); $('adOtp').focus(); }
+                    else msg(d.error || 'OTP नहीं भेज सके।', false);
+                } catch (err) { msg('नेटवर्क त्रुटि।', false); }
+                finally { b.disabled = false; b.textContent = 'OTP भेजें'; }
+            });
+            $('adOtpForm').addEventListener('submit', async function (e) {
+                e.preventDefault(); hideMsg();
+                var otp = $('adOtp').value; if (otp.length < 4) return msg('OTP डालें।', false);
+                var b = $('adVerify'); b.disabled = true; b.textContent = 'जाँच रहे हैं…';
+                try {
+                    var r = await fetch(W.verify, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: phone, otp: otp }) });
+                    var d = await r.json().catch(function () { return {}; });
+                    if (r.ok && d.ok !== false && d.token) {
+                        token = d.token;
+                        try { var mr = await fetch(W.mine, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, phone: phone }) }); var md = await mr.json().catch(function () { return {}; }); existing = md.ad || md.existingAd || null; } catch (me) { existing = null; }
+                        if (existing && existing.id) {
+                            $('adExistingImg').style.backgroundImage = "url('" + esc(existing.imageUrl || '') + "')";
+                            $('adExistingText').textContent = existing.text || '';
+                            var st = existing.status || 'active';
+                            $('adExistingStatus').textContent = st === 'active' ? 'दिख रहा है (Active)' : (st === 'inactive' ? 'बंद (Inactive)' : st);
+                            $('adToggleBtn').textContent = st === 'active' ? 'बंद करें' : 'चालू करें';
+                            show('adExisting');
+                        } else { replaceMode = false; show('adUploadForm'); }
+                    } else msg(d.error || 'गलत या एक्सपायर OTP।', false);
+                } catch (err) { msg('नेटवर्क त्रुटि।', false); }
+                finally { b.disabled = false; b.textContent = 'वेरिफाई करें'; }
+            });
+            $('adUploadForm').addEventListener('submit', async function (e) {
+                e.preventDefault(); hideMsg();
+                var txt = $('adText').value.trim();
+                var words = txt ? txt.split(/\s+/).filter(Boolean).length : 0;
+                if (!imgData) return msg('कृपया एक इमेज चुनें।', false);
+                if (!txt) return msg('कृपया विवरण लिखें।', false);
+                if (words > 140) return msg('विवरण 140 शब्दों से कम रखें।', false);
+                var b = $('adSubmitBtn'); b.disabled = true; b.textContent = 'इमेज अपलोड हो रही है…';
+                try {
+                    var up = await uploadImgBB(imgData); // browser -> ImgBB, same as the rest of the site
+                    b.textContent = 'सबमिट हो रहा है…';
+                    var adId = (existing && existing.id) ? existing.id : ('ad_' + Array.from({ length: 6 }, function () { return Math.floor(Math.random() * 16).toString(16); }).join(''));
+                    var r = await fetch(W.submit, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, phone: phone, id: adId, imageUrl: up.url, deleteUrl: up.deleteUrl, text: txt, status: 'active', replace: replaceMode }) });
+                    var d = await r.json().catch(function () { return {}; });
+                    if (r.ok && d.ok !== false) { msg('✅ विज्ञापन जुड़ गया! जल्द ही बैनर में दिखेगा।', true); loadAds(); setTimeout(closeForm, 1800); }
+                    else msg(d.error || 'सबमिट नहीं हो सका।', false);
+                } catch (err) { msg('इमेज अपलोड/सबमिट में समस्या।', false); }
+                finally { b.disabled = false; b.textContent = 'विज्ञापन सबमिट करें'; }
+            });
+        }
+        async function manage(action) {
+            try {
+                var r = await fetch(W.manage, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, phone: phone, action: action }) });
+                var d = await r.json().catch(function () { return {}; });
+                return r.ok && d.ok !== false;
+            } catch (e) { return false; }
+        }
+        async function toggleActive() {
+            var cur = existing ? (existing.status || 'active') : 'active';
+            var action = cur === 'active' ? 'deactivate' : 'activate';
+            if (await manage(action)) { existing.status = action === 'deactivate' ? 'inactive' : 'active'; msg(action === 'deactivate' ? 'विज्ञापन बंद कर दिया।' : 'विज्ञापन चालू कर दिया।', true); $('adToggleBtn').textContent = existing.status === 'active' ? 'बंद करें' : 'चालू करें'; $('adExistingStatus').textContent = existing.status === 'active' ? 'दिख रहा है (Active)' : 'बंद (Inactive)'; loadAds(); }
+            else msg('कार्रवाई विफल।', false);
+        }
+        async function deleteAd() {
+            if (!confirm('विज्ञापन हमेशा के लिए हटाएँ?')) return;
+            if (await manage('delete')) { msg('विज्ञापन हटा दिया गया।', true); existing = null; loadAds(); setTimeout(closeForm, 1400); }
+            else msg('हटाने में समस्या।', false);
+        }
+
+        if (document.readyState !== 'loading') init(); else document.addEventListener('DOMContentLoaded', init);
+        return { openForm: openForm, closeForm: closeForm, backToPhone: backToPhone, startReplace: startReplace, onFile: onFile, countWords: countWords, like: like, toggleActive: toggleActive, deleteAd: deleteAd };
     })();
     </script>
 
