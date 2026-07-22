@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broker Today | 2D फ्लोर प्लान जनरेटर</title>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Broker Today">
+    <meta property="og:title" content="Broker Today — 2D Floor Plan Generator">
+    <meta property="og:description" content="अपने प्लॉट के लिए तुरंत 2D फ्लोर प्लान बनाएँ — प्लॉट साइज़, कमरे और दिशा डालें और डाउनलोड करें।">
+    <meta property="og:url" content="https://brokertoday.in/floorplan.html">
+    <meta property="og:image" content="https://brokertoday.in/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .fp-spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; border-radius: 50%; animation: fpspin .7s linear infinite; vertical-align: -2px; margin-right: 4px; }
+        @keyframes fpspin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Navigation Bar (shared skeleton) -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
+        <div class="container mx-auto max-w-6xl flex items-center gap-3">
+            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            </a>
+            <span class="ml-auto hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-blue-500/20 text-blue-200 border border-blue-500/40 px-3 py-1.5 rounded-full">📐 Floor Plan</span>
+        </div>
+    </nav>
+
+    <!-- ===== SITE MENU (Hamburger Drawer) ===== -->
+    <div id="mainMenuOverlay" onclick="closeMainMenu()" class="hidden fixed inset-0 bg-black/50 z-[90]"></div>
+    <aside id="mainMenu" class="hidden fixed top-0 right-0 h-full w-72 max-w-[80%] bg-slate-900 text-white z-[100] shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b border-slate-700">
+            <span class="text-lg font-extrabold tracking-tight">मेन्यू (Menu)</span>
+            <button onclick="closeMainMenu()" aria-label="बंद करें" class="p-1.5 hover:bg-slate-700 rounded-md text-xl leading-none">✕</button>
+        </div>
+        <nav class="flex flex-col p-3 gap-1.5 overflow-y-auto">
+            <a href="index.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">🏠 होम (Home)</a>
+            <a href="news.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">📰 न्यूज़ अपडेट्स (News Updates)</a>
+            <a href="rentals.html?type=rent" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">किराये की प्रॉपर्टी (Rentals)</a>
+            <a href="rentals.html?type=sell" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी बेचें (Sell Property)</a>
+            <a href="agents.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी एक्सपर्ट्स (Property Experts)</a>
+            <a href="floorplan.html" class="px-4 py-3 rounded-lg bg-blue-600 border border-blue-400 text-white font-semibold tracking-wide transition-all">📐 2D फ्लोर प्लान (Floor Plan)</a>
+            <a href="marketing.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">📣 मार्केटिंग (Marketing)</a>
+        </nav>
+        <div class="mt-auto p-4 border-t border-slate-700">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">थीम चुनें (Theme)</p>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-xl leading-none">🖥️</span><span class="text-[10px] text-slate-300">System</span></button>
+                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-xl leading-none">☀️</span><span class="text-[10px] text-slate-300">Light</span></button>
+                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-xl leading-none">🌙</span><span class="text-[10px] text-slate-300">Dark</span></button>
+            </div>
+        </div>
+    </aside>
+    <script>
+        function toggleMainMenu() { document.getElementById('mainMenu').classList.toggle('hidden'); document.getElementById('mainMenuOverlay').classList.toggle('hidden'); }
+        function closeMainMenu() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('mainMenuOverlay').classList.add('hidden'); }
+        (function () {
+            const css = `
+:root{--brand:#FF6D5A;--brand-dark:#F04E38;--brand-ring:#FF8A7A;}
+.bg-blue-600,.bg-blue-500,.bg-green-600,.bg-green-500,.bg-indigo-600,.bg-indigo-500{background-color:var(--brand)!important;}
+.hover\\:bg-blue-700:hover,.hover\\:bg-blue-600:hover,.hover\\:bg-green-700:hover,.hover\\:bg-green-600:hover,.hover\\:bg-indigo-700:hover{background-color:var(--brand-dark)!important;}
+.text-\\[\\#FF6D5A\\]{color:var(--brand)!important;}
+.focus\\:border-blue-500:focus,.focus\\:border-indigo-500:focus{border-color:var(--brand)!important;}
+html[data-theme="dark"] body{background-color:#0B1220!important;color:#E2E8F0!important;}
+html[data-theme="dark"] .bg-white{background-color:#1E293B!important;}
+html[data-theme="dark"] .bg-slate-50{background-color:#0F172A!important;}
+html[data-theme="dark"] .bg-slate-100{background-color:#334155!important;}
+html[data-theme="dark"] .text-slate-900,html[data-theme="dark"] .text-slate-800,html[data-theme="dark"] .text-slate-700{color:#E2E8F0!important;}
+html[data-theme="dark"] .text-slate-600,html[data-theme="dark"] .text-slate-500{color:#94A3B8!important;}
+html[data-theme="dark"] .border-slate-100,html[data-theme="dark"] .border-slate-200,html[data-theme="dark"] .border-slate-300{border-color:#334155!important;}
+html[data-theme="dark"] input,html[data-theme="dark"] select{background-color:#0F172A!important;color:#E2E8F0!important;border-color:#334155!important;}
+`;
+            const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+        })();
+        const _btDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
+        function applySavedTheme() {
+            const stored = localStorage.getItem('bt_theme') || 'system';
+            const useDark = stored === 'dark' || (stored === 'system' && _btDarkMQL.matches);
+            if (useDark) document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme');
+            document.querySelectorAll('.theme-opt').forEach(function (b) { const active = b.getAttribute('data-theme-value') === stored; b.classList.toggle('ring-2', active); b.classList.toggle('ring-white', active); });
+        }
+        function setTheme(t) { localStorage.setItem('bt_theme', t); applySavedTheme(); }
+        if (_btDarkMQL.addEventListener) { _btDarkMQL.addEventListener('change', function () { if ((localStorage.getItem('bt_theme') || 'system') === 'system') applySavedTheme(); }); }
+        applySavedTheme();
+    </script>
+    <!-- ===== END SITE MENU ===== -->
+
+    <!-- ============ LEAD GATE (name + WhatsApp + OTP) ============ -->
+    <section id="fpGate" class="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-10">
+        <div class="w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+                <div class="text-center mb-6">
+                    <div class="mx-auto w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-3xl mb-3">📐</div>
+                    <h2 class="text-2xl font-extrabold text-slate-800">2D फ्लोर प्लान बनाएँ</h2>
+                    <p class="text-slate-500 text-sm mt-1">अपना विवरण दर्ज करें और WhatsApp OTP से वेरिफाई करें — फिर तुरंत अपना फ्री फ्लोर प्लान बनाएँ।</p>
+                </div>
+                <!-- details -->
+                <form id="fpDetailsForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">आपका नाम</label>
+                        <input type="text" id="fpName" required placeholder="Your name" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">WhatsApp नंबर</label>
+                        <div class="flex items-stretch rounded-lg border border-slate-300 overflow-hidden focus-within:border-blue-500">
+                            <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
+                            <input type="tel" id="fpPhone" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="fpSendOtp" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">OTP भेजें</button>
+                </form>
+                <!-- otp -->
+                <form id="fpOtpForm" class="space-y-4 hidden">
+                    <p class="text-sm text-slate-500">OTP भेजा गया <span id="fpOtpPhone" class="font-bold"></span> पर · <button type="button" onclick="fpBackToDetails()" class="text-blue-600 font-semibold">बदलें</button></p>
+                    <input type="text" id="fpOtp" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500" required>
+                    <button type="submit" id="fpVerify" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">वेरिफाई करें</button>
+                </form>
+                <p id="fpGateMsg" class="hidden mt-4 text-center text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg py-2 px-3"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ GENERATOR ============ -->
+    <main id="fpApp" class="hidden container mx-auto px-4 py-8 max-w-6xl">
+        <div class="mb-6">
+            <h2 class="text-2xl font-extrabold text-slate-800">2D फ्लोर प्लान जनरेटर</h2>
+            <p class="text-slate-500 text-sm">प्लॉट साइज़, कमरे और दिशा भरें — तुरंत एक इंडिकेटिव 2D लेआउट बनेगा। <span class="text-slate-400">(योजनात्मक — प्रोफेशनल आर्किटेक्ट ड्रॉइंग नहीं)</span></p>
+        </div>
+
+        <div class="grid lg:grid-cols-[340px_1fr] gap-6">
+            <!-- form -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 h-max">
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">चौड़ाई (ft)</label><input type="number" id="fWidth" value="30" min="10" max="200" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">लंबाई (ft)</label><input type="number" id="fLength" value="40" min="10" max="200" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                </div>
+                <div class="mt-3">
+                    <label class="block text-xs font-bold text-slate-600 mb-1">दिशा (मुख / Facing)</label>
+                    <select id="fFacing" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <option value="N">उत्तर (North)</option>
+                        <option value="E">पूर्व (East)</option>
+                        <option value="S" selected>दक्षिण (South)</option>
+                        <option value="W">पश्चिम (West)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">बेडरूम</label>
+                        <select id="fBed" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">बाथरूम</label>
+                        <select id="fBath" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"><option>1</option><option selected>2</option><option>3</option></select></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">मंज़िल (Floors)</label>
+                        <select id="fFloors" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"><option value="1" selected>ग्राउंड (G)</option><option value="2">G + 1</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">मंज़िल दिखाएँ</label>
+                        <select id="fFloorShow" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"><option value="G" selected>ग्राउंड फ्लोर</option><option value="1">पहली मंज़िल</option></select></div>
+                </div>
+                <p class="text-xs font-bold text-slate-600 mt-4 mb-2">शामिल करें:</p>
+                <div class="grid grid-cols-2 gap-y-2 gap-x-3 text-sm">
+                    <label class="flex items-center gap-2"><input type="checkbox" id="fKitchen" checked> किचन</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="fDining" checked> डाइनिंग</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="fPooja"> पूजा रूम</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="fParking" checked> पार्किंग</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="fStairs" checked> सीढ़ी</label>
+                    <label class="flex items-center gap-2"><input type="checkbox" id="fBalcony"> बालकनी</label>
+                </div>
+                <button onclick="generatePlan()" class="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">📐 प्लान बनाएँ</button>
+            </div>
+
+            <!-- output -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <h3 class="font-bold text-slate-800" id="fpTitle">आपका फ्लोर प्लान</h3>
+                    <div class="flex gap-2">
+                        <button onclick="downloadPlan()" id="fpDownload" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-sm">⬇️ डाउनलोड (PNG)</button>
+                    </div>
+                </div>
+                <div id="planOutput" class="rounded-xl bg-white border border-slate-200 overflow-auto flex items-center justify-center min-h-[320px] text-slate-400 text-sm">
+                    “प्लान बनाएँ” दबाएँ — आपका लेआउट यहाँ दिखेगा
+                </div>
+                <p class="text-xs text-slate-400 mt-4">यह एक योजनात्मक (indicative) लेआउट है, जो प्लॉट में कमरों की संभावित व्यवस्था दर्शाता है। निर्माण से पहले किसी लाइसेंस प्राप्त आर्किटेक्ट से पुष्टि करें।</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    // ============ FLOOR PLAN APP ============
+    const N8N = 'https://llcsolution.duckdns.org/webhook';
+    const WH = { otpSend: N8N + '/mkt-otp-send', otpVerify: N8N + '/mkt-otp-verify', lead: N8N + '/floorplan-lead' };
+    let fpBusy = false, fpToken = '', fpPhone = '', fpName = '';
+    const $ = id => document.getElementById(id);
+    const digits = s => String(s == null ? '' : s).replace(/\D/g, '');
+
+    $('fpPhone').addEventListener('input', e => e.target.value = digits(e.target.value).slice(0, 10));
+    $('fpOtp').addEventListener('input', e => e.target.value = digits(e.target.value).slice(0, 6));
+    function gmsg(t) { const m = $('fpGateMsg'); m.textContent = t; m.classList.remove('hidden'); }
+    function ghide() { $('fpGateMsg').classList.add('hidden'); }
+    function spin(b, t) { b.disabled = true; b.innerHTML = '<span class="fp-spin"></span> ' + t; }
+    function unspin(b, t) { b.disabled = false; b.textContent = t; }
+    function fpBackToDetails() { $('fpOtpForm').classList.add('hidden'); $('fpDetailsForm').classList.remove('hidden'); ghide(); }
+
+    // ---- gate: send OTP ----
+    $('fpDetailsForm').addEventListener('submit', async e => {
+        e.preventDefault(); ghide();
+        if (fpBusy) return;
+        const nm = $('fpName').value.trim(); const p = $('fpPhone').value;
+        if (nm.length < 2) return gmsg('कृपया अपना नाम डालें।');
+        if (!/^[6-9]\d{9}$/.test(p)) return gmsg('सही 10-अंकों का नंबर डालें।');
+        fpBusy = true; const b = $('fpSendOtp'); spin(b, 'OTP भेज रहे हैं…');
+        try {
+            const r = await fetch(WH.otpSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: p }) });
+            const d = await r.json().catch(() => ({}));
+            if (r.ok && d.ok !== false) { fpName = nm; fpPhone = p; $('fpOtpPhone').textContent = '+91 ' + p; $('fpDetailsForm').classList.add('hidden'); $('fpOtpForm').classList.remove('hidden'); $('fpOtp').focus(); }
+            else gmsg(d.error || 'OTP नहीं भेज सके।');
+        } catch (err) { gmsg('नेटवर्क त्रुटि।'); }
+        finally { fpBusy = false; unspin(b, 'OTP भेजें'); }
+    });
+
+    // ---- gate: verify OTP → capture lead → open generator ----
+    $('fpOtpForm').addEventListener('submit', async e => {
+        e.preventDefault(); ghide();
+        if (fpBusy) return;
+        const otp = $('fpOtp').value; if (otp.length < 4) return gmsg('OTP डालें।');
+        fpBusy = true; const b = $('fpVerify'); spin(b, 'जाँच हो रही है…');
+        try {
+            const r = await fetch(WH.otpVerify, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: fpPhone, otp }) });
+            const d = await r.json().catch(() => ({}));
+            if (r.ok && d.ok !== false && d.token) {
+                fpToken = d.token;
+                try { await fetch(WH.lead, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: fpToken, phone: fpPhone, name: fpName }) }); } catch (le) {}
+                $('fpGate').classList.add('hidden'); $('fpApp').classList.remove('hidden');
+                generatePlan();
+            } else gmsg(d.error || 'गलत या एक्सपायर OTP।');
+        } catch (err) { gmsg('नेटवर्क त्रुटि।'); }
+        finally { fpBusy = false; unspin(b, 'वेरिफाई करें'); }
+    });
+
+    // ============ TEMPLATE-PARAMETRIC LAYOUT ENGINE ============
+    const FILL = { living: '#FFE3DC', bed: '#E3ECFF', util: '#FFF2DA', bath: '#E4EDF2', pooja: '#F1E6FF', stair: '#E9ECEF', balcony: '#E4F6EA', park: '#EEF1F4' };
+
+    function buildRooms(c) {
+        const r = [];
+        if (c.parking) r.push({ name: 'पार्किंग', w: 1.25, cls: 'park' });
+        r.push({ name: 'हॉल / लिविंग', w: 2.3, cls: 'living' });
+        if (c.dining) r.push({ name: 'डाइनिंग', w: 1.0, cls: 'util' });
+        if (c.kitchen) r.push({ name: 'किचन', w: 1.05, cls: 'util' });
+        for (let i = 0; i < c.bed; i++) r.push({ name: i === 0 ? 'मास्टर बेडरूम' : 'बेडरूम ' + (i + 1), w: i === 0 ? 1.7 : 1.35, cls: 'bed' });
+        for (let j = 0; j < c.bath; j++) r.push({ name: 'बाथ', w: 0.5, cls: 'bath' });
+        if (c.pooja) r.push({ name: 'पूजा', w: 0.45, cls: 'pooja' });
+        if (c.stairs) r.push({ name: 'सीढ़ी', w: 0.65, cls: 'stair' });
+        if (c.balcony) r.push({ name: 'बालकनी', w: 0.75, cls: 'balcony' });
+        return r;
+    }
+    // recursive split by longest axis → clean, non-overlapping tiling
+    function layout(rooms, rect) {
+        if (rooms.length === 1) return [Object.assign({}, rooms[0], rect)];
+        const total = rooms.reduce((s, r) => s + r.w, 0);
+        let acc = 0, i = 0;
+        while (i < rooms.length - 1 && acc + rooms[i].w < total / 2) { acc += rooms[i].w; i++; }
+        if (i === 0) i = 1;
+        const A = rooms.slice(0, i), B = rooms.slice(i);
+        const wA = A.reduce((s, r) => s + r.w, 0) / total;
+        let rA, rB;
+        if (rect.w >= rect.h) { rA = { x: rect.x, y: rect.y, w: rect.w * wA, h: rect.h }; rB = { x: rect.x + rect.w * wA, y: rect.y, w: rect.w * (1 - wA), h: rect.h }; }
+        else { rA = { x: rect.x, y: rect.y, w: rect.w, h: rect.h * wA }; rB = { x: rect.x, y: rect.y + rect.h * wA, w: rect.w, h: rect.h * (1 - wA) }; }
+        return layout(A, rA).concat(layout(B, rB));
+    }
+
+    function cfg() {
+        return {
+            width: Math.max(10, Math.min(200, parseInt($('fWidth').value, 10) || 30)),
+            length: Math.max(10, Math.min(200, parseInt($('fLength').value, 10) || 40)),
+            facing: $('fFacing').value,
+            bed: parseInt($('fBed').value, 10) || 1,
+            bath: parseInt($('fBath').value, 10) || 1,
+            floors: parseInt($('fFloors').value, 10) || 1,
+            floorShow: $('fFloorShow').value,
+            kitchen: $('fKitchen').checked, dining: $('fDining').checked, pooja: $('fPooja').checked,
+            parking: $('fParking').checked, stairs: $('fStairs').checked, balcony: $('fBalcony').checked
+        };
+    }
+
+    function generatePlan() {
+        const c = cfg();
+        const scale = Math.min(560 / c.width, 560 / c.length, 15);
+        const pxW = Math.round(c.width * scale), pxH = Math.round(c.length * scale), pad = 22, footer = 34;
+        let rooms = buildRooms(c);
+        // upper floor: no parking/pooja on 1st floor typically; add a terrace/balcony feel
+        if (c.floorShow === '1') rooms = rooms.filter(r => r.cls !== 'park');
+        const placed = layout(rooms, { x: 0, y: 0, w: pxW, h: pxH });
+        const gap = 3;
+        const vbW = pxW + pad * 2, vbH = pxH + pad * 2 + footer;
+        let svg = '<svg id="fpSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + vbW + ' ' + vbH + '" width="' + vbW + '" height="' + vbH + '" style="max-width:100%;height:auto;font-family:Inter,sans-serif">';
+        svg += '<rect x="0" y="0" width="' + vbW + '" height="' + vbH + '" fill="#ffffff"/>';
+        // outer wall
+        svg += '<rect x="' + (pad - 4) + '" y="' + (pad - 4) + '" width="' + (pxW + 8) + '" height="' + (pxH + 8) + '" fill="none" stroke="#1e293b" stroke-width="5"/>';
+        // rooms
+        placed.forEach(function (r) {
+            const x = r.x + pad + gap / 2, y = r.y + pad + gap / 2, w = Math.max(0, r.w - gap), h = Math.max(0, r.h - gap);
+            const wft = Math.max(1, Math.round(r.w / scale)), hft = Math.max(1, Math.round(r.h / scale));
+            svg += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + (FILL[r.cls] || '#eef1f4') + '" stroke="#334155" stroke-width="2"/>';
+            const cx = x + w / 2, cy = y + h / 2, small = (w < 46 || h < 34);
+            svg += '<text x="' + cx + '" y="' + (cy - (small ? 0 : 5)) + '" text-anchor="middle" font-size="' + (small ? 8 : 11) + '" font-weight="700" fill="#1e293b">' + r.name + '</text>';
+            if (!small) svg += '<text x="' + cx + '" y="' + (cy + 11) + '" text-anchor="middle" font-size="9" fill="#64748b">' + wft + "'×" + hft + "'</text>";
+        });
+        // entry (front = bottom), marked per facing
+        const entryX = pad + pxW / 2;
+        svg += '<rect x="' + (entryX - 16) + '" y="' + (pad + pxH + 1) + '" width="32" height="6" fill="#FF6D5A"/>';
+        svg += '<text x="' + entryX + '" y="' + (pad + pxH + 22) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#FF6D5A">प्रवेश (' + facingLabel(c.facing) + ')</text>';
+        // north arrow (front faces bottom = the facing direction)
+        const dir = { S: [0, -1], N: [0, 1], E: [-1, 0], W: [1, 0] }[c.facing] || [0, -1];
+        const nx = vbW - 30, ny = pad + 18;
+        svg += '<line x1="' + nx + '" y1="' + ny + '" x2="' + (nx + dir[0] * 16) + '" y2="' + (ny + dir[1] * 16) + '" stroke="#1e293b" stroke-width="2" marker-end="url(#ah)"/>';
+        svg += '<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1e293b"/></marker></defs>';
+        svg += '<text x="' + (nx + dir[0] * 24) + '" y="' + (ny + dir[1] * 24 + 4) + '" text-anchor="middle" font-size="11" font-weight="800" fill="#1e293b">N</text>';
+        svg += '</svg>';
+
+        $('planOutput').innerHTML = svg;
+        $('planOutput').classList.remove('text-slate-400', 'text-sm');
+        $('fpTitle').textContent = (c.floorShow === '1' ? 'पहली मंज़िल' : 'ग्राउंड फ्लोर') + ' — ' + c.width + "' × " + c.length + "' (" + c.bed + 'BHK)';
+        $('fpDownload').classList.remove('hidden');
+    }
+    function facingLabel(f) { return { N: 'उत्तर', E: 'पूर्व', S: 'दक्षिण', W: 'पश्चिम' }[f] || ''; }
+
+    // ---- download as PNG ----
+    function downloadPlan() {
+        const svg = document.getElementById('fpSvg'); if (!svg) return;
+        const xml = new XMLSerializer().serializeToString(svg);
+        const svg64 = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(xml)));
+        const img = new Image();
+        img.onload = function () {
+            const scale = 2, c = document.createElement('canvas');
+            c.width = img.width * scale; c.height = img.height * scale;
+            const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = 'brokertoday-floorplan.png'; a.click();
+        };
+        img.src = svg64;
+    }
+    </script>
+</body>
+</html>
