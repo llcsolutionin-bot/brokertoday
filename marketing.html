@@ -441,13 +441,18 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     let PENDING_PHONE = '';
     let resendInterval = null;
 
+    (function () { const st = document.createElement('style'); st.textContent = '.mkt-spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:mspin .7s linear infinite;vertical-align:-2px;margin-right:4px}@keyframes mspin{to{transform:rotate(360deg)}}'; document.head.appendChild(st); })();
+    let mktBusy = false; // prevents repeated clicks / Enter from firing multiple OTP requests
+
     document.getElementById('phoneForm').addEventListener('submit', async e => {
         e.preventDefault();
         hideError();
+        if (mktBusy) return;
         const p = document.getElementById('phoneInput').value;
         if (!/^[6-9]\d{9}$/.test(p)) return showError('Enter a valid 10-digit mobile number.');
+        mktBusy = true;
         const btn = document.getElementById('sendOtpBtn'); btn.disabled = true;
-        document.getElementById('sendOtpText').textContent = 'Sending…';
+        document.getElementById('sendOtpText').innerHTML = '<span class="mkt-spin"></span> Sending OTP…';
         try {
             const r = await fetch(WH.otpSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: p }) });
             const data = await r.json().catch(() => ({}));
@@ -460,7 +465,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 startResendTimer();
             } else { showError(data.error || 'Could not send OTP. Try again.'); }
         } catch (err) { showError('Network error. Please try again.'); }
-        finally { btn.disabled = false; document.getElementById('sendOtpText').textContent = 'Send OTP'; }
+        finally { mktBusy = false; btn.disabled = false; document.getElementById('sendOtpText').textContent = 'Send OTP'; }
     });
 
     function startResendTimer() {
@@ -475,9 +480,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     document.getElementById('otpForm').addEventListener('submit', async e => {
         e.preventDefault();
         hideError();
+        if (mktBusy) return;
         const otp = document.getElementById('otpInput').value;
         if (otp.length < 4) return showError('Enter the OTP you received.');
-        const btn = document.getElementById('verifyOtpBtn'); btn.disabled = true; btn.textContent = 'Verifying…';
+        mktBusy = true;
+        const btn = document.getElementById('verifyOtpBtn'); btn.disabled = true; btn.innerHTML = '<span class="mkt-spin"></span> Verifying…';
         try {
             const r = await fetch(WH.otpVerify, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: PENDING_PHONE, otp }) });
             const data = await r.json().catch(() => ({}));
@@ -488,7 +495,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 showApp();
             } else { showError(data.error || 'Incorrect or expired OTP.'); }
         } catch (err) { showError('Network error. Please try again.'); }
-        finally { btn.disabled = false; btn.textContent = 'Verify & Login'; }
+        finally { mktBusy = false; btn.disabled = false; btn.textContent = 'Verify & Login'; }
     });
 
     function showGate() { document.getElementById('app').classList.add('hidden'); document.getElementById('loginGate').classList.remove('hidden'); document.getElementById('otpForm').classList.add('hidden'); document.getElementById('phoneForm').classList.remove('hidden'); }

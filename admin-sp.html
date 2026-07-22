@@ -1055,15 +1055,17 @@
         };
 
         // STEP 1 — password. Validated server-side; on success n8n sends an OTP to the admin WhatsApp.
+        let adminBusy = false; // prevents repeated submits from firing multiple admin-login / OTP requests
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (adminBusy) return; adminBusy = true;
             const password = document.getElementById('passwordInput').value;
             const btnText = document.getElementById('btnText');
             const btnLoader = document.getElementById('btnLoader');
             document.getElementById('errorMessage').classList.add('hidden');
             btnText.classList.add('hidden'); btnLoader.classList.remove('hidden');
 
-            const reset = () => { btnText.classList.remove('hidden'); btnLoader.classList.add('hidden'); };
+            const reset = () => { adminBusy = false; btnText.classList.remove('hidden'); btnLoader.classList.add('hidden'); };
             try {
                 const r = await fetch(ADMIN_LOGIN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
                 const data = await r.json().catch(() => ({}));
@@ -1086,13 +1088,14 @@
         document.getElementById('adminOtpInput').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
         document.getElementById('otpForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (adminBusy) return; adminBusy = true;
             const otp = document.getElementById('adminOtpInput').value;
             const btnText = document.getElementById('otpBtnText');
             const btnLoader = document.getElementById('otpBtnLoader');
             document.getElementById('errorMessage').classList.add('hidden');
             btnText.classList.add('hidden'); btnLoader.classList.remove('hidden');
 
-            const reset = () => { btnText.classList.remove('hidden'); btnLoader.classList.add('hidden'); };
+            const reset = () => { adminBusy = false; btnText.classList.remove('hidden'); btnLoader.classList.add('hidden'); };
             try {
                 const r = await fetch(ADMIN_VERIFY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp, loginId: ADMIN_LOGIN_ID }) });
                 const data = await r.json().catch(() => ({}));
