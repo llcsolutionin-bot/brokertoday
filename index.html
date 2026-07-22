@@ -96,7 +96,8 @@
                 <button id="adAddBtn" type="button" onclick="AdApp.openForm()" title="अपना विज्ञापन जोड़ें" class="absolute top-2 right-2 z-20 inline-flex items-center gap-1 bg-[#FF6D5A] hover:opacity-90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow">
                     <span class="text-base leading-none">＋</span> <span class="hidden sm:inline">अपना बिज़नेस दिखाएँ</span>
                 </button>
-                <div id="adDots" class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-1.5"></div>
+                <button id="adPrev" type="button" onclick="AdApp.userPrev()" aria-label="पिछला" class="hidden absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white text-xl leading-none items-center justify-center backdrop-blur">‹</button>
+                <button id="adNext" type="button" onclick="AdApp.userNext()" aria-label="अगला" class="hidden absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white text-xl leading-none items-center justify-center backdrop-blur">›</button>
             </div>
         </div>
     </section>
@@ -675,43 +676,49 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             renderSlides();
         }
         function renderSlides() {
-            var wrap = $('adSlides'), dots = $('adDots'); if (!wrap) return;
+            var wrap = $('adSlides'); if (!wrap) return;
+            var prevB = $('adPrev'), nextB = $('adNext');
             if (!ADS.length) {
                 wrap.innerHTML = '<button type="button" onclick="AdApp.openForm()" class="absolute inset-0 flex items-center justify-center text-white/90 text-sm font-semibold bg-gradient-to-r from-slate-800 to-slate-900">＋ अपना विज्ञापन यहाँ दिखाएँ — क्लिक करें</button>';
-                dots.innerHTML = ''; return;
+                if (prevB) prevB.classList.add('hidden'); if (nextB) nextB.classList.add('hidden'); return;
             }
             var L = liked();
             wrap.innerHTML = ADS.map(function (a, i) {
                 var isL = L.indexOf(a.id) !== -1;
                 var u = esc(a.imageUrl);
-                return '<div class="ad-slide absolute inset-0 transition-opacity duration-700 ' + (i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none') + '">' +
-                    // blurred fill so any aspect ratio looks clean
+                // whole slide is tap-to-enlarge; blurred fill behind the contained image
+                return '<div class="ad-slide absolute inset-0 transition-opacity duration-700 cursor-zoom-in ' + (i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none') + '" onclick="AdApp.zoom(\'' + u + '\')">' +
                     '<div class="absolute inset-0 bg-center bg-cover blur-xl scale-110" style="background-image:url(\'' + u + '\')"></div>' +
                     '<div class="absolute inset-0 bg-slate-900/35"></div>' +
-                    // the real image, contained + centered, tap to enlarge
-                    '<div class="absolute inset-0 flex items-center justify-center">' +
-                    '<img src="' + u + '" alt="विज्ञापन" onclick="AdApp.zoom(\'' + u + '\')" class="h-full w-auto max-w-full object-contain cursor-zoom-in">' +
+                    '<div class="absolute inset-0 flex items-center justify-center pointer-events-none">' +
+                    '<img src="' + u + '" alt="विज्ञापन" class="h-full w-auto max-w-full object-contain">' +
                     '</div>' +
-                    // caption + like
-                    '<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/85 to-transparent px-4 pt-6 pb-1.5 flex items-end justify-between gap-3">' +
-                    '<p class="text-white text-xs sm:text-sm font-semibold line-clamp-2 max-w-[70%] drop-shadow">' + esc(a.text || '') + '</p>' +
-                    '<button type="button" onclick="AdApp.like(\'' + esc(a.id) + '\')" class="shrink-0 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur' + (isL ? ' opacity-70' : '') + '">' +
+                    '<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/85 to-transparent px-4 pt-6 pb-1.5 flex items-end justify-between gap-3 pointer-events-none">' +
+                    '<p class="text-white text-xs sm:text-sm font-semibold line-clamp-2 max-w-[68%] drop-shadow">' + esc(a.text || '') + '</p>' +
+                    '<button type="button" onclick="event.stopPropagation(); AdApp.like(\'' + esc(a.id) + '\')" class="pointer-events-auto shrink-0 inline-flex items-center gap-1 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur' + (isL ? ' opacity-70' : '') + '">' +
                     '<span class="ad-heart">' + (isL ? '❤️' : '🤍') + '</span> <span data-like="' + esc(a.id) + '">' + (Number(a.likes) || 0) + '</span></button>' +
                     '</div></div>';
             }).join('');
-            dots.innerHTML = ADS.map(function (a, i) { return '<span class="ad-dot w-1.5 h-1.5 rounded-full ' + (i === 0 ? 'bg-white' : 'bg-white/40') + '"></span>'; }).join('');
+            var multi = ADS.length > 1;
+            if (prevB) { prevB.classList.toggle('hidden', !multi); prevB.classList.toggle('flex', multi); }
+            if (nextB) { nextB.classList.toggle('hidden', !multi); nextB.classList.toggle('flex', multi); }
             idx = 0; startRotate();
         }
-        function startRotate() { clearInterval(timer); if (ADS.length < 2) return; timer = setInterval(next, 3000); }
-        function next() {
-            var slides = document.querySelectorAll('#adSlides .ad-slide'), dots = document.querySelectorAll('#adDots .ad-dot');
-            if (!slides.length) return;
-            slides[idx].classList.add('opacity-0', 'pointer-events-none'); slides[idx].classList.remove('opacity-100');
-            if (dots[idx]) { dots[idx].classList.remove('bg-white'); dots[idx].classList.add('bg-white/40'); }
-            idx = (idx + 1) % slides.length;
-            slides[idx].classList.remove('opacity-0', 'pointer-events-none'); slides[idx].classList.add('opacity-100');
-            if (dots[idx]) { dots[idx].classList.add('bg-white'); dots[idx].classList.remove('bg-white/40'); }
+        function showSlide(i) {
+            var slides = document.querySelectorAll('#adSlides .ad-slide'); if (!slides.length) return;
+            i = ((i % slides.length) + slides.length) % slides.length;
+            for (var k = 0; k < slides.length; k++) {
+                slides[k].classList.toggle('opacity-100', k === i);
+                slides[k].classList.toggle('opacity-0', k !== i);
+                slides[k].classList.toggle('pointer-events-none', k !== i);
+            }
+            idx = i;
         }
+        function next() { showSlide(idx + 1); }
+        function prev() { showSlide(idx - 1); }
+        function startRotate() { clearInterval(timer); if (ADS.length < 2) return; timer = setInterval(next, 3000); }
+        function userNext() { next(); startRotate(); }   // manual arrow/swipe: advance + reset timer
+        function userPrev() { prev(); startRotate(); }
         async function like(id) {
             var l = liked(); if (l.indexOf(id) !== -1) return;
             l.push(id); localStorage.setItem(LIKED, JSON.stringify(l));
@@ -772,6 +779,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
         function init() {
             loadAds();
+            // swipe left/right on the banner to change ad
+            var sx = 0, sw = $('adSlides');
+            if (sw) {
+                sw.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+                sw.addEventListener('touchend', function (e) { var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) { dx < 0 ? userNext() : userPrev(); } }, { passive: true });
+            }
             document.addEventListener('input', function (e) {
                 if (e.target.id === 'adPhone') e.target.value = digits(e.target.value).slice(0, 10);
                 if (e.target.id === 'adOtp') e.target.value = digits(e.target.value).slice(0, 6);
@@ -853,7 +866,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         function closeZoom() { var z = $('adZoom'); if (z) z.classList.add('hidden'); startRotate(); }
 
         if (document.readyState !== 'loading') init(); else document.addEventListener('DOMContentLoaded', init);
-        return { openForm: openForm, closeForm: closeForm, backToPhone: backToPhone, startReplace: startReplace, onFile: onFile, countWords: countWords, like: like, toggleActive: toggleActive, deleteAd: deleteAd, zoom: zoom, closeZoom: closeZoom };
+        return { openForm: openForm, closeForm: closeForm, backToPhone: backToPhone, startReplace: startReplace, onFile: onFile, countWords: countWords, like: like, toggleActive: toggleActive, deleteAd: deleteAd, zoom: zoom, closeZoom: closeZoom, userPrev: userPrev, userNext: userNext };
     })();
     </script>
 
