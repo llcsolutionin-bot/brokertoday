@@ -670,7 +670,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
         // ---------- banner ----------
         async function loadAds() {
-            try { var r = await fetch(W.list, { headers: { 'Cache-Control': 'no-cache' } }); var d = await r.json().catch(function () { return {}; }); ADS = Array.isArray(d.ads) ? d.ads : (Array.isArray(d) ? d : []); }
+            try { var r = await fetch(W.list, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); var d = await r.json().catch(function () { return {}; }); ADS = Array.isArray(d.ads) ? d.ads : (Array.isArray(d) ? d : []); }
             catch (e) { ADS = []; }
             renderSlides();
         }
