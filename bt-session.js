@@ -98,6 +98,28 @@
     }
     function logout() { clear(); try { location.reload(); } catch (e) {} }
 
+    // Shared footer on every page that doesn't already have one (index keeps its own richer footer).
+    function renderFooter() {
+        if (document.querySelector('footer')) return;
+        var f = document.createElement('footer');
+        f.className = 'bg-slate-900 text-slate-400 mt-12';
+        f.innerHTML =
+            '<div class="max-w-6xl mx-auto px-4 py-8 text-center">' +
+                '<a href="index.html" class="text-[#FF6D5A] font-extrabold text-lg">Broker Today</a>' +
+                '<p class="text-xs mt-2">सिरोही, राजस्थान की भरोसेमंद प्रॉपर्टी सेवा</p>' +
+                '<nav class="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm">' +
+                    '<a href="index.html" class="hover:text-white">होम</a>' +
+                    '<a href="rentals.html?type=rent" class="hover:text-white">किराया</a>' +
+                    '<a href="rentals.html?type=sell" class="hover:text-white">बिक्री</a>' +
+                    '<a href="agents.html" class="hover:text-white">एक्सपर्ट्स</a>' +
+                    '<a href="news.html" class="hover:text-white">न्यूज़</a>' +
+                    '<a href="privacy.html" class="hover:text-white">गोपनीयता नीति</a>' +
+                '</nav>' +
+                '<p class="text-xs mt-5 pt-4 border-t border-slate-800">© 2026 Broker Today · सिरोही, राजस्थान · सभी अधिकार सुरक्षित</p>' +
+            '</div>';
+        document.body.appendChild(f);
+    }
+
     window.BTSession = {
         BASE: BASE,
         get: read,
@@ -115,7 +137,7 @@
         renderMenuAccount: renderMenuAccount
     };
 
-    function onReady() { autofill(); renderMenuAccount(); }
+    function onReady() { autofill(); renderMenuAccount(); renderFooter(); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onReady);
     else onReady();
 })();

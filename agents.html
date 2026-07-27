@@ -10,7 +10,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>एजेंट प्रबंधन पैनल | Broker Today</title>
+    <title>प्रॉपर्टी एक्सपर्ट्स सिरोही — भरोसेमंद रियल एस्टेट एजेंट | Property Experts Sirohi | Broker Today</title>
     <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -24,6 +24,8 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[200] focus:bg-white focus:text-slate-900 focus:px-4 focus:py-2 focus:rounded-lg focus:shadow">मुख्य सामग्री पर जाएँ</a>
+
     <!-- लोडिंग स्क्रीन -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="loader mb-4"></div>
@@ -33,10 +35,10 @@
     <!-- सुरक्षा पासवर्ड modal -->
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative">
-            <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('passwordModal')" aria-label="बंद करें" class="absolute top-4 right-4 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-500 hover:text-slate-600">✖</button>
             <h3 class="font-bold text-lg mb-4">एडमिन सुरक्षा जांच</h3>
             <p class="text-xs text-slate-500 mb-4">एजेंट्स को जोड़ने, एडिट या डिलीट करने के लिए पासवर्ड डालें।</p>
-            <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500">
+            <input type="password" id="adminPwdInput" aria-label="पासवर्ड दर्ज करें" placeholder="पासवर्ड दर्ज करें" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500">
             <button onclick="verifyPassword()" class="bg-indigo-600 text-white font-bold w-full py-3 rounded-lg hover:bg-indigo-700">एडमिन मोड अनलॉक करें</button>
         </div>
     </div>
@@ -44,7 +46,7 @@
     <!-- नेविगेशन बार -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto max-w-6xl flex items-center gap-3">
-            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -186,7 +188,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     </header>
 
     <!-- मुख्य सूची -->
-    <main class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
+    <main id="main" class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
         <div id="agentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         <div id="emptyState" class="hidden text-center py-20">
             <span class="text-6xl mb-4 block">🕵️‍♂️</span>
@@ -198,23 +200,23 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <!-- एजेंट फॉर्म Modal -->
     <div id="agentModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeModal('agentModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('agentModal')" aria-label="बंद करें" class="absolute top-4 right-4 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-500 hover:text-slate-600">✖</button>
             <h3 class="text-xl font-bold text-indigo-700 mb-4" id="modalTitle">नया एजेंट जोड़ें</h3>
             
             <form id="agentForm" class="space-y-4">
                 <input type="hidden" id="agentUid">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">एजेंट का पूरा नाम</label>
-                    <input data-bt="name" type="text" id="aName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input data-bt="name" type="text" id="aName" required aria-label="एजेंट का पूरा नाम" autocomplete="name" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">व्हाट्सएप / फोन नंबर</label>
-                    <input data-bt="phone" type="tel" id="aPhone" required maxlength="13" inputmode="numeric" placeholder="10 अंकों का मोबाइल नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
-                    <p class="text-[11px] text-slate-400 mt-1">सिर्फ 10 अंकों का मोबाइल नंबर (देश कोड 91 अपने आप जुड़ जाएगा)</p>
+                    <input data-bt="phone" type="tel" id="aPhone" required maxlength="13" inputmode="numeric" aria-label="व्हाट्सएप / फोन नंबर" autocomplete="tel" placeholder="10 अंकों का मोबाइल नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <p class="text-[11px] text-slate-500 mt-1">सिर्फ 10 अंकों का मोबाइल नंबर (देश कोड 91 अपने आप जुड़ जाएगा)</p>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">स्टार रेटिंग (1 से 5)</label>
-                    <select id="aRating" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+                    <select id="aRating" aria-label="स्टार रेटिंग (1 से 5)" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg font-bold">
                         <option value="5">⭐⭐⭐⭐⭐ (5 स्टार)</option>
                         <option value="4">⭐⭐⭐⭐ (4 स्टार)</option>
                         <option value="3">⭐⭐⭐ (3 स्टार)</option>
@@ -305,7 +307,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
                 const projectsBadgeHtml = projectArray.length > 0 
                     ? `<div class="mt-2 flex flex-wrap gap-1">${projectArray.map(p => `<span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-medium">${p}</span>`).join('')}</div>`
-                    : `<div class="text-[10px] text-slate-400 mt-2">कोई प्रोजेक्ट असाइन नहीं है</div>`;
+                    : `<div class="text-[10px] text-slate-500 mt-2">कोई प्रोजेक्ट असाइन नहीं है</div>`;
 
                 const controlsHtml = isAdmin ? `<div class="mt-4 flex gap-2 border-t pt-4">
                         <button onclick='openAgentModal(${JSON.stringify(agent)})' class="flex-1 bg-indigo-50 text-indigo-700 text-sm font-bold py-2 rounded">एडिट</button>
@@ -454,8 +456,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     </script>
     <!-- ===== BROKER TODAY CHAT WIDGET (shared across all pages except admin) ===== -->
     <div id="bt-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <button id="bt-chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button id="bt-chat-toggle" aria-label="चैट खोलें" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 transition-transform transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
         </button>
@@ -471,8 +473,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <span class="text-xs font-semibold text-green-200">Live</span>
                     </div>
                 </div>
-                <button id="bt-chat-close" class="text-white hover:text-blue-200 focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <button id="bt-chat-close" aria-label="बंद करें" class="text-white hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -486,9 +488,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             </div>
             <div id="bt-chat-quick" class="px-3 pt-3 bg-white flex flex-wrap gap-2"></div>
             <div class="p-3 bg-white border-t border-slate-100 flex items-center">
-                <input type="text" id="bt-chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
-                <button id="bt-chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <input type="text" id="bt-chat-input" aria-label="अपना मैसेज लिखें" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
+                <button id="bt-chat-send" aria-label="भेजें" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -634,7 +636,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             appendMessage(text, true);
             input.value = '';
             const typing = document.createElement('div');
-            typing.className = 'flex items-start text-xs text-slate-400 ml-2 mt-1';
+            typing.className = 'flex items-start text-xs text-slate-500 ml-2 mt-1';
             typing.textContent = 'typing...';
             messages.appendChild(typing);
             messages.scrollTop = messages.scrollHeight;

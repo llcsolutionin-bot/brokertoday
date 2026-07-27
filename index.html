@@ -77,11 +77,12 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[200] focus:bg-white focus:text-slate-900 focus:px-4 focus:py-2 focus:rounded-lg focus:shadow">मुख्य सामग्री पर जाएँ</a>
 
     <!-- Navigation Bar -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
         <div class="container mx-auto max-w-6xl flex items-center gap-3">
-            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -103,9 +104,9 @@
             </div>
             <!-- controls BELOW the banner image: arrows at edges, + business centered -->
             <div class="relative flex items-center justify-center mt-2 min-h-[38px]">
-                <button id="adPrev" type="button" onclick="AdApp.userPrev()" aria-label="पिछला" class="hidden absolute left-0 w-9 h-9 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xl leading-none items-center justify-center shadow-sm">‹</button>
+                <button id="adPrev" type="button" onclick="AdApp.userPrev()" aria-label="पिछला" class="hidden absolute left-0 w-11 h-11 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xl leading-none items-center justify-center shadow-sm">‹</button>
                 <button id="adAddBtn" type="button" onclick="AdApp.openForm()" class="inline-flex items-center gap-1 bg-[#FF6D5A] hover:opacity-90 text-white text-xs font-bold px-4 py-2 rounded-full shadow"><span class="text-base leading-none">＋</span> अपना बिज़नेस दिखाएँ</button>
-                <button id="adNext" type="button" onclick="AdApp.userNext()" aria-label="अगला" class="hidden absolute right-0 w-9 h-9 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xl leading-none items-center justify-center shadow-sm">›</button>
+                <button id="adNext" type="button" onclick="AdApp.userNext()" aria-label="अगला" class="hidden absolute right-0 w-11 h-11 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xl leading-none items-center justify-center shadow-sm">›</button>
             </div>
         </div>
     </section>
@@ -275,7 +276,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <div class="h-28 bg-cover bg-center relative" style="background-image:url('aerocity-cover.jpg')"><span class="absolute top-2 left-2 text-[10px] font-extrabold bg-white/90 text-[#FF6D5A] px-2 py-0.5 rounded-full">✓ Verified</span></div>
                         <div class="p-4">
                             <h4 class="font-bold text-slate-800">Aerocity Residency</h4>
-                            <div class="text-yellow-400 text-sm mt-0.5">★★★★★ <span class="text-slate-400 text-xs">4.9</span></div>
+                            <div class="text-yellow-400 text-sm mt-0.5">★★★★★ <span class="text-slate-500 text-xs">4.9</span></div>
                             <div class="mt-3 text-xs font-bold bg-slate-100 text-slate-600 rounded-lg py-2 text-center">मैप देखें →</div>
                         </div>
                     </div>
@@ -362,7 +363,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     </section>
 
     <!-- Main Content & Property Cards -->
-    <main class="container mx-auto px-4 py-12 max-w-6xl">
+    <main id="main" class="container mx-auto px-4 py-12 max-w-6xl">
         <div id="projects" class="text-center mb-10 scroll-mt-20">
             <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800">हमारे वेरिफाइड प्रोजेक्ट्स</h2>
             <p class="text-slate-500 mt-3 max-w-2xl mx-auto">Verified projects — लाइव मास्टरप्लान, पट्टे शुदा प्लॉट्स और भरोसेमंद डेवलपर्स के साथ।</p>
@@ -376,8 +377,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                         Verified
                     </div>
-                    <button type="button" onclick="event.stopPropagation(); btShare('aerocity.html', 'Aerocity Residency');" title="Share" class="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-700 rounded-full p-2 shadow-sm transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    <button type="button" onclick="event.stopPropagation(); btShare('aerocity.html', 'Aerocity Residency');" title="Share" aria-label="शेयर करें" class="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-700 rounded-full p-2 shadow-sm transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     </button>
                     <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all"></div>
                 </div>
@@ -414,8 +415,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                         Verified
                     </div>
-                    <button type="button" onclick="event.stopPropagation(); btShare('shetrapal.html', 'Shetrapal Residency');" title="Share" class="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-700 rounded-full p-2 shadow-sm transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    <button type="button" onclick="event.stopPropagation(); btShare('shetrapal.html', 'Shetrapal Residency');" title="Share" aria-label="शेयर करें" class="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-700 rounded-full p-2 shadow-sm transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                     </button>
                     <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all"></div>
                 </div>
@@ -466,7 +467,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         <!-- Contact Us (form hidden until the button is clicked) -->
         <div id="contactTriggerWrap" class="text-center">
             <button id="contactTrigger" type="button" onclick="document.getElementById('contactCard').classList.remove('hidden'); document.getElementById('contactTriggerWrap').classList.add('hidden'); document.getElementById('contactCard').scrollIntoView({behavior:'smooth', block:'center'});" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-indigo-500/25 transform hover:-translate-y-0.5 transition-all duration-200">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <svg class="w-6 h-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                 Contact us
             </button>
         </div>
@@ -484,24 +485,24 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             <form id="leadForm" class="space-y-5 relative z-10">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">आपका नाम</label>
-                    <input data-bt="name" type="text" id="name" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
+                    <input data-bt="name" type="text" id="name" aria-label="आपका नाम" autocomplete="name" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
                 </div>
                 
                 <!-- Updated Phone Input with Country Code Validation -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">WhatsApp नंबर</label>
                     <div class="flex gap-2">
-                        <select id="countryCode" class="w-1/3 sm:w-1/4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm cursor-pointer font-medium text-slate-700">
+                        <select id="countryCode" aria-label="देश कोड" class="w-1/3 sm:w-1/4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm cursor-pointer font-medium text-slate-700">
                             <option value="+91" selected>🇮🇳 +91</option>
                         </select>
-                        <input data-bt="phone" type="tel" id="phone" placeholder="9876543210" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="flex-1 w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
+                        <input data-bt="phone" type="tel" id="phone" aria-label="WhatsApp नंबर" autocomplete="tel" placeholder="9876543210" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="flex-1 w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
                     </div>
                     <p id="phoneError" class="text-xs text-red-500 mt-1.5 font-medium ml-1 hidden">कृपया सही 10 अंकों का नंबर दर्ज करें।</p>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">आप कौन हैं?</label>
-                    <select id="role" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm cursor-pointer">
+                    <select id="role" aria-label="आप कौन हैं?" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm cursor-pointer">
                         <option value="Broker">ब्रोकर / एजेंट</option>
                         <option value="Property Owner">प्रॉपर्टी मालिक</option>
                         <option value="Developer">डेवलपर</option>
@@ -510,7 +511,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">आप क्या खोज रहे हैं / प्रॉपर्टी का विवरण?</label>
-                    <textarea id="message" rows="3" required placeholder="अपना संदेश यहाँ लिखें... (Your message)" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm resize-none"></textarea>
+                    <textarea id="message" rows="3" required aria-label="आप क्या खोज रहे हैं / प्रॉपर्टी का विवरण?" placeholder="अपना संदेश यहाँ लिखें... (Your message)" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm resize-none"></textarea>
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-indigo-500/25 transform hover:-translate-y-0.5 transition-all duration-200 mt-2">
@@ -615,7 +616,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md my-6">
             <div class="flex items-center justify-between p-5 border-b border-slate-100">
                 <h3 class="text-lg font-bold text-slate-800">📣 अपना बिज़नेस विज्ञापन</h3>
-                <button onclick="AdApp.closeForm()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+                <button onclick="AdApp.closeForm()" aria-label="बंद करें" class="text-slate-500 hover:text-slate-600 text-2xl leading-none min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
             </div>
             <div class="p-5">
                 <!-- phone -->
@@ -623,14 +624,14 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <p class="text-sm text-slate-500">अपना 10-अंकों का WhatsApp नंबर डालें। OTP से वेरिफाई करने के बाद आप विज्ञापन जोड़ सकते हैं।</p>
                     <div class="flex items-stretch rounded-lg border border-slate-300 overflow-hidden focus-within:border-[#FF6D5A]">
                         <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
-                        <input data-bt="loginphone" id="adPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
+                        <input data-bt="loginphone" id="adPhone" type="tel" aria-label="WhatsApp नंबर" autocomplete="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
                     </div>
                     <button type="submit" id="adSendOtp" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">OTP भेजें</button>
                 </form>
                 <!-- otp -->
                 <form id="adOtpForm" class="space-y-4 hidden">
                     <p class="text-sm text-slate-500">OTP भेजा गया <span id="adOtpPhone" class="font-bold"></span> पर · <button type="button" onclick="AdApp.backToPhone()" class="text-[#FF6D5A] font-semibold">बदलें</button></p>
-                    <input autocomplete="one-time-code" id="adOtp" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#FF6D5A]" required>
+                    <input autocomplete="one-time-code" id="adOtp" type="text" aria-label="OTP कोड" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#FF6D5A]" required>
                     <button type="submit" id="adVerify" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">वेरिफाई करें</button>
                 </form>
                 <!-- existing ad -->
@@ -652,14 +653,14 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <!-- upload -->
                 <form id="adUploadForm" class="space-y-4 hidden">
                     <div>
-                        <div id="adPreview" onclick="AdApp.chooseImage()" class="h-40 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 hover:border-[#FF6D5A] flex flex-col items-center justify-center gap-1 text-slate-400 text-sm bg-cover bg-center cursor-pointer"><span class="text-3xl">📷</span><span>इमेज चुनें — टैप करें</span></div>
+                        <div id="adPreview" onclick="AdApp.chooseImage()" class="h-40 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 hover:border-[#FF6D5A] flex flex-col items-center justify-center gap-1 text-slate-500 text-sm bg-cover bg-center cursor-pointer"><span class="text-3xl">📷</span><span>इमेज चुनें — टैप करें</span></div>
                         <input id="adFileGallery" type="file" accept="image/*" class="hidden" onchange="AdApp.onFile(this)">
                         <input id="adFileCamera" type="file" accept="image/*" capture="environment" class="hidden" onchange="AdApp.onFile(this)">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-1">विवरण (अधिकतम 140 शब्द)</label>
-                        <textarea id="adText" rows="3" maxlength="1400" oninput="AdApp.countWords()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#FF6D5A]" placeholder="अपने बिज़नेस या इमेज के बारे में लिखें..."></textarea>
-                        <p class="text-xs mt-1"><span id="adWordCount" class="text-slate-400">0</span><span class="text-slate-400">/140 शब्द</span></p>
+                        <textarea id="adText" rows="3" maxlength="1400" aria-label="विवरण (अधिकतम 140 शब्द)" oninput="AdApp.countWords()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#FF6D5A]" placeholder="अपने बिज़नेस या इमेज के बारे में लिखें..."></textarea>
+                        <p class="text-xs mt-1"><span id="adWordCount" class="text-slate-500">0</span><span class="text-slate-500">/140 शब्द</span></p>
                     </div>
                     <button type="submit" id="adSubmitBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">विज्ञापन सबमिट करें</button>
                 </form>
@@ -667,7 +668,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <!-- shown only when logged in: current phone + logout (clears the shared site session) -->
                 <div id="adAccount" class="hidden mt-5 pt-4 border-t border-slate-100 text-center">
                     <p class="text-xs text-slate-500 mb-2">लॉग इन: <span id="adAccountPhone" class="font-bold text-slate-700"></span></p>
-                    <button type="button" onclick="AdApp.logout()" class="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>लॉग आउट</button>
+                    <button type="button" onclick="AdApp.logout()" class="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700"><svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>लॉग आउट</button>
                 </div>
             </div>
         </div>
@@ -807,7 +808,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         function startReplace() { replaceMode = true; imgData = ''; $('adPreview').style.backgroundImage = ''; $('adPreview').textContent = 'नई इमेज चुनें'; $('adText').value = existing ? (existing.text || '') : ''; countWords(); show('adUploadForm'); hideMsg(); }
         function countWords() {
             var t = $('adText').value.trim(); var n = t ? t.split(/\s+/).filter(Boolean).length : 0;
-            var c = $('adWordCount'); c.textContent = n; c.className = n > 140 ? 'text-red-500 font-bold' : 'text-slate-400';
+            var c = $('adWordCount'); c.textContent = n; c.className = n > 140 ? 'text-red-500 font-bold' : 'text-slate-500';
         }
 
         function resizeImage(file) {
@@ -949,8 +950,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
     <!-- CHAT WIDGET HTML -->
     <div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <button id="chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button id="chat-toggle" aria-label="चैट खोलें" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 transition-transform transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
         </button>
@@ -967,8 +968,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <span class="text-xs font-semibold text-green-200">Live</span>
                     </div>
                 </div>
-                <button id="chat-close" class="text-white hover:text-blue-200 focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <button id="chat-close" aria-label="बंद करें" class="text-white hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -984,9 +985,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
             <div id="chat-quick" class="px-3 pt-3 bg-white flex flex-wrap gap-2"></div>
             <div class="p-3 bg-white border-t border-slate-100 flex items-center">
-                <input type="text" id="chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
-                <button id="chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <input type="text" id="chat-input" aria-label="अपना मैसेज" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
+                <button id="chat-send" aria-label="भेजें" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -1234,7 +1235,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             const typingId = 'typing-' + Date.now();
             const typingDiv = document.createElement('div');
             typingDiv.id = typingId;
-            typingDiv.className = 'flex items-start text-xs text-slate-400 ml-2 mt-1';
+            typingDiv.className = 'flex items-start text-xs text-slate-500 ml-2 mt-1';
             typingDiv.textContent = 'typing...';
             chatMessages.appendChild(typingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1437,9 +1438,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 const overlay = '<a href="' + dest + '" onclick="event.stopPropagation()" class="absolute inset-0 z-10" title="' + btEscAttr(it.label) + ' — देखें" aria-label="' + btEscAttr(it.label) + '"></a>';
                 let media;
                 if (it.type === 'youtube') {
-                    media = '<img src="https://i.ytimg.com/vi/' + it.id + '/mqdefault.jpg" alt="" loading="lazy" onerror="btThumbErr(this)" class="w-full h-full object-cover">' + play;
+                    media = '<img src="https://i.ytimg.com/vi/' + it.id + '/mqdefault.jpg" alt="" loading="lazy" decoding="async" onerror="btThumbErr(this)" class="w-full h-full object-cover">' + play;
                 } else if (it.type === 'image') {
-                    media = '<img src="' + btEscAttr(it.src) + '" alt="" loading="lazy" onerror="btThumbErr(this)" class="w-full h-full object-cover">';
+                    media = '<img src="' + btEscAttr(it.src) + '" alt="" loading="lazy" decoding="async" onerror="btThumbErr(this)" class="w-full h-full object-cover">';
                 } else if (it.type === 'video') {
                     media = '<video src="' + btEscAttr(it.src) + '#t=0.1" muted playsinline preload="metadata" class="w-full h-full object-cover"></video>' + play;
                 } else if (it.type === 'iframe') {
@@ -1451,7 +1452,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 return '<div class="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-slate-100 hover:shadow-md transition-shadow">' + media + overlay + '</div>';
             }).join('');
             if (!tiles) return '';
-            return '<div class="mt-4"><p class="text-[11px] font-semibold text-slate-400 mb-1.5">सोशल मीडिया पर देखें</p><div class="flex flex-wrap gap-2 justify-start">' + tiles + '</div></div>';
+            return '<div class="mt-4"><p class="text-xs font-semibold text-slate-500 mb-1.5">सोशल मीडिया पर देखें</p><div class="flex flex-wrap gap-2 justify-start">' + tiles + '</div></div>';
         }
 
         // --- PROJECT RATINGS (average stars on cards) ---
@@ -1469,7 +1470,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             const visits = r.visits || 0;
             const starsPart = count
                 ? '<span class="bt-stars inline-flex">' + starsHtml(r.avg) + '</span><span class="text-xs text-slate-500 font-semibold">' + r.avg.toFixed(1) + ' (' + count + ')</span>'
-                : '<span class="text-slate-300">★★★★★</span><span class="text-xs text-slate-400 font-medium">(अभी कोई रेटिंग नहीं)</span>';
+                : '<span class="text-slate-300">★★★★★</span><span class="text-xs text-slate-500 font-medium">(अभी कोई रेटिंग नहीं)</span>';
             const visitsPart = '<span class="bt-interest inline-flex items-center gap-1 text-xs font-bold text-orange-600">🔥 ' + visits + ' लोगों ने रुचि दिखाई</span>';
             return '<div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-base">' + starsPart + visitsPart + '</div>';
         }

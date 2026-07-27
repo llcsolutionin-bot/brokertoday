@@ -39,11 +39,12 @@
     <script src="bt-session.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[200] focus:bg-white focus:text-slate-900 focus:px-4 focus:py-2 focus:rounded-lg focus:shadow">मुख्य सामग्री पर जाएँ</a>
 
     <!-- Navigation Bar -->
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
         <div class="container mx-auto max-w-6xl flex items-center gap-3">
-            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -185,7 +186,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     </header>
 
     <!-- News List -->
-    <main class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
+    <main id="main" class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
         <div id="loadingState" class="flex justify-center py-16"><div class="loader"></div></div>
         <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         <div id="emptyState" class="hidden text-center py-20">
@@ -198,10 +199,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <!-- Admin Password Modal -->
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative">
-            <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('passwordModal')" aria-label="बंद करें" class="absolute top-4 right-4 text-slate-500 hover:text-slate-700 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
             <h3 class="font-bold text-lg mb-4">एडमिन सुरक्षा जांच</h3>
             <p class="text-xs text-slate-500 mb-4">न्यूज़ जोड़ने, एडिट या डिलीट करने के लिए पासवर्ड डालें।</p>
-            <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500" onkeydown="if(event.key==='Enter')verifyPassword()">
+            <input type="password" id="adminPwdInput" aria-label="पासवर्ड दर्ज करें" placeholder="पासवर्ड दर्ज करें" class="w-full border p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500" onkeydown="if(event.key==='Enter')verifyPassword()">
             <button onclick="verifyPassword()" class="bg-indigo-600 text-white font-bold w-full py-3 rounded-lg hover:bg-indigo-700">एडमिन मोड अनलॉक करें</button>
         </div>
     </div>
@@ -211,7 +212,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-2xl w-full my-8 max-h-[90vh] overflow-y-auto relative">
             <div class="flex items-start justify-between mb-5">
                 <h3 class="text-xl font-bold text-indigo-700" id="newsModalTitle">नई न्यूज़ जोड़ें</h3>
-                <button type="button" onclick="closeModal('newsModal')" aria-label="Close" class="shrink-0 text-slate-400 hover:text-slate-700 text-2xl leading-none p-1 -mt-1 -mr-1">✕</button>
+                <button type="button" onclick="closeModal('newsModal')" aria-label="बंद करें" class="shrink-0 text-slate-500 hover:text-slate-700 text-2xl leading-none p-1 -mt-1 -mr-1 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✕</button>
             </div>
 
             <form id="newsForm" class="space-y-4">
@@ -219,30 +220,30 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">शीर्षक (Title)</label>
-                    <input type="text" id="newsTitle" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input type="text" id="newsTitle" required aria-label="शीर्षक (Title)" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">विवरण (अधिकतम 250 शब्द / Max 250 words)</label>
-                    <textarea id="newsDescription" required rows="5" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                    <textarea id="newsDescription" required rows="5" aria-label="विवरण (अधिकतम 250 शब्द)" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
                     <p id="wordCounter" class="text-xs text-slate-500 mt-1">0 / 250 शब्द</p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">इमेज (Image — optional)</label>
-                    <input type="file" id="newsImageFile" accept="image/*" class="w-full border-2 border-slate-300 p-2 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input type="file" id="newsImageFile" accept="image/*" aria-label="इमेज (Image — optional)" class="w-full border-2 border-slate-300 p-2 rounded-lg focus:outline-none focus:border-blue-500">
                     <div id="newsImagePreview" class="mt-2"></div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">PDF लिंक (PDF URL — optional)</label>
-                    <input type="url" id="newsPdfUrl" placeholder="https://.../document.pdf" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input type="url" id="newsPdfUrl" placeholder="https://.../document.pdf" aria-label="PDF लिंक (PDF URL — optional)" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                     <p class="text-xs text-slate-500 mt-1">किसी होस्ट किए गए PDF का लिंक पेस्ट करें (Google Drive / hosted link).</p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">वेरिफिकेशन URL (Verification link — optional)</label>
-                    <input type="url" id="newsVerifyUrl" placeholder="https://..." class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input type="url" id="newsVerifyUrl" placeholder="https://..." aria-label="वेरिफिकेशन URL (Verification link — optional)" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div>
@@ -264,15 +265,15 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-[120] flex flex-col">
         <div class="flex items-center justify-between p-3 text-white gap-3">
             <div id="lbControls" class="flex items-center gap-2">
-                <button type="button" onclick="lbZoom(-0.3)" class="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">−</button>
-                <button type="button" onclick="lbReset()" class="px-3 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-sm font-semibold">Fit</button>
-                <button type="button" onclick="lbZoom(0.3)" class="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">+</button>
+                <button type="button" onclick="lbZoom(-0.3)" aria-label="ज़ूम कम करें" class="w-11 h-11 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">−</button>
+                <button type="button" onclick="lbReset()" class="px-3 h-11 rounded-lg bg-white/15 hover:bg-white/25 text-sm font-semibold">Fit</button>
+                <button type="button" onclick="lbZoom(0.3)" aria-label="ज़ूम बढ़ाएँ" class="w-11 h-11 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">+</button>
             </div>
             <a id="lbOpenTab" href="#" target="_blank" rel="noopener" class="hidden text-sm font-semibold underline">नई टैब में खोलें ↗</a>
-            <button type="button" onclick="closeLightbox()" aria-label="Close" class="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">✕</button>
+            <button type="button" onclick="closeLightbox()" aria-label="बंद करें" class="w-11 h-11 rounded-lg bg-white/15 hover:bg-white/25 text-xl leading-none">✕</button>
         </div>
         <div id="lbStage" class="flex-1 overflow-auto flex items-center justify-center p-2 sm:p-4">
-            <img id="lbImage" class="hidden max-w-full max-h-full select-none" style="transform-origin:center center;" alt="">
+            <img id="lbImage" class="hidden max-w-full max-h-full select-none" style="transform-origin:center center;" alt="न्यूज़ फ़ोटो">
             <iframe id="lbFrame" class="hidden w-full h-full bg-white rounded"></iframe>
         </div>
     </div>
@@ -424,7 +425,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     ? `<div class="mt-3 flex flex-wrap gap-1">${projects.map(p => `<span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded-md border border-indigo-100 font-medium">${escapeHtml(p)}</span>`).join('')}</div>`
                     : '';
                 const image = news.imageUrl
-                    ? `<img src="${escapeHtml(news.imageUrl)}" data-lightbox="${escapeHtml(news.imageUrl)}" class="w-full h-44 object-cover cursor-zoom-in" title="क्लिक करके पूरा देखें (Click to enlarge)" onerror="this.style.display='none'">`
+                    ? `<img src="${escapeHtml(news.imageUrl)}" alt="${escapeHtml(news.title) || 'न्यूज़ फोटो'}" loading="lazy" decoding="async" data-lightbox="${escapeHtml(news.imageUrl)}" class="w-full h-44 object-cover cursor-zoom-in" title="क्लिक करके पूरा देखें (Click to enlarge)" onerror="this.style.display='none'">`
                     : `<div class="w-full h-44 bg-gradient-to-br from-orange-100 to-rose-50 flex items-center justify-center text-4xl">📰</div>`;
                 const links = [];
                 if (news.verifyUrl) links.push(`<a href="${escapeHtml(news.verifyUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs font-semibold">✅ Verify</a>`);
@@ -441,7 +442,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
                         ${image}
                         <div class="p-5 flex flex-col flex-1">
-                            <div class="text-xs text-slate-400 font-semibold mb-1">${formatDate(news.date)}</div>
+                            <div class="text-xs text-slate-500 font-semibold mb-1">${formatDate(news.date)}</div>
                             <h3 class="text-lg font-bold text-slate-800 leading-snug">${escapeHtml(news.title)}</h3>
                             <p class="text-sm text-slate-600 mt-2 whitespace-pre-line flex-1">${escapeHtml(news.description)}</p>
                             ${badges}
@@ -478,7 +479,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 document.getElementById('newsPdfUrl').value = news.pdfUrl || '';
                 document.getElementById('newsVerifyUrl').value = news.verifyUrl || '';
                 if (news.imageUrl) {
-                    document.getElementById('newsImagePreview').innerHTML = `<img src="${escapeHtml(news.imageUrl)}" class="w-24 h-24 object-cover rounded-lg border border-slate-200"><p class="text-[11px] text-slate-500 mt-1">नई फोटो चुनने पर यह बदल जाएगी</p>`;
+                    document.getElementById('newsImagePreview').innerHTML = `<img src="${escapeHtml(news.imageUrl)}" alt="चयनित न्यूज़ फोटो" loading="lazy" decoding="async" class="w-24 h-24 object-cover rounded-lg border border-slate-200"><p class="text-[11px] text-slate-500 mt-1">नई फोटो चुनने पर यह बदल जाएगी</p>`;
                 }
                 const saved = parseProjects(news.projects);
                 document.querySelectorAll('.news-project-cb').forEach(cb => { if (saved.includes(cb.value)) cb.checked = true; });
@@ -662,7 +663,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         document.getElementById('newsImageFile').addEventListener('change', function (e) {
             const file = e.target.files[0];
             const prev = document.getElementById('newsImagePreview');
-            if (file) prev.innerHTML = `<img src="${URL.createObjectURL(file)}" class="w-24 h-24 object-cover rounded-lg border border-slate-200">`;
+            if (file) prev.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="चयनित फोटो" loading="lazy" decoding="async" class="w-24 h-24 object-cover rounded-lg border border-slate-200">`;
         });
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -674,8 +675,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     </script>
     <!-- ===== BROKER TODAY CHAT WIDGET (shared across all pages except admin) ===== -->
     <div id="bt-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <button id="bt-chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button id="bt-chat-toggle" aria-label="चैट खोलें" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 transition-transform transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
         </button>
@@ -691,8 +692,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <span class="text-xs font-semibold text-green-200">Live</span>
                     </div>
                 </div>
-                <button id="bt-chat-close" class="text-white hover:text-blue-200 focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <button id="bt-chat-close" aria-label="बंद करें" class="text-white hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -706,9 +707,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             </div>
             <div id="bt-chat-quick" class="px-3 pt-3 bg-white flex flex-wrap gap-2"></div>
             <div class="p-3 bg-white border-t border-slate-100 flex items-center">
-                <input type="text" id="bt-chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
-                <button id="bt-chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <input type="text" id="bt-chat-input" aria-label="अपना मैसेज लिखें" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
+                <button id="bt-chat-send" aria-label="भेजें" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -854,7 +855,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             appendMessage(text, true);
             input.value = '';
             const typing = document.createElement('div');
-            typing.className = 'flex items-start text-xs text-slate-400 ml-2 mt-1';
+            typing.className = 'flex items-start text-xs text-slate-500 ml-2 mt-1';
             typing.textContent = 'typing...';
             messages.appendChild(typing);
             messages.scrollTop = messages.scrollHeight;

@@ -8,7 +8,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Broker Today</title>
+    <title>Broker Today एडमिन पैनल — प्रोजेक्ट, प्लॉट व एजेंट प्रबंधन | Admin Panel</title>
     <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
@@ -37,10 +37,11 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-screen flex items-center justify-center p-4">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[200] focus:bg-white focus:text-slate-900 focus:px-4 focus:py-2 focus:rounded-lg focus:shadow">मुख्य सामग्री पर जाएँ</a>
 
     <!-- Password Modal -->
     <div id="passwordModal" class="w-full max-w-md">
-        <div class="bg-white rounded-2xl shadow-2xl p-8">
+        <div id="main" class="bg-white rounded-2xl shadow-2xl p-8">
             <!-- Logo/Header -->
             <div class="text-center mb-8">
                 <div class="flex justify-center mb-4">
@@ -64,10 +65,11 @@
                             required
                             class="w-full border-2 border-slate-300 p-3 pr-12 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
                         >
-                        <button 
-                            type="button" 
-                            onclick="togglePassword()" 
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-600 text-xl transition-colors"
+                        <button
+                            type="button"
+                            onclick="togglePassword()"
+                            aria-label="पासवर्ड दिखाएँ"
+                            class="absolute right-1 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-600 text-xl transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                         >
                             <span id="eyeIcon">👁️</span>
                         </button>
@@ -91,6 +93,7 @@
                     <label class="block text-sm font-bold text-slate-700 mb-2">Enter OTP</label>
                     <p class="text-xs text-slate-500 mb-2">A one-time code was sent to the admin WhatsApp number. <button type="button" onclick="adminBackToPassword()" class="text-indigo-600 font-semibold">start over</button></p>
                     <input type="text" id="adminOtpInput" inputmode="numeric" maxlength="6" placeholder="••••••" required
+                        autocomplete="one-time-code" aria-label="OTP दर्ज करें"
                         class="w-full text-center text-2xl tracking-[0.5em] font-bold border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors">
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl">
@@ -111,8 +114,8 @@
             <!-- Header -->
             <div class="flex justify-between items-center mb-8 pb-6 border-b border-slate-200">
                 <div class="flex items-center gap-3">
-                    <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-slate-700 p-2 rounded-md hover:bg-slate-100 transition-colors focus:outline-none">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-slate-700 p-2 rounded-md hover:bg-slate-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2">
+                        <svg class="w-7 h-7" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
@@ -293,7 +296,7 @@
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
                 <h2 class="text-2xl font-bold text-slate-800">➕ Create New Project</h2>
-                <button onclick="closeNewProjectForm()" class="text-slate-400 hover:text-slate-600 text-2xl">✖</button>
+                <button onclick="closeNewProjectForm()" aria-label="बंद करें" class="text-slate-500 hover:text-slate-600 text-2xl min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
             </div>
 
             <form id="newProjectForm" class="space-y-5">
@@ -444,7 +447,7 @@
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
                 <h2 class="text-2xl font-bold text-slate-800">🔐 Password Manager</h2>
-                <button onclick="closePasswordManager()" class="text-slate-400 hover:text-slate-600 text-2xl">✖</button>
+                <button onclick="closePasswordManager()" aria-label="बंद करें" class="text-slate-500 hover:text-slate-600 text-2xl min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
             </div>
 
             <div class="space-y-4">
@@ -457,7 +460,7 @@
                     <div class="flex items-center gap-2">
                         <span class="text-slate-600 text-sm">Password:</span>
                         <code id="pwd-aerocity" class="bg-white px-3 py-1 rounded border border-indigo-200 font-mono text-sm">••••••••</code>
-                        <button onclick="togglePasswordVisibility('aerocity')" class="text-indigo-600 hover:text-indigo-800">👁️</button>
+                        <button onclick="togglePasswordVisibility('aerocity')" aria-label="पासवर्ड दिखाएँ" class="text-indigo-600 hover:text-indigo-800 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">👁️</button>
                     </div>
                 </div>
 
@@ -470,7 +473,7 @@
                     <div class="flex items-center gap-2">
                         <span class="text-slate-600 text-sm">Password:</span>
                         <code id="pwd-shetrapal" class="bg-white px-3 py-1 rounded border border-amber-200 font-mono text-sm">••••••••</code>
-                        <button onclick="togglePasswordVisibility('shetrapal')" class="text-amber-600 hover:text-amber-800">👁️</button>
+                        <button onclick="togglePasswordVisibility('shetrapal')" aria-label="पासवर्ड दिखाएँ" class="text-amber-600 hover:text-amber-800 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">👁️</button>
                     </div>
                 </div>
 
@@ -483,7 +486,7 @@
                     <div class="flex items-center gap-2">
                         <span class="text-slate-600 text-sm">Password:</span>
                         <code id="pwd-agents" class="bg-white px-3 py-1 rounded border border-green-200 font-mono text-sm">••••••••</code>
-                        <button onclick="togglePasswordVisibility('agents')" class="text-green-600 hover:text-green-800">👁️</button>
+                        <button onclick="togglePasswordVisibility('agents')" aria-label="पासवर्ड दिखाएँ" class="text-green-600 hover:text-green-800 min-w-[44px] min-h-[44px] inline-flex items-center justify-center">👁️</button>
                     </div>
                 </div>
 
@@ -523,7 +526,7 @@
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
                 <h2 class="text-2xl font-bold text-slate-800">✏️ Edit Project</h2>
-                <button onclick="closeEditProjectModal()" class="text-slate-400 hover:text-slate-600 text-2xl">✖</button>
+                <button onclick="closeEditProjectModal()" aria-label="बंद करें" class="text-slate-500 hover:text-slate-600 text-2xl min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
             </div>
 
             <form id="editProjectForm" class="space-y-5">
@@ -694,7 +697,7 @@
                 <h2 class="text-2xl font-bold text-slate-800">🖼️ Ads Manager</h2>
                 <div class="flex items-center gap-2">
                     <button onclick="loadAdminAds()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-sm">🔄 Refresh</button>
-                    <button onclick="closeAdsManager()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+                    <button onclick="closeAdsManager()" aria-label="बंद करें" class="text-slate-500 hover:text-slate-600 text-2xl leading-none min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
                 </div>
             </div>
             <div class="p-5">
@@ -724,7 +727,7 @@
         }
         function renderAdminAds() {
             const c = document.getElementById('adminAdsList');
-            if (!ADMIN_ADS.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-8 text-center col-span-2">No ads submitted yet.</p>'; return; }
+            if (!ADMIN_ADS.length) { c.innerHTML = '<p class="text-slate-500 text-sm py-8 text-center col-span-2">No ads submitted yet.</p>'; return; }
             c.innerHTML = ADMIN_ADS.map(a => {
                 const st = a.status || 'active';
                 const badge = st === 'active' ? 'bg-green-100 text-green-700' : (st === 'inactive' ? 'bg-slate-200 text-slate-600' : 'bg-red-100 text-red-700');
@@ -736,7 +739,7 @@
                             <span class="px-2 py-0.5 rounded-full text-xs font-bold ${badge}">${st}</span>
                         </div>
                         <p class="text-sm text-slate-700">${adEsc(a.text || '')}</p>
-                        <p class="text-xs text-slate-400 mt-1">❤ ${Number(a.likes) || 0} · ${adEsc(a.createdAt || '')}</p>
+                        <p class="text-xs text-slate-500 mt-1">❤ ${Number(a.likes) || 0} · ${adEsc(a.createdAt || '')}</p>
                         <div class="grid grid-cols-3 gap-1.5 mt-3">
                             <button onclick="adminAdAction('${adEsc(a.id)}','activate')" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 rounded-lg">Keep</button>
                             <button onclick="adminAdAction('${adEsc(a.id)}','deactivate')" class="bg-slate-500 hover:bg-slate-600 text-white text-xs font-bold py-1.5 rounded-lg">Hide</button>
@@ -763,7 +766,7 @@
                 <h2 class="text-2xl font-bold text-slate-800">📣 Marketing Manager</h2>
                 <div class="flex items-center gap-2">
                     <button onclick="loadMarketing()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-sm">🔄 Refresh</button>
-                    <button onclick="closeMarketingManager()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+                    <button onclick="closeMarketingManager()" aria-label="बंद करें" class="text-slate-500 hover:text-slate-600 text-2xl leading-none min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
                 </div>
             </div>
             <div class="flex gap-2 px-5 pt-4 border-b border-slate-100">
@@ -782,11 +785,11 @@
                 </div>
                 <!-- ONBOARDING -->
                 <div class="mkt-pane hidden" data-tab="onboard">
-                    <div id="mktOnboard" class="space-y-2"><p class="text-slate-400 text-sm">Loading…</p></div>
+                    <div id="mktOnboard" class="space-y-2"><p class="text-slate-500 text-sm">Loading…</p></div>
                 </div>
                 <!-- BILLING -->
                 <div class="mkt-pane hidden" data-tab="billing">
-                    <div id="mktBilling" class="space-y-2"><p class="text-slate-400 text-sm">Loading…</p></div>
+                    <div id="mktBilling" class="space-y-2"><p class="text-slate-500 text-sm">Loading…</p></div>
                 </div>
             </div>
         </div>
@@ -797,13 +800,13 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-6">
             <div class="flex items-center justify-between p-5 border-b border-slate-200">
                 <h3 class="text-xl font-bold text-slate-800" id="userEditorTitle">Edit user</h3>
-                <button onclick="closeUserEditor()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+                <button onclick="closeUserEditor()" aria-label="बंद करें" class="text-slate-500 hover:text-slate-600 text-2xl leading-none min-w-[44px] min-h-[44px] inline-flex items-center justify-center">✖</button>
             </div>
             <div class="p-5 space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Phone (10-digit)</label><input id="euPhone" maxlength="10" inputmode="numeric" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
-                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Name</label><input id="euName" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
-                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Business</label><input id="euBusiness" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Phone (10-digit)</label><input id="euPhone" maxlength="10" inputmode="numeric" autocomplete="tel" aria-label="फ़ोन (10 अंकों का)" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Name</label><input id="euName" autocomplete="name" aria-label="नाम" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Business</label><input id="euBusiness" aria-label="व्यवसाय" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></div>
                 </div>
 
                 <div>
@@ -813,8 +816,8 @@
 
                 <div>
                     <label class="text-sm font-bold text-slate-700 block mb-1">Contacts</label>
-                    <p class="text-xs text-slate-400 mb-1">Paste as <code>Name, 10-digit-number</code> per line (name optional).</p>
-                    <textarea id="euContacts" rows="5" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Amit, 9876500001&#10;9876500002"></textarea>
+                    <p class="text-xs text-slate-500 mb-1">Paste as <code>Name, 10-digit-number</code> per line (name optional).</p>
+                    <textarea id="euContacts" rows="5" aria-label="संपर्क सूची" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Amit, 9876500001&#10;9876500002"></textarea>
                 </div>
 
                 <div class="flex gap-2">
@@ -864,13 +867,13 @@
 
         function renderMktUsers() {
             const c = document.getElementById('mktUsers');
-            if (!MKT_DATA.users.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-6 text-center">No users yet. Click “Add user”.</p>'; return; }
+            if (!MKT_DATA.users.length) { c.innerHTML = '<p class="text-slate-500 text-sm py-6 text-center">No users yet. Click “Add user”.</p>'; return; }
             c.innerHTML = MKT_DATA.users.map((u, i) => `
                 <div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
                     <div class="min-w-0">
                         <p class="font-bold text-slate-800 truncate">${mEsc(u.business || u.name || '+91 ' + u.phone)}</p>
                         <p class="text-xs text-slate-500">+91 ${mEsc(u.phone)} · ${mEsc(u.name || '')}</p>
-                        <p class="text-xs text-slate-400 mt-1">${(u.templates || []).length} template(s) · ${(u.contacts || []).length} contact(s)</p>
+                        <p class="text-xs text-slate-500 mt-1">${(u.templates || []).length} template(s) · ${(u.contacts || []).length} contact(s)</p>
                     </div>
                     <button onclick="editUser(${i})" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-sm shrink-0">Edit</button>
                 </div>`).join('');
@@ -879,11 +882,11 @@
         function renderMktOnboard() {
             const c = document.getElementById('mktOnboard'); const reqs = MKT_DATA.onboardRequests || [];
             document.getElementById('obCount').textContent = reqs.filter(r => (r.status || 'new') === 'new').length || '';
-            if (!reqs.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-6 text-center">No onboarding requests.</p>'; return; }
+            if (!reqs.length) { c.innerHTML = '<p class="text-slate-500 text-sm py-6 text-center">No onboarding requests.</p>'; return; }
             c.innerHTML = reqs.map(r => `
                 <div class="border border-slate-200 rounded-lg p-3 flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                        <p class="font-bold text-slate-800">${mEsc(r.business || r.name)} <span class="text-xs font-normal text-slate-400">${mEsc(r.createdAt || '')}</span></p>
+                        <p class="font-bold text-slate-800">${mEsc(r.business || r.name)} <span class="text-xs font-normal text-slate-500">${mEsc(r.createdAt || '')}</span></p>
                         <p class="text-xs text-slate-500">${mEsc(r.name || '')} · +91 ${mEsc(r.phone)}</p>
                         <p class="text-sm text-slate-600 mt-1">${mEsc(r.description || '')}</p>
                     </div>
@@ -893,7 +896,7 @@
 
         function renderMktBilling() {
             const c = document.getElementById('mktBilling'); const camps = MKT_DATA.campaigns || [];
-            if (!camps.length) { c.innerHTML = '<p class="text-slate-400 text-sm py-6 text-center">No campaigns yet.</p>'; return; }
+            if (!camps.length) { c.innerHTML = '<p class="text-slate-500 text-sm py-6 text-center">No campaigns yet.</p>'; return; }
             c.innerHTML = camps.map(c2 => {
                 const st = c2.paymentStatus || 'unpaid';
                 const badge = st === 'paid' ? 'bg-green-100 text-green-700' : st === 'waived' ? 'bg-slate-200 text-slate-600' : 'bg-amber-100 text-amber-700';
@@ -932,13 +935,13 @@
             const wrap = document.createElement('div');
             wrap.className = 'tpl-row grid grid-cols-12 gap-2 items-center';
             wrap.innerHTML = `
-                <select class="tpl-select col-span-8 px-2 py-1.5 border border-slate-300 rounded text-sm bg-white" onchange="onTplPick(this)">${optionsHtml}</select>
+                <select class="tpl-select col-span-8 px-2 py-1.5 border border-slate-300 rounded text-sm bg-white" aria-label="टेम्पलेट चुनें" onchange="onTplPick(this)">${optionsHtml}</select>
                 <div class="col-span-3 flex items-stretch rounded border border-slate-300 overflow-hidden">
                     <span class="px-2 flex items-center bg-slate-100 text-slate-500 text-xs">₹/msg</span>
-                    <input placeholder="0.85" value="${t.price != null ? t.price : ''}" inputmode="decimal" class="tpl-price w-full px-2 py-1.5 text-sm focus:outline-none">
+                    <input placeholder="0.85" value="${t.price != null ? t.price : ''}" inputmode="decimal" aria-label="प्रति संदेश मूल्य (₹)" class="tpl-price w-full px-2 py-1.5 text-sm focus:outline-none">
                 </div>
-                <button onclick="this.parentElement.remove()" class="col-span-1 text-red-500 font-bold">✕</button>
-                <p class="tpl-preview-txt col-span-12 text-xs text-slate-400 -mt-1 whitespace-pre-wrap">${mEsc(t.preview || '')}</p>`;
+                <button onclick="this.parentElement.remove()" aria-label="टेम्पलेट हटाएँ" class="col-span-1 text-red-500 font-bold">✕</button>
+                <p class="tpl-preview-txt col-span-12 text-xs text-slate-500 -mt-1 whitespace-pre-wrap">${mEsc(t.preview || '')}</p>`;
             document.getElementById('euTemplates').appendChild(wrap);
         }
         // Show the selected template's body text as a preview hint.
@@ -1317,7 +1320,7 @@
                             <td class="p-3">
                                 <div class="flex items-center gap-2">
                                     <code class="bg-slate-200 px-3 py-1 rounded font-mono text-sm">${PASSWORDS[project.id] || 'Goal@2030'}</code>
-                                    <button onclick="copyPassword('${PASSWORDS[project.id] || 'Goal@2030'}')" class="text-blue-600 hover:text-blue-800 text-sm" title="Copy Password">
+                                    <button onclick="copyPassword('${PASSWORDS[project.id] || 'Goal@2030'}')" aria-label="पासवर्ड कॉपी करें" class="text-blue-600 hover:text-blue-800 text-sm min-w-[44px] min-h-[44px] inline-flex items-center justify-center" title="Copy Password">
                                         📋
                                     </button>
                                 </div>
@@ -1494,11 +1497,11 @@
             const row = document.createElement('div');
             row.className = 'flex gap-2 items-center social-row';
             row.innerHTML = `
-                <select class="social-platform border-2 border-slate-300 p-2 rounded-lg text-sm">
+                <select class="social-platform border-2 border-slate-300 p-2 rounded-lg text-sm" aria-label="सोशल मीडिया प्लेटफ़ॉर्म">
                     ${SOCIAL_PLATFORMS.map(p => `<option value="${p}" ${p === platform ? 'selected' : ''}>${p}</option>`).join('')}
                 </select>
-                <input type="url" class="social-url flex-1 min-w-0 border-2 border-slate-300 p-2 rounded-lg text-sm" placeholder="https://..." value="${url}">
-                <button type="button" onclick="this.closest('.social-row').remove()" class="text-red-500 hover:text-red-700 px-2 text-lg leading-none">✖</button>
+                <input type="url" class="social-url flex-1 min-w-0 border-2 border-slate-300 p-2 rounded-lg text-sm" aria-label="सोशल मीडिया लिंक" placeholder="https://..." value="${url}">
+                <button type="button" onclick="this.closest('.social-row').remove()" aria-label="हटाएँ" class="text-red-500 hover:text-red-700 px-2 text-lg leading-none">✖</button>
             `;
             container.appendChild(row);
         }
@@ -1542,8 +1545,8 @@
             const div = document.createElement('div');
             div.className = 'flex gap-2';
             div.innerHTML = `
-                <input type="text" placeholder="Custom amenity name" class="custom-amenity-input flex-1 border border-slate-300 p-2 rounded-lg text-sm focus:outline-none focus:border-teal-500">
-                <button type="button" onclick="removeCustomAmenity(this)" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold">✖</button>
+                <input type="text" placeholder="Custom amenity name" aria-label="कस्टम सुविधा नाम" class="custom-amenity-input flex-1 border border-slate-300 p-2 rounded-lg text-sm focus:outline-none focus:border-teal-500">
+                <button type="button" onclick="removeCustomAmenity(this)" aria-label="हटाएँ" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold">✖</button>
             `;
             container.appendChild(div);
             
@@ -1630,8 +1633,8 @@
                         const div = document.createElement('div');
                         div.className = 'flex gap-2';
                         div.innerHTML = `
-                            <input type="text" value="${amenity}" class="edit-custom-amenity-input flex-1 border border-slate-300 p-2 rounded-lg text-sm focus:outline-none focus:border-blue-500">
-                            <button type="button" onclick="this.parentElement.remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold">✖</button>
+                            <input type="text" value="${amenity}" aria-label="कस्टम सुविधा नाम" class="edit-custom-amenity-input flex-1 border border-slate-300 p-2 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                            <button type="button" onclick="this.parentElement.remove()" aria-label="हटाएँ" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold">✖</button>
                         `;
                         container.appendChild(div);
                     }

@@ -10,7 +10,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aerocity Residency | Live Interactive Map</title>
+    <title>Aerocity Residency सिरोही — लाइव मास्टरप्लान व प्लॉट रेट | Broker Today</title>
 
     <!-- Open Graph / social share preview (WhatsApp, Facebook, etc.) -->
     <meta property="og:type" content="website">
@@ -218,6 +218,8 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[200] focus:bg-white focus:text-slate-900 focus:px-4 focus:py-2 focus:rounded-lg focus:shadow">मुख्य सामग्री पर जाएँ</a>
+
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="loader mb-4"></div>
@@ -228,11 +230,11 @@
     <!-- Admin Password Modal -->
     <div id="passwordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl relative zoom-fixed-content">
-            <button onclick="closeModal('passwordModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('passwordModal')" aria-label="बंद करें" class="absolute top-4 right-4 text-slate-500 hover:text-slate-600 w-11 h-11 inline-flex items-center justify-center">✖</button>
             <h3 class="font-bold text-lg mb-4 text-slate-800">एडमिन लॉगिन (Admin Login)</h3>
             <div class="relative">
-                <input type="password" id="adminPwdInput" placeholder="पासवर्ड दर्ज करें" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500 pr-12">
-                <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-slate-500 hover:text-indigo-600 text-xl">
+                <input type="password" id="adminPwdInput" aria-label="पासवर्ड" placeholder="पासवर्ड दर्ज करें" class="w-full border border-slate-300 p-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500 pr-12">
+                <button type="button" onclick="togglePassword()" aria-label="पासवर्ड दिखाएँ" class="absolute right-3 top-3 text-slate-500 hover:text-indigo-600 text-xl">
                     <span id="eyeIcon">👁️</span>
                 </button>
             </div>
@@ -244,7 +246,7 @@
     <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
         <div class="container mx-auto max-w-6xl flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-                <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none">
+                <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
@@ -377,7 +379,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <!-- ===== END SITE MENU ===== -->
 
     <!-- Header -->
-    <header class="bg-slate-900 text-white py-10">
+    <header id="main" class="bg-slate-900 text-white py-10">
         <div class="container mx-auto px-4 max-w-6xl text-center">
             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200" id="projectTitle">Aerocity Residency</h1>
             <p class="text-lg text-indigo-100 mt-2">प्रीमियम गेटेड कम्युनिटी @ Sirohi Airstrip के पास। Modern Amenities के साथ।</p>
@@ -390,18 +392,18 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             <div>
                 <div class="flex items-center gap-2">
                     <h2 class="text-2xl font-bold text-slate-800">लाइव मास्टरप्लान</h2>
-                    <button onclick="btShare(location.href, document.title)" title="शेयर करें / Share" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    <button onclick="btShare(location.href, document.title)" aria-label="शेयर करें" title="शेयर करें / Share" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                         <span class="hidden sm:inline">Share</span>
                     </button>
                 </div>
                 <p class="text-slate-500 text-sm mt-1" id="modeIndicator">प्लॉट की जानकारी देखने के लिए <b>हरे</b> या <b>लाल</b> नंबरों पर क्लिक करें।</p>
             </div>
             <div class="flex gap-4 items-center">
-                <a href="https://maps.app.goo.gl/wg6mckscBFR9LUy19" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 text-2xl" title="Open in Google Maps">
+                <a href="https://maps.app.goo.gl/wg6mckscBFR9LUy19" target="_blank" rel="noopener noreferrer" aria-label="Google Maps में खोलें" class="text-blue-500 hover:text-blue-700 text-2xl" title="Open in Google Maps">
                     📍
                 </a>
-                <button id="btnAdminLogin" onclick="openPasswordModal()" class="text-slate-300 hover:text-slate-500 text-xl" title="Admin Login">🔒</button>
+                <button id="btnAdminLogin" onclick="openPasswordModal()" aria-label="एडमिन लॉगिन" class="text-slate-300 hover:text-slate-500 text-xl" title="Admin Login">🔒</button>
                 <button id="btnAdminExit" onclick="exitAdminMode()" class="hidden ml-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-full shadow-md transition-all">
                     Save & Exit Admin
                 </button>
@@ -415,7 +417,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         <div class="flex justify-center mt-4">
             <div id="adminMarkerControls" class="hidden bg-white border-2 border-indigo-500 rounded-lg p-3 shadow-lg">
                 <label class="block text-xs font-bold text-slate-700 mb-2">Marker Size (Desktop)</label>
-                <input type="range" id="markerSizeSlider" min="6" max="24" value="16" step="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <input type="range" id="markerSizeSlider" aria-label="मार्कर साइज़" min="6" max="24" value="16" step="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                 <div class="text-xs text-center text-slate-600 mt-2"><span id="markerSizeValue">16</span>px</div>
             </div>
         </div>
@@ -426,8 +428,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             <h3 class="text-xl font-bold text-slate-800 mb-3">📸 प्रोजेक्ट गैलरी</h3>
             <div class="relative bg-slate-100 rounded-2xl overflow-hidden">
                 <div id="btGalleryTrack" class="flex transition-transform duration-500 ease-in-out"></div>
-                <button type="button" onclick="galleryMove(-1)" id="btGalleryPrev" class="hidden absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white w-10 h-10 rounded-full shadow flex items-center justify-center text-2xl text-slate-700">‹</button>
-                <button type="button" onclick="galleryMove(1)" id="btGalleryNext" class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white w-10 h-10 rounded-full shadow flex items-center justify-center text-2xl text-slate-700">›</button>
+                <button type="button" onclick="galleryMove(-1)" id="btGalleryPrev" aria-label="पिछली फ़ोटो" class="hidden absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white w-11 h-11 rounded-full shadow flex items-center justify-center text-2xl text-slate-700">‹</button>
+                <button type="button" onclick="galleryMove(1)" id="btGalleryNext" aria-label="अगली फ़ोटो" class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white w-11 h-11 rounded-full shadow flex items-center justify-center text-2xl text-slate-700">›</button>
                 <div id="btGalleryDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5"></div>
             </div>
         </section>
@@ -458,7 +460,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 if (!section || !track) return;
                 if (!images.length) { section.classList.add('hidden'); return; }
                 section.classList.remove('hidden');
-                track.innerHTML = images.map(u => '<div class="w-full flex-shrink-0"><img src="' + u + '" class="w-full h-64 sm:h-96 object-contain bg-slate-100"></div>').join('');
+                track.innerHTML = images.map(u => '<div class="w-full flex-shrink-0"><img src="' + u + '" alt="Aerocity Residency प्रोजेक्ट फोटो" loading="lazy" decoding="async" class="w-full h-64 sm:h-96 object-contain bg-slate-100"></div>').join('');
                 if (idx >= images.length) idx = 0;
                 track.style.transform = 'translateX(-' + (idx * 100) + '%)';
                 const multi = images.length > 1;
@@ -469,7 +471,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             function renderThumbs() {
                 const thumbs = $('btGalleryThumbs'), hint = $('btGalleryHint');
                 if (!thumbs) return;
-                thumbs.innerHTML = images.map((u, i) => '<div class="relative"><img src="' + u + '" class="w-full h-20 object-cover rounded-lg border border-slate-200"><button type="button" onclick="galleryRemove(' + i + ')" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center shadow">✖</button></div>').join('');
+                thumbs.innerHTML = images.map((u, i) => '<div class="relative"><img src="' + u + '" alt="गैलरी फोटो" loading="lazy" decoding="async" class="w-full h-20 object-cover rounded-lg border border-slate-200"><button type="button" aria-label="फ़ोटो हटाएँ" onclick="galleryRemove(' + i + ')" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center shadow">✖</button></div>').join('');
                 if (hint) hint.textContent = images.length + '/' + MAX + ' फोटो';
             }
             async function uploadToImgBB(file) {
@@ -603,7 +605,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <!-- Admin Add/Edit Plot Modal -->
     <div id="adminModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full relative zoom-fixed-content">
-            <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('adminModal')" aria-label="बंद करें" class="absolute top-4 right-4 text-slate-500 hover:text-slate-600 w-11 h-11 inline-flex items-center justify-center">✖</button>
             <h3 class="text-xl font-bold text-indigo-700 mb-4" id="adminModalTitle">Add New Plot</h3>
             
             <form id="adminForm" class="space-y-3">
@@ -613,30 +615,30 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">प्लॉट नंबर (Plot Number)</label>
-                        <input type="text" id="adminPlotNo" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold text-indigo-700">
+                        <input type="text" id="adminPlotNo" aria-label="प्लॉट नंबर" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold text-indigo-700">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">स्थिति (Status)</label>
-                        <select id="adminStatus" class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold">
+                        <select id="adminStatus" aria-label="स्थिति" class="w-full p-2 bg-slate-50 border border-slate-200 rounded font-bold">
                             <option value="Available" class="text-green-600">उपलब्ध (Available)</option>
                             <option value="Sold" class="text-red-600">बिक गया (Sold)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">कुल वर्ग फुट (Total Sq. Feet)</label>
-                        <input type="text" id="adminSqFt" placeholder="उदा. 800" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <input type="text" id="adminSqFt" aria-label="कुल वर्ग फुट" placeholder="उदा. 800" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">आयाम (L x W)</label>
-                        <input type="text" id="adminSize" placeholder="उदा. 20x40" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <input type="text" id="adminSize" aria-label="आयाम (लंबाई x चौड़ाई)" placeholder="उदा. 20x40" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div id="priceContainer">
                         <label class="block text-xs font-bold text-slate-700 mb-1">मूल्य / वर्ग फुट (₹)</label>
-                        <input type="text" id="adminPrice" placeholder="उदा. 1500" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <input type="text" id="adminPrice" aria-label="मूल्य प्रति वर्ग फुट" placeholder="उदा. 1500" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">दिशा (Facing Direction)</label>
-                        <select id="adminDirection" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
+                        <select id="adminDirection" aria-label="दिशा" class="w-full p-2 bg-slate-50 border border-slate-200 rounded">
                             <option value="East">पूर्व (East)</option>
                             <option value="West">पश्चिम (West)</option>
                             <option value="North">उत्तर (North)</option>
@@ -660,7 +662,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <!-- User Plot Details Modal -->
     <div id="userModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative zoom-fixed-content">
-            <button onclick="closeModal('userModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('userModal')" aria-label="बंद करें" class="absolute top-4 right-4 text-slate-500 hover:text-slate-600 w-11 h-11 inline-flex items-center justify-center">✖</button>
             
             <div class="flex items-center gap-3 mb-6">
                 <h3 id="uPlotNo" class="text-3xl font-black text-slate-800">Plot --</h3>
@@ -698,17 +700,17 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <!-- Contact Agent WhatsApp Modal -->
     <div id="contactModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 zoom-modal">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full relative zoom-fixed-content">
-            <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('contactModal')" aria-label="बंद करें" class="absolute top-4 right-4 text-slate-500 hover:text-slate-600 w-11 h-11 inline-flex items-center justify-center">✖</button>
             <h3 class="text-xl font-bold text-slate-800 mb-4">Inquiry for Plot <span id="contactPlotLabel" class="text-indigo-600"></span></h3>
             
             <form id="contactForm" class="space-y-4">
                 <input type="hidden" id="cPlotNo">
                 
                 <div>
-                    <input data-bt="name" type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input data-bt="name" type="text" id="cName" aria-label="आपका नाम" autocomplete="name" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <input data-bt="phone" type="tel" id="cPhone" placeholder="10 अंकों का WhatsApp नंबर" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input data-bt="phone" type="tel" id="cPhone" aria-label="WhatsApp नंबर" autocomplete="tel" placeholder="10 अंकों का WhatsApp नंबर" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 
                 <div>
@@ -730,8 +732,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
     <!-- ===== BROKER TODAY CHAT WIDGET (shared across all pages except admin) ===== -->
     <div id="bt-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <button id="bt-chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none transition-transform transform hover:scale-105">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button id="bt-chat-toggle" aria-label="चैट खोलें" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 transition-transform transform hover:scale-105">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
         </button>
@@ -747,8 +749,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <span class="text-xs font-semibold text-green-200">Live</span>
                     </div>
                 </div>
-                <button id="bt-chat-close" class="text-white hover:text-blue-200 focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <button id="bt-chat-close" aria-label="बंद करें" class="text-white hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -762,9 +764,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             </div>
             <div id="bt-chat-quick" class="px-3 pt-3 bg-white flex flex-wrap gap-2"></div>
             <div class="p-3 bg-white border-t border-slate-100 flex items-center">
-                <input type="text" id="bt-chat-input" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
-                <button id="bt-chat-send" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <input type="text" id="bt-chat-input" aria-label="अपना मैसेज लिखें" placeholder="अपना मैसेज यहाँ लिखें..." class="flex-1 p-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mr-2">
+                <button id="bt-chat-send" aria-label="भेजें" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] inline-flex items-center justify-center">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -949,7 +951,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <!-- Rating Modal (shown after Contact Agent, before sending the enquiry) -->
     <div id="ratingModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[75] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center relative">
-            <button onclick="closeModal('ratingModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">✖</button>
+            <button onclick="closeModal('ratingModal')" aria-label="बंद करें" class="absolute top-3 right-3 text-slate-500 hover:text-slate-600 w-11 h-11 inline-flex items-center justify-center">✖</button>
             <h3 class="text-lg font-bold text-slate-800 mb-1">इस प्रोजेक्ट को रेटिंग दें</h3>
             <p class="text-sm text-slate-500 mb-4">Rate this project before we connect you</p>
             <div id="ratingStars" class="flex justify-center gap-2 mb-5 text-4xl text-slate-300 select-none">
@@ -960,7 +962,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <span data-v="5" class="cursor-pointer transition-transform hover:scale-110">★</span>
             </div>
             <button id="ratingSubmitBtn" onclick="submitRatingAndInquiry()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors">भेजें (Submit)</button>
-            <button type="button" onclick="submitRatingAndInquiry(0)" class="mt-2 text-xs text-slate-400 hover:text-slate-600">बिना रेटिंग के भेजें (Skip)</button>
+            <button type="button" onclick="submitRatingAndInquiry(0)" class="mt-2 text-xs text-slate-500 hover:text-slate-600">बिना रेटिंग के भेजें (Skip)</button>
         </div>
     </div>
 
