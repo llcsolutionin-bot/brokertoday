@@ -647,6 +647,32 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             renderPublicListings();
         }
 
+        // --- Share a property (native share sheet / WhatsApp) + deep-link to a single shared card ---
+        function btShareUrl(shareUrl, title) {
+            var text = (title ? title + ' — ' : '') + 'Broker Today पर देखें';
+            if (navigator.share) {
+                navigator.share({ title: title || 'Broker Today', text: text, url: shareUrl }).catch(function () {});
+            } else {
+                try { navigator.clipboard.writeText(shareUrl); } catch (e) {}
+                window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + shareUrl), '_blank');
+            }
+        }
+        function shareProperty(id, title) {
+            var u = new URL('rentals.html', location.href);
+            u.searchParams.set('type', currentCategory);
+            u.searchParams.set('id', id);
+            btShareUrl(u.href, title);
+        }
+        function renderSingleProperty(id) {
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('publicView').classList.remove('hidden');
+            var grid = document.getElementById('listingsGrid');
+            if (!grid) return;
+            var p = allProperties.find(function (x) { return String(x.propertyId) === String(id); });
+            if (!p) { grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">यह प्रॉपर्टी अब उपलब्ध नहीं है। <a href="rentals.html" class="text-blue-600 font-semibold">सभी प्रॉपर्टी देखें</a></div>'; return; }
+            grid.innerHTML = '<div class="col-span-full mb-1"><a href="rentals.html?type=' + getCategory(p) + '" class="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700">← सभी प्रॉपर्टी देखें</a></div>' + createPropertyCard(p);
+        }
+
         // Render public listings (active category + search + type + price range + sort)
         function renderPublicListings() {
             var grid = document.getElementById('listingsGrid');
@@ -728,6 +754,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         </div>
                         <button onclick="openContactModal('${property.propertyId}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
                             WhatsApp पर संपर्क करें
+                        </button>
+                        <button type="button" onclick="shareProperty('${property.propertyId}', '${String((property.propertyType || 'प्रॉपर्टी') + ' · ' + (property.village || '')).replace(/'/g, "\\'")}')" class="w-full mt-2 border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 font-semibold py-2.5 rounded-lg text-sm inline-flex items-center justify-center gap-1.5 transition-colors">
+                            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                            शेयर करें
                         </button>
                         <p class="text-center text-xs text-slate-500 mt-3">🔥 अब तक ${property.contactCount || 0} लोगों ने संपर्क किया है</p>
                     </div>
@@ -1291,6 +1321,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 e.target.value = '';
             });
 
+            // Deep-link: ?id=<propertyId> shows ONLY that property (a shared card), regardless of login.
+            const shareId = urlParams.get('id');
+
             // Restore the shared BTSession (one OTP reused across all features)
             const session = BTSession.get();
             if (session) {
@@ -1305,10 +1338,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         );
                         if (mine && mine.ownerName) currentUser.name = String(mine.ownerName).trim();
                     }
-                    showDashboard();
+                    if (shareId) renderSingleProperty(shareId); else showDashboard();
                 });
             } else {
-                loadProperties();
+                loadProperties().then(() => { if (shareId) renderSingleProperty(shareId); });
             }
         });
     </script>
