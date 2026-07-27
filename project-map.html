@@ -535,6 +535,15 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 </div>
             </div>
         </div>
+
+        <!-- Social media presence — live previews of the project's posts/reels/videos (hidden if none) -->
+        <div id="projectSocialSection" class="mt-8 hidden">
+            <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-slate-100">
+                <h3 class="text-2xl font-bold mb-1 text-center" style="color: var(--theme-color);">सोशल मीडिया पर इस प्रोजेक्ट की झलक</h3>
+                <p class="text-slate-500 text-sm mb-6 text-center">रील, वीडियो, फ़ोटो और पोस्ट के ज़रिए इस प्रोजेक्ट को और करीब से देखें</p>
+                <div id="projectSocialLinks" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start"></div>
+            </div>
+        </div>
     </main>
 
     <!-- Admin Add/Edit Plot Modal -->
@@ -987,6 +996,135 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
 
         // Load project data from backend
+        // --- SOCIAL MEDIA (beautiful branded thumbnails on the project page) ---
+        function pmSocialMeta(platform) {
+            const p = (platform || '').toLowerCase();
+            const map = {
+                instagram: { color: '#E4405F', label: 'Instagram', svg: '<svg viewBox="0 0 24 24" class="w-8 h-8" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163C8.741 0 8.332.014 7.052.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>' },
+                facebook:  { color: '#1877F2', label: 'Facebook', svg: '<svg viewBox="0 0 24 24" class="w-8 h-8" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>' },
+                youtube:   { color: '#FF0000', label: 'YouTube', svg: '<svg viewBox="0 0 24 24" class="w-8 h-8" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>' },
+                whatsapp:  { color: '#25D366', label: 'WhatsApp', svg: '<svg viewBox="0 0 24 24" class="w-8 h-8" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.157 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.207zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>' },
+                twitter:   { color: '#0F1419', label: 'Twitter / X', svg: '<svg viewBox="0 0 24 24" class="w-8 h-8" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' },
+                website:   { color: '#0EA5E9', label: 'Website', svg: '<svg viewBox="0 0 24 24" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>' }
+            };
+            return map[p] || map.website;
+        }
+        // Normalise/allow-list a user-entered URL: block javascript:/data: etc., add https:// to bare domains.
+        function pmSafeUrl(u) {
+            u = String(u == null ? '' : u).trim();
+            if (!u) return '';
+            if (/^(javascript:|data:|vbscript:)/i.test(u)) return '';
+            if (/^(https?:\/\/|mailto:|tel:)/i.test(u)) return u;
+            if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return '';   // unknown scheme → reject
+            return 'https://' + u.replace(/^\/+/, '');        // schemeless → assume https
+        }
+        // Detect what a shared URL points to, so we can preview the ACTUAL content (not a profile logo).
+        function pmParseMedia(rawUrl, platform) {
+            const url = pmSafeUrl(rawUrl);
+            if (!url) return null;
+            const label = pmSocialMeta(platform).label;
+            let m;
+            m = url.match(/instagram\.com\/(p|reel|reels|tv)\/([A-Za-z0-9_-]+)/i);
+            if (m) { const t = m[1].toLowerCase() === 'reels' ? 'reel' : m[1].toLowerCase(); return { type: 'instagram', embed: 'https://www.instagram.com/' + t + '/' + m[2] + '/embed', url: url, label: label }; }
+            m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/))([A-Za-z0-9_-]{6,})/i);
+            if (m) { return { type: 'youtube', id: m[1], url: url, label: label }; }
+            if (/facebook\.com\/.*\/videos\/|facebook\.com\/watch|fb\.watch\//i.test(url)) { return { type: 'fbframe', embed: 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=false&width=500', url: url, label: label }; }
+            if (/facebook\.com\//i.test(url)) { return { type: 'fbframe', embed: 'https://www.facebook.com/plugins/post.php?href=' + encodeURIComponent(url) + '&show_text=true&width=500', url: url, label: label }; }
+            const path = url.split(/[?#]/)[0];
+            if (/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(path)) { return { type: 'image', url: url, label: label }; }
+            if (/\.(mp4|webm|ogg|mov)$/i.test(path)) { return { type: 'video', url: url, label: label }; }
+            return { type: 'link', url: url, label: label };
+        }
+        function pmLinkCard(item) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden';
+            const a = document.createElement('a');
+            a.href = item.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.className = 'flex flex-col items-center justify-center gap-3 p-10 text-center hover:bg-slate-50 transition-colors h-full min-h-[12rem]';
+            const ic = document.createElement('span');
+            ic.className = 'w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center';
+            ic.innerHTML = '<svg viewBox="0 0 24 24" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>';
+            const tx = document.createElement('span');
+            tx.className = 'text-sm font-bold text-slate-700';
+            tx.textContent = (item.label ? item.label + ' — ' : '') + 'सोशल मीडिया पर देखें';
+            a.appendChild(ic); a.appendChild(tx); card.appendChild(a);
+            return card;
+        }
+        function pmMediaCard(item) {
+            if (item.type === 'link') return pmLinkCard(item);
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden';
+            if (item.type === 'youtube') {
+                const box = document.createElement('div');
+                box.className = 'relative w-full cursor-pointer group bg-black';
+                box.style.aspectRatio = '16 / 9';
+                const img = document.createElement('img');
+                img.src = 'https://i.ytimg.com/vi/' + item.id + '/hqdefault.jpg';
+                img.alt = item.label + ' video'; img.loading = 'lazy';
+                img.className = 'w-full h-full object-cover';
+                const play = document.createElement('span');
+                play.className = 'absolute inset-0 flex items-center justify-center';
+                play.innerHTML = '<span class="w-16 h-16 rounded-full bg-red-600/90 group-hover:bg-red-600 flex items-center justify-center shadow-lg transition-colors"><svg viewBox="0 0 24 24" class="w-8 h-8 text-white ml-1" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>';
+                box.appendChild(img); box.appendChild(play);
+                box.addEventListener('click', function () {
+                    const ifr = document.createElement('iframe');
+                    ifr.src = 'https://www.youtube.com/embed/' + item.id + '?autoplay=1';
+                    ifr.title = item.label + ' video'; ifr.className = 'w-full h-full';
+                    ifr.setAttribute('frameborder', '0');
+                    ifr.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+                    ifr.setAttribute('allowfullscreen', '');
+                    box.innerHTML = ''; box.appendChild(ifr);
+                });
+                card.appendChild(box);
+            } else if (item.type === 'instagram' || item.type === 'fbframe') {
+                // Wrap in an overflow-x container + min-width so the embed is never clipped on narrow screens.
+                const scroll = document.createElement('div');
+                scroll.className = 'overflow-x-auto';
+                const ifr = document.createElement('iframe');
+                ifr.src = item.embed;
+                ifr.title = item.label + ' post'; ifr.className = 'w-full'; ifr.loading = 'lazy';
+                ifr.style.minWidth = item.type === 'instagram' ? '326px' : '340px';
+                ifr.style.height = item.type === 'instagram' ? '640px' : '560px';
+                ifr.setAttribute('frameborder', '0');
+                ifr.setAttribute('allowtransparency', 'true');
+                ifr.setAttribute('allow', 'encrypted-media; clipboard-write; picture-in-picture; web-share');
+                ifr.setAttribute('allowfullscreen', '');
+                scroll.appendChild(ifr);
+                card.appendChild(scroll);
+            } else if (item.type === 'image') {
+                const a = document.createElement('a');
+                a.href = item.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                const img = document.createElement('img');
+                img.src = item.url; img.alt = 'Project media'; img.loading = 'lazy';
+                img.className = 'w-full h-80 object-cover hover:opacity-95 transition-opacity';
+                img.onerror = function () { card.replaceWith(pmLinkCard(item)); };  // dead/misdetected URL → graceful link card
+                a.appendChild(img); card.appendChild(a);
+            } else if (item.type === 'video') {
+                const v = document.createElement('video');
+                v.src = item.url; v.controls = true; v.setAttribute('playsinline', '');
+                v.className = 'w-full h-80 object-cover bg-black';
+                v.onerror = function () { card.replaceWith(pmLinkCard(item)); };
+                card.appendChild(v);
+            }
+            return card;
+        }
+        function renderProjectSocial(raw) {
+            const section = document.getElementById('projectSocialSection');
+            const wrap = document.getElementById('projectSocialLinks');
+            if (!section || !wrap) return;
+            let links = [];
+            try { links = typeof raw === 'string' ? JSON.parse(raw || '[]') : (raw || []); } catch (e) { links = []; }
+            if (!Array.isArray(links)) links = [];
+            links = links.filter(s => s && s.url).slice(0, 5);
+            wrap.innerHTML = '';
+            links.forEach(s => {
+                const item = pmParseMedia(s.url, s.platform);
+                if (item) wrap.appendChild(pmMediaCard(item));
+            });
+            if (!wrap.children.length) { section.classList.add('hidden'); return; }
+            section.classList.remove('hidden');
+        }
+
         async function loadProjectData() {
             PROJECT_ID = getUrlParameter('project');
             
@@ -1061,6 +1199,22 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
                 // Render dynamic amenities
                 renderAmenities();
+
+                // Render social media previews (optional — section stays hidden if none)
+                renderProjectSocial(PROJECT_DATA.socialLinks);
+
+                // If arriving via a "#social" thumbnail link from a project card, scroll to the previews.
+                // The image gallery above loads async and shifts layout, so re-scroll a few times as the page settles.
+                if (location.hash === '#social') {
+                    const scrollToSocial = function () {
+                        const sec = document.getElementById('projectSocialSection');
+                        if (!sec || sec.classList.contains('hidden')) return;
+                        if (Math.abs(sec.getBoundingClientRect().top) < 12) return; // already at the top — don't re-yank
+                        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    };
+                    [200, 700, 1400, 2500].forEach(function (t) { setTimeout(scrollToSocial, t); });
+                    window.addEventListener('load', function () { setTimeout(scrollToSocial, 300); });
+                }
 
                 // Load marker size from localStorage
                 desktopMarkerSize = parseFloat(localStorage.getItem(`${PROJECT_ID}_marker_size`)) || 16;
