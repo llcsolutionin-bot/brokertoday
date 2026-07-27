@@ -1479,11 +1479,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     if (proj) appendMapButton(proj);
                     appendRentSellNav(text, reply);
                 } else {
-                    appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
+                    appendMessage('माफ़ करें, अभी सर्वर से कनेक्ट नहीं हो पा रहा। कृपया थोड़ी देर बाद फिर कोशिश करें।', false);
                 }
             } catch (e) {
                 typing.remove();
-                appendMessage('Network error. Please try again later.', false);
+                appendMessage('नेटवर्क समस्या। कृपया थोड़ी देर बाद फिर कोशिश करें।', false);
                 const proj = detectProject(text);
                 if (proj) appendMapButton(proj);
                 appendRentSellNav(text, '');

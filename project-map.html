@@ -882,11 +882,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     if (proj) appendMapButton(proj);
                     appendRentSellNav(text, reply);
                 } else {
-                    appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
+                    appendMessage('माफ़ करें, अभी सर्वर से कनेक्ट नहीं हो पा रहा। कृपया थोड़ी देर बाद फिर कोशिश करें।', false);
                 }
             } catch (e) {
                 typing.remove();
-                appendMessage('Network error. Please try again later.', false);
+                appendMessage('नेटवर्क समस्या। कृपया थोड़ी देर बाद फिर कोशिश करें।', false);
                 const proj = detectProject(text);
                 if (proj) appendMapButton(proj);
                 appendRentSellNav(text, '');
@@ -1469,6 +1469,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         async function loadPlots() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.remove('hidden'); 
+            var _ovWatch = setTimeout(function () {
+                if (overlay && !overlay.classList.contains('hidden') && overlay.style.opacity !== '0') {
+                    overlay.innerHTML = '<div class="text-center px-6"><p class="text-lg font-bold text-slate-800 mb-1">लोड होने में समस्या</p><p class="text-slate-500 mb-4">इंटरनेट कनेक्शन जाँचें और दोबारा कोशिश करें।</p><button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg">फिर से लोड करें</button></div>';
+                }
+            }, 12000);
             
             try {
                 const cacheBuster = new Date().getTime();
@@ -1927,12 +1932,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     const replyText = data.reply || 'Thanks for reaching out! We received your message.';
                     appendMessage(replyText, false);
                 } else {
-                    appendMessage('Sorry, I am having trouble connecting to the server right now.', false);
+                    appendMessage('माफ़ करें, अभी सर्वर से कनेक्ट नहीं हो पा रहा। कृपया थोड़ी देर बाद फिर कोशिश करें।', false);
                 }
             } catch (error) {
                 console.error('Chat Error:', error);
                 document.getElementById(typingId).remove();
-                appendMessage('Network error. Please try again later.', false);
+                appendMessage('नेटवर्क समस्या। कृपया थोड़ी देर बाद फिर कोशिश करें।', false);
             }
         }
 
