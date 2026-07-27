@@ -25,8 +25,8 @@
 
     <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS — parse uploaded .xlsx / .xls / .csv contact files in-browser -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- SheetJS (xlsx, ~1MB) is lazy-loaded on the first file upload — see ensureXLSX() -->
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -717,23 +717,36 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
     }
 
+    // Load SheetJS only when a file is actually uploaded (keeps ~1MB off the initial page load).
+    function ensureXLSX() {
+        return new Promise(function (resolve, reject) {
+            if (window.XLSX) return resolve();
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+            s.onload = function () { resolve(); };
+            s.onerror = function () { reject(new Error('xlsx load failed')); };
+            document.head.appendChild(s);
+        });
+    }
     function handleFile(input) {
         const file = input.files[0]; if (!file) return;
         const msg = document.getElementById('fileMsg'); msg.textContent = 'Reading…'; msg.className = 'text-sm font-semibold mt-2 text-slate-500';
-        const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                const wb = XLSX.read(e.target.result, { type: 'array' });
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                let added = 0, bad = 0;
-                rows.forEach(row => row.forEach(cell => { const n = normalizeIN(cell); if (n) { if (!WSTATE.recipients.has(n)) added++; WSTATE.recipients.add(n); } else if (String(cell || '').match(/\d/)) bad++; }));
-                WSTATE.invalidCount = bad;
-                msg.textContent = `✅ Added ${added} valid number(s)` + (bad ? `, skipped ${bad} invalid.` : '.');
-                msg.className = 'text-sm font-semibold mt-2 text-green-600';
-                refreshRecipients();
-            } catch (err) { msg.textContent = 'Could not read file. Use CSV or Excel with phone numbers.'; msg.className = 'text-sm font-semibold mt-2 text-red-600'; }
-        };
-        reader.readAsArrayBuffer(file);
+        ensureXLSX().then(function () {
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const wb = XLSX.read(e.target.result, { type: 'array' });
+                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+                    let added = 0, bad = 0;
+                    rows.forEach(row => row.forEach(cell => { const n = normalizeIN(cell); if (n) { if (!WSTATE.recipients.has(n)) added++; WSTATE.recipients.add(n); } else if (String(cell || '').match(/\d/)) bad++; }));
+                    WSTATE.invalidCount = bad;
+                    msg.textContent = `✅ Added ${added} valid number(s)` + (bad ? `, skipped ${bad} invalid.` : '.');
+                    msg.className = 'text-sm font-semibold mt-2 text-green-600';
+                    refreshRecipients();
+                } catch (err) { msg.textContent = 'Could not read file. Use CSV or Excel with phone numbers.'; msg.className = 'text-sm font-semibold mt-2 text-red-600'; }
+            };
+            reader.readAsArrayBuffer(file);
+        }).catch(function () { msg.textContent = 'फ़ाइल टूल लोड नहीं हो पाया। कृपया दोबारा कोशिश करें।'; msg.className = 'text-sm font-semibold mt-2 text-red-600'; });
     }
     function clearRecipients() { WSTATE.recipients.clear(); WSTATE.invalidCount = 0; document.querySelectorAll('.contact-cb').forEach(cb => cb.checked = false); const m = document.getElementById('selectAllContacts'); if (m) m.checked = false; refreshRecipients(); }
     function refreshRecipients() {
