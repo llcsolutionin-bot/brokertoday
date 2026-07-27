@@ -207,6 +207,7 @@
             max-height: 90vh;
         }
     </style>
+    <script src="bt-session.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
@@ -286,6 +287,7 @@
             <div class="flex items-center gap-1.5 text-sm text-slate-400">
                 स्थान: सिरोही
             </div>
+            <div id="btMenuAccount"></div>
         </div>
     </aside>
     <script>
@@ -696,10 +698,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <input type="hidden" id="cPlotNo">
                 
                 <div>
-                    <input type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input data-bt="name" type="text" id="cName" placeholder="आपका नाम (Your Name)" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <input type="tel" id="cPhone" placeholder="10 अंकों का WhatsApp नंबर" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input data-bt="phone" type="tel" id="cPhone" placeholder="10 अंकों का WhatsApp नंबर" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 
                 <div>

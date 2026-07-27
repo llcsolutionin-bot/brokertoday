@@ -13,6 +13,7 @@
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
+    <script src="bt-session.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
@@ -85,6 +86,7 @@
             <div class="flex items-center gap-1.5 text-sm text-slate-400">
                 स्थान: सिरोही
             </div>
+            <div id="btMenuAccount"></div>
         </div>
     </aside>
     <script>
@@ -196,11 +198,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <input type="hidden" id="agentUid">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">एजेंट का पूरा नाम</label>
-                    <input type="text" id="aName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input data-bt="name" type="text" id="aName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">व्हाट्सएप / फोन नंबर</label>
-                    <input type="tel" id="aPhone" required maxlength="13" inputmode="numeric" placeholder="10 अंकों का मोबाइल नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <input data-bt="phone" type="tel" id="aPhone" required maxlength="13" inputmode="numeric" placeholder="10 अंकों का मोबाइल नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500">
                     <p class="text-[11px] text-slate-400 mt-1">सिर्फ 10 अंकों का मोबाइल नंबर (देश कोड 91 अपने आप जुड़ जाएगा)</p>
                 </div>
                 <div>

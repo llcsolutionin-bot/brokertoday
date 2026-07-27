@@ -138,6 +138,7 @@
             <div class="flex items-center gap-1.5 text-sm text-slate-400">
                 स्थान: सिरोही
             </div>
+            <div id="btMenuAccount"></div>
         </div>
     </aside>
     <script>
@@ -476,7 +477,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             <form id="leadForm" class="space-y-5 relative z-10">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">आपका नाम</label>
-                    <input type="text" id="name" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
+                    <input data-bt="name" type="text" id="name" required class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
                 </div>
                 
                 <!-- Updated Phone Input with Country Code Validation -->
@@ -486,7 +487,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <select id="countryCode" class="w-1/3 sm:w-1/4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm cursor-pointer font-medium text-slate-700">
                             <option value="+91" selected>🇮🇳 +91</option>
                         </select>
-                        <input type="tel" id="phone" placeholder="9876543210" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="flex-1 w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
+                        <input data-bt="phone" type="tel" id="phone" placeholder="9876543210" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="flex-1 w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 outline-none transition-all shadow-sm">
                     </div>
                     <p id="phoneError" class="text-xs text-red-500 mt-1.5 font-medium ml-1 hidden">कृपया सही 10 अंकों का नंबर दर्ज करें।</p>
                 </div>
@@ -614,14 +615,14 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <p class="text-sm text-slate-500">अपना 10-अंकों का WhatsApp नंबर डालें। OTP से वेरिफाई करने के बाद आप विज्ञापन जोड़ सकते हैं।</p>
                     <div class="flex items-stretch rounded-lg border border-slate-300 overflow-hidden focus-within:border-[#FF6D5A]">
                         <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
-                        <input id="adPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
+                        <input data-bt="loginphone" id="adPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
                     </div>
                     <button type="submit" id="adSendOtp" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">OTP भेजें</button>
                 </form>
                 <!-- otp -->
                 <form id="adOtpForm" class="space-y-4 hidden">
                     <p class="text-sm text-slate-500">OTP भेजा गया <span id="adOtpPhone" class="font-bold"></span> पर · <button type="button" onclick="AdApp.backToPhone()" class="text-[#FF6D5A] font-semibold">बदलें</button></p>
-                    <input id="adOtp" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#FF6D5A]" required>
+                    <input autocomplete="one-time-code" id="adOtp" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#FF6D5A]" required>
                     <button type="submit" id="adVerify" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">वेरिफाई करें</button>
                 </form>
                 <!-- existing ad -->
@@ -792,6 +793,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             token = ''; phone = ''; existing = null; imgData = ''; replaceMode = false;
             show('adPhoneForm'); $('adPhone').value = ''; $('adOtp').value = ''; $('adText').value = '';
             $('adPreview').style.backgroundImage = ''; $('adPreview').textContent = 'इमेज चुनें'; $('adWordCount').textContent = '0'; hideMsg();
+            if (window.BTSession) BTSession.autofill();   // re-apply last-used number after the field was cleared
         }
         function backToPhone() { show('adPhoneForm'); hideMsg(); }
         function startReplace() { replaceMode = true; imgData = ''; $('adPreview').style.backgroundImage = ''; $('adPreview').textContent = 'नई इमेज चुनें'; $('adText').value = existing ? (existing.text || '') : ''; countWords(); show('adUploadForm'); hideMsg(); }

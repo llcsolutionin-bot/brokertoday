@@ -92,6 +92,7 @@
             <div class="flex items-center gap-1.5 text-sm text-slate-400">
                 स्थान: सिरोही
             </div>
+            <div id="btMenuAccount"></div>
         </div>
     </aside>
     <script>
@@ -187,10 +188,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <h2 id="dashboardHeader" class="text-3xl font-extrabold text-slate-800">मेरी प्रॉपर्टीज</h2>
                 <p class="text-slate-500 mt-1">Welcome, <span id="userName" class="font-bold"></span></p>
             </div>
-            <button onclick="logout()" class="inline-flex items-center gap-2 bg-white hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-300 font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                Logout
-            </button>
+            <div class="flex flex-col items-end gap-1.5">
+                <p class="text-xs text-slate-500">लॉग इन: <span id="userPhone" class="font-bold text-slate-700"></span></p>
+                <button onclick="logout()" class="inline-flex items-center gap-2 bg-white hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-300 font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Logout
+                </button>
+            </div>
         </div>
 
         <div id="maxLimitWarning" class="hidden bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6 text-red-700 font-semibold">
@@ -218,7 +222,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp नंबर (+91)</label>
-                        <input type="tel" id="ownerWhatsapp" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                        <input data-bt="loginphone" type="tel" id="ownerWhatsapp" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                     </div>
                     <button id="btnSendOTP" onclick="sendOTP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
                         OTP भेजें
@@ -232,7 +236,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">4-Digit OTP</label>
-                        <input type="text" id="otpInput" required maxlength="6" inputmode="numeric" placeholder="••••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 text-center text-2xl font-bold tracking-widest">
+                        <input autocomplete="one-time-code" type="text" id="otpInput" required maxlength="6" inputmode="numeric" placeholder="••••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 text-center text-2xl font-bold tracking-widest">
                     </div>
                     <button id="btnVerifyOTP" onclick="verifyOTP()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
                         Verify & Login
@@ -252,11 +256,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <input type="hidden" id="contactPropertyId">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">आपका नाम</label>
-                    <input type="text" id="customerName" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input data-bt="name" type="text" id="customerName" required class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp नंबर (+91)</label>
-                    <input type="tel" id="customerWhatsapp" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input data-bt="phone" type="tel" id="customerWhatsapp" required maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="9876543210" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
                 </div>
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
                     WhatsApp पर संपर्क करें
@@ -632,6 +636,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         // Auth Modal
         function openAuthModal() {
             document.getElementById('authModal').classList.remove('hidden');
+            if (window.BTSession) BTSession.autofill();   // prefill the last-used login number
         }
 
         function closeAuthModal() {
@@ -741,7 +746,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             document.getElementById('userDashboard').classList.remove('hidden');
             document.getElementById('btnListProperty').classList.add('hidden');
             document.getElementById('userName').textContent = currentUser.name;
-            
+            var _up = document.getElementById('userPhone'); if (_up) _up.textContent = '+91 ' + BTSession.phone();
+
             loadUserProperties();
         }
 

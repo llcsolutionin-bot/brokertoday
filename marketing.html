@@ -87,6 +87,7 @@
             <div class="flex items-center gap-1.5 text-sm text-slate-400">
                 स्थान: सिरोही
             </div>
+            <div id="btMenuAccount"></div>
         </div>
     </aside>
     <script>
@@ -143,7 +144,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp Number</label>
                         <div class="flex items-stretch rounded-lg border border-slate-300 focus-within:border-blue-500 overflow-hidden">
                             <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
-                            <input type="tel" id="phoneInput" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
+                            <input data-bt="loginphone" type="tel" id="phoneInput" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="flex-1 px-4 py-3 focus:outline-none" required>
                         </div>
                     </div>
                     <button type="submit" id="sendOtpBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
@@ -156,7 +157,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Enter OTP</label>
                         <p class="text-xs text-slate-500 mb-2">OTP sent on WhatsApp to <span id="otpTargetPhone" class="font-bold"></span> · <button type="button" onclick="editPhone()" class="text-blue-600 font-semibold">change</button></p>
-                        <input type="text" id="otpInput" inputmode="numeric" maxlength="6" placeholder="••••••" class="otp-cell w-full text-center text-2xl font-bold px-4 py-3 rounded-lg border border-slate-300 focus:border-blue-500 focus:outline-none" required>
+                        <input autocomplete="one-time-code" type="text" id="otpInput" inputmode="numeric" maxlength="6" placeholder="••••••" class="otp-cell w-full text-center text-2xl font-bold px-4 py-3 rounded-lg border border-slate-300 focus:border-blue-500 focus:outline-none" required>
                     </div>
                     <button type="submit" id="verifyOtpBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">Verify & Login</button>
                     <p class="text-center text-sm text-slate-500">Didn't get it? <button type="button" id="resendBtn" onclick="resendOtp()" class="text-blue-600 font-semibold disabled:text-slate-400" disabled>Resend</button> <span id="resendTimer" class="text-slate-400"></span></p>

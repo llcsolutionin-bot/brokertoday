@@ -51,6 +51,7 @@
     })();
 
     function otpSend(phone) {
+        try { localStorage.setItem('bt_last_phone', digits10(phone)); } catch (e) {}  // remember for faster re-login
         return fetch(BASE + '/mkt-otp-send', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone: digits10(phone) })
@@ -63,17 +64,58 @@
         });
     }
 
+    // Auto-fill forms so a user never re-types.
+    //  - data-bt="phone"  → logged-in user's number (enquiry/contact forms)
+    //  - data-bt="name"   → logged-in user's name (if known)
+    //  - data-bt="loginphone" → the last number they used to log in (works even when logged OUT,
+    //    so re-verifying after expiry/device change is ~one tap)
+    // Only fills EMPTY inputs; never overwrites typed input; fields stay editable.
+    // Call BTSession.autofill(modalEl) after opening a modal that resets its fields.
+    function autofill(root) {
+        var scope = (root && root.querySelectorAll) ? root : document;
+        var s = read();
+        if (s) {
+            scope.querySelectorAll('[data-bt="phone"]').forEach(function (el) { if (!el.value) el.value = s.phone; });
+            if (s.name) scope.querySelectorAll('[data-bt="name"]').forEach(function (el) { if (!el.value) el.value = s.name; });
+        }
+        try {
+            var last = localStorage.getItem('bt_last_phone');
+            if (last) scope.querySelectorAll('[data-bt="loginphone"]').forEach(function (el) { if (!el.value) el.value = last; });
+        } catch (e) {}
+    }
+
+    // Global "signed in as … / logout" chip rendered into #btMenuAccount (present in every page's
+    // hamburger drawer). Logout clears the shared session site-wide.
+    function renderMenuAccount() {
+        var el = document.getElementById('btMenuAccount'); if (!el) return;
+        var s = read();
+        if (!s) { el.innerHTML = ''; return; }
+        el.innerHTML =
+            '<div class="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-700">' +
+                '<span class="text-xs text-slate-400 truncate">लॉग इन: <span class="font-bold text-slate-200">+91 ' + s.phone + '</span></span>' +
+                '<button type="button" onclick="BTSession.logout()" class="text-xs font-bold text-red-400 hover:text-red-300 whitespace-nowrap">लॉग आउट</button>' +
+            '</div>';
+    }
+    function logout() { clear(); try { location.reload(); } catch (e) {} }
+
     window.BTSession = {
         BASE: BASE,
         get: read,
         set: save,
         clear: clear,
+        logout: logout,
         isValid: function () { return !!read(); },
         phone: function () { var s = read(); return s ? s.phone : ''; },
         token: function () { var s = read(); return s ? s.token : ''; },
         name: function () { var s = read(); return s ? (s.name || '') : ''; },
         digits10: digits10,
         otpSend: otpSend,
-        otpVerify: otpVerify
+        otpVerify: otpVerify,
+        autofill: autofill,
+        renderMenuAccount: renderMenuAccount
     };
+
+    function onReady() { autofill(); renderMenuAccount(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onReady);
+    else onReady();
 })();
