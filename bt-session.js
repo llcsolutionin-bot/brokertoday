@@ -89,7 +89,10 @@
     function renderMenuAccount() {
         var el = document.getElementById('btMenuAccount'); if (!el) return;
         var s = read();
-        if (!s) { el.innerHTML = ''; return; }
+        if (!s) {
+            el.innerHTML = '<button type="button" onclick="BTSession.openLogin()" class="w-full mt-3 pt-3 border-t border-slate-700 text-left text-sm font-bold text-[#FF6D5A] hover:text-white transition-colors">लॉगिन / साइन-अप →</button>';
+            return;
+        }
         el.innerHTML =
             '<div class="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-700">' +
                 '<span class="text-xs text-slate-400 truncate">लॉग इन: <span class="font-bold text-slate-200">+91 ' + s.phone + '</span></span>' +
@@ -145,6 +148,89 @@
         document.body.appendChild(f);
     }
 
+    // ---- Master login (one OTP sign-in usable from the hamburger, works everywhere) ----
+    function closeMenu() { var a = document.getElementById('mainMenu'), o = document.getElementById('mainMenuOverlay'); if (a) a.classList.add('hidden'); if (o) o.classList.add('hidden'); }
+    function injectLoginModal() {
+        if (document.getElementById('btLoginModal')) return;
+        var d = document.createElement('div');
+        d.id = 'btLoginModal';
+        d.className = 'hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[130] flex items-center justify-center p-4';
+        d.innerHTML =
+            '<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6" onclick="event.stopPropagation()">' +
+                '<div class="flex justify-between items-center mb-4"><h3 class="text-lg font-bold text-slate-800">लॉगिन / साइन-अप</h3>' +
+                '<button type="button" onclick="BTSession.closeLogin()" aria-label="बंद करें" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button></div>' +
+                '<div id="btLoginPhoneStep" class="space-y-3">' +
+                    '<p class="text-sm text-slate-500">अपना WhatsApp नंबर डालें — एक बार लॉगिन करें, पूरी वेबसाइट पर काम करेगा।</p>' +
+                    '<div class="flex items-stretch rounded-lg border border-slate-300 overflow-hidden focus-within:border-[#FF6D5A]"><span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>' +
+                    '<input id="btLoginPhone" data-bt="loginphone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-अंकों का नंबर" aria-label="WhatsApp नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')" class="flex-1 px-3 py-2.5 focus:outline-none"></div>' +
+                    '<button type="button" id="btLoginSend" onclick="BTSession._sendLogin()" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-2.5 rounded-lg">OTP भेजें</button>' +
+                '</div>' +
+                '<div id="btLoginOtpStep" class="space-y-3 hidden">' +
+                    '<p class="text-sm text-slate-500">6-अंकों का OTP भेजा गया <span id="btLoginOtpPhone" class="font-bold"></span> पर</p>' +
+                    '<input id="btLoginOtp" autocomplete="one-time-code" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" aria-label="OTP" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')" class="w-full text-center text-2xl tracking-[0.3em] font-bold px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:border-[#FF6D5A]">' +
+                    '<button type="button" id="btLoginVerify" onclick="BTSession._verifyLogin()" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-2.5 rounded-lg">वेरिफाई करें</button>' +
+                    '<p class="text-center text-sm text-slate-500">OTP नहीं मिला? <button type="button" id="btLoginResend" data-label="दोबारा भेजें" class="font-semibold text-[#FF6D5A]">दोबारा भेजें</button></p>' +
+                '</div>' +
+                '<p id="btLoginMsg" class="hidden mt-3 text-center text-sm font-semibold"></p>' +
+            '</div>';
+        d.addEventListener('click', function () { closeLogin(); });   // click backdrop to close
+        document.body.appendChild(d);
+    }
+    function _lmsg(t, ok) { var m = document.getElementById('btLoginMsg'); if (!m) return; m.textContent = t; m.className = 'mt-3 text-center text-sm font-semibold ' + (ok ? 'text-green-600' : 'text-red-600'); m.classList.remove('hidden'); }
+    function openLogin() {
+        if (read()) return;                       // already signed in
+        injectLoginModal();
+        var m = document.getElementById('btLoginModal'); if (!m) return;
+        document.getElementById('btLoginPhoneStep').classList.remove('hidden');
+        document.getElementById('btLoginOtpStep').classList.add('hidden');
+        var msg = document.getElementById('btLoginMsg'); if (msg) msg.classList.add('hidden');
+        m.classList.remove('hidden');
+        autofill(m);
+        closeMenu();
+    }
+    function closeLogin() { var m = document.getElementById('btLoginModal'); if (m) m.classList.add('hidden'); }
+    var _loginPhone = '';
+    function _sendLogin() {
+        var el = document.getElementById('btLoginPhone');
+        var p = digits10(el ? el.value : '');
+        if (!/^[6-9]\d{9}$/.test(p)) return _lmsg('सही 10-अंकों का नंबर डालें।', false);
+        _loginPhone = p;
+        var b = document.getElementById('btLoginSend'); if (b) { b.disabled = true; b.textContent = 'भेज रहे हैं…'; }
+        otpSend(p).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
+            if (d && d.ok !== false) {
+                document.getElementById('btLoginOtpPhone').textContent = '+91 ' + p;
+                document.getElementById('btLoginPhoneStep').classList.add('hidden');
+                document.getElementById('btLoginOtpStep').classList.remove('hidden');
+                var o = document.getElementById('btLoginOtp'); if (o) o.focus();
+                var msg = document.getElementById('btLoginMsg'); if (msg) msg.classList.add('hidden');
+                startResend('btLoginResend', function () { otpSend(p); }, 30);
+            } else _lmsg((d && d.error) || 'OTP नहीं भेज सके।', false);
+        }).catch(function () { _lmsg('नेटवर्क त्रुटि।', false); })
+            .then(function () { if (b) { b.disabled = false; b.textContent = 'OTP भेजें'; } });
+    }
+    function _verifyLogin() {
+        var el = document.getElementById('btLoginOtp');
+        var otp = (el ? el.value : '').trim();
+        if (otp.length < 4) return _lmsg('OTP डालें।', false);
+        var b = document.getElementById('btLoginVerify'); if (b) { b.disabled = true; b.textContent = 'जाँच हो रही है…'; }
+        otpVerify(_loginPhone, otp).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
+            if (d && d.ok !== false && d.token) {
+                save(_loginPhone, d.token);
+                closeLogin();
+                try { location.reload(); } catch (e) { renderMenuAccount(); }
+            } else _lmsg((d && d.error) || 'गलत या एक्सपायर OTP।', false);
+        }).catch(function () { _lmsg('नेटवर्क त्रुटि।', false); })
+            .then(function () { if (b) { b.disabled = false; b.textContent = 'वेरिफाई करें'; } });
+    }
+    // Cross-tab sync: a login OR logout in any tab reflects in every open tab (master logout).
+    var _wasLoggedIn = !!read();
+    function _onStorage(e) {
+        if (e && e.key && e.key !== KEY) return;
+        var now = !!read();
+        if (now !== _wasLoggedIn) { _wasLoggedIn = now; try { location.reload(); } catch (x) { renderMenuAccount(); } }
+        else renderMenuAccount();
+    }
+
     window.BTSession = {
         BASE: BASE,
         get: read,
@@ -160,10 +246,15 @@
         otpVerify: otpVerify,
         autofill: autofill,
         renderMenuAccount: renderMenuAccount,
-        startResend: startResend
+        startResend: startResend,
+        openLogin: openLogin,
+        closeLogin: closeLogin,
+        _sendLogin: _sendLogin,
+        _verifyLogin: _verifyLogin
     };
 
-    function onReady() { autofill(); renderMenuAccount(); renderFooter(); }
+    function onReady() { injectLoginModal(); autofill(); renderMenuAccount(); renderFooter(); }
+    window.addEventListener('storage', _onStorage);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onReady);
     else onReady();
 })();
