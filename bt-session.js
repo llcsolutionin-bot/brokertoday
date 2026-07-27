@@ -98,6 +98,31 @@
     }
     function logout() { clear(); try { location.reload(); } catch (e) {} }
 
+    // Resend-OTP button with a countdown. Call after each send; the button is disabled for
+    // `seconds`, then clicking it runs resendFn() and restarts the countdown. Binds its click once.
+    function startResend(btnId, resendFn, seconds) {
+        var btn = document.getElementById(btnId);
+        if (!btn) return;
+        seconds = seconds || 30;
+        if (!btn._btLabel) btn._btLabel = btn.getAttribute('data-label') || btn.textContent || 'OTP दोबारा भेजें';
+        btn._btResend = resendFn;
+        if (!btn._btBound) {
+            btn._btBound = true;
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (btn.disabled) return;
+                try { if (btn._btResend) btn._btResend(); } catch (err) {}
+                startResend(btnId, btn._btResend, seconds);
+            });
+        }
+        clearTimeout(btn._btTimer);
+        (function tick(n) {
+            if (n <= 0) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.textContent = btn._btLabel; return; }
+            btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); btn.textContent = btn._btLabel + ' (' + n + 's)';
+            btn._btTimer = setTimeout(function () { tick(n - 1); }, 1000);
+        })(seconds);
+    }
+
     // Shared footer on every page that doesn't already have one (index keeps its own richer footer).
     function renderFooter() {
         if (document.querySelector('footer')) return;
@@ -134,7 +159,8 @@
         otpSend: otpSend,
         otpVerify: otpVerify,
         autofill: autofill,
-        renderMenuAccount: renderMenuAccount
+        renderMenuAccount: renderMenuAccount,
+        startResend: startResend
     };
 
     function onReady() { autofill(); renderMenuAccount(); renderFooter(); }

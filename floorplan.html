@@ -148,6 +148,7 @@ html[data-theme="dark"] input,html[data-theme="dark"] select{background-color:#0
                     <p class="text-sm text-slate-500">OTP भेजा गया <span id="fpOtpPhone" class="font-bold"></span> पर · <button type="button" onclick="fpBackToDetails()" class="text-blue-600 font-semibold">बदलें</button></p>
                     <input autocomplete="one-time-code" type="text" id="fpOtp" inputmode="numeric" maxlength="6" placeholder="••••••" aria-label="OTP" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500" required>
                     <button type="submit" id="fpVerify" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">वेरिफाई करें</button>
+                    <p class="text-center text-sm text-slate-500">OTP नहीं मिला? <button type="button" id="fpResend" data-label="दोबारा भेजें" class="font-semibold text-blue-600 hover:text-blue-700">दोबारा भेजें</button></p>
                 </form>
                 <p id="fpGateMsg" class="hidden mt-4 text-center text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg py-2 px-3"></p>
             </div>
@@ -252,7 +253,7 @@ html[data-theme="dark"] input,html[data-theme="dark"] select{background-color:#0
         try {
             const r = await BTSession.otpSend(p);
             const d = await r.json().catch(() => ({}));
-            if (r.ok && d.ok !== false) { fpName = nm; fpPhone = p; $('fpOtpPhone').textContent = '+91 ' + p; $('fpDetailsForm').classList.add('hidden'); $('fpOtpForm').classList.remove('hidden'); $('fpOtp').focus(); }
+            if (r.ok && d.ok !== false) { fpName = nm; fpPhone = p; $('fpOtpPhone').textContent = '+91 ' + p; $('fpDetailsForm').classList.add('hidden'); $('fpOtpForm').classList.remove('hidden'); $('fpOtp').focus(); BTSession.startResend('fpResend', function () { if (/^[6-9]\d{9}$/.test(fpPhone)) BTSession.otpSend(fpPhone); }, 30); }
             else gmsg(d.error || 'OTP नहीं भेज सके।');
         } catch (err) { gmsg('नेटवर्क त्रुटि।'); }
         finally { fpBusy = false; unspin(b, 'OTP भेजें'); }

@@ -646,6 +646,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <p class="text-sm text-slate-500">OTP भेजा गया <span id="adOtpPhone" class="font-bold"></span> पर · <button type="button" onclick="AdApp.backToPhone()" class="text-[#FF6D5A] font-semibold">बदलें</button></p>
                     <input autocomplete="one-time-code" id="adOtp" type="text" aria-label="OTP कोड" inputmode="numeric" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#FF6D5A]" required>
                     <button type="submit" id="adVerify" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">वेरिफाई करें</button>
+                    <p class="text-center text-sm text-slate-500">OTP नहीं मिला? <button type="button" id="adResend" data-label="दोबारा भेजें" class="font-semibold text-[#FF6D5A] hover:opacity-80">दोबारा भेजें</button></p>
                 </form>
                 <!-- existing ad -->
                 <div id="adExisting" class="space-y-4 hidden">
@@ -877,7 +878,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 try {
                     var r = await fetch(W.otpSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: p }) });
                     var d = await r.json().catch(function () { return {}; });
-                    if (r.ok && d.ok !== false) { phone = p; $('adOtpPhone').textContent = '+91 ' + p; show('adOtpForm'); $('adOtp').focus(); }
+                    if (r.ok && d.ok !== false) { phone = p; $('adOtpPhone').textContent = '+91 ' + p; show('adOtpForm'); $('adOtp').focus(); BTSession.startResend('adResend', function () { if (/^[6-9]\d{9}$/.test(phone)) BTSession.otpSend(phone); }, 30); }
                     else msg(d.error || 'OTP नहीं भेज सके।', false);
                 } catch (err) { msg('नेटवर्क त्रुटि।', false); }
                 finally { busy = false; unspin(b, 'OTP भेजें'); }
