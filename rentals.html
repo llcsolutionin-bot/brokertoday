@@ -232,7 +232,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">4-Digit OTP</label>
-                        <input type="text" id="otpInput" required maxlength="4" placeholder="1234" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 text-center text-2xl font-bold tracking-widest">
+                        <input type="text" id="otpInput" required maxlength="6" inputmode="numeric" placeholder="••••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 text-center text-2xl font-bold tracking-widest">
                     </div>
                     <button id="btnVerifyOTP" onclick="verifyOTP()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
                         Verify & Login
@@ -277,6 +277,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <input type="hidden" id="propertyId">
                 <input type="hidden" id="formOwnerName">
                 <input type="hidden" id="formOwnerWhatsapp">
+
+                <!-- Owner name — needed even if OTP was verified on another feature (no name captured there) -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">आपका नाम (Your name)</label>
+                    <input type="text" id="ownerNameInput" required placeholder="आपका नाम" class="w-full border-2 border-slate-300 p-3 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
 
                 <!-- Listing Type (Rent / Sell) — locked to the page category, not editable -->
                 <div>
@@ -427,6 +433,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         </div>
     </div>
 
+    <script src="bt-session.js"></script>
     <script>
         // API Endpoints
         const API_GET_RENTALS = 'https://llcsolution.duckdns.org/webhook/79621d58-d31e-4f18-a02a-5bf179ea23f3';
@@ -650,19 +657,15 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             btn.classList.add('opacity-75', 'cursor-not-allowed');
             
             try {
-                const response = await fetch(API_SEND_OTP, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, phone: '+91' + phone })
-                });
-                
+                const response = await BTSession.otpSend(phone);
+
                 if (!response.ok) {
                     btn.disabled = false;
                     btn.innerText = originalText;
                     btn.classList.remove('opacity-75', 'cursor-not-allowed');
                     throw new Error('Failed to send OTP');
                 }
-                
+
                 document.getElementById('displayPhone').textContent = '+91' + phone;
                 document.getElementById('step1').classList.add('hidden');
                 document.getElementById('step2').classList.remove('hidden');
@@ -674,63 +677,60 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             }
         }
 
-        // Verify OTP
+        // Verify OTP (shared BTSession flow)
         async function verifyOTP() {
-            const phone = '+91' + document.getElementById('ownerWhatsapp').value.trim();
+            const phone10 = document.getElementById('ownerWhatsapp').value.replace(/\D/g, '').slice(-10);
+            const ownerName = document.getElementById('ownerName').value.trim();
             const otp = document.getElementById('otpInput').value.trim();
-            
-            if (otp.length !== 4) {
-                alert('कृपया 4-digit OTP दर्ज करें');
+
+            if (otp.length < 4) {
+                alert('कृपया OTP दर्ज करें');
                 return;
             }
-            
+
             const btn = document.getElementById('btnVerifyOTP');
             const originalText = btn.innerText;
             btn.disabled = true;
             btn.innerText = 'वेरीफाई कर रहे हैं...';
             btn.classList.add('opacity-75', 'cursor-not-allowed');
-            
-            try {
-                const response = await fetch(API_VERIFY_OTP, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, otp })
-                });
-                
-                if (!response.ok) {
-                    btn.disabled = false;
-                    btn.innerText = originalText;
-                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
-                    throw new Error('Invalid OTP');
-                }
-                
-                const userData = await response.json();
-                
-                if (userData.success === false) {
-                    btn.disabled = false;
-                    btn.innerText = originalText;
-                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
-                    alert('गलत OTP। कृपया पुनः प्रयास करें।');
-                    return;
-                }
-                
-                // Crash-proof properties handling
-                let props = userData.properties || [];
-                if (!Array.isArray(props)) { props = [props]; }
-                
-                currentUser = {
-                    name: document.getElementById('ownerName').value,
-                    phone: String(phone),
-                    properties: props
-                };
-                
-                sessionStorage.setItem('rentalUser', JSON.stringify(currentUser));
-                closeAuthModal();
-                showDashboard();
-            } catch (error) {
+
+            const resetBtn = () => {
                 btn.disabled = false;
                 btn.innerText = originalText;
                 btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            };
+
+            try {
+                const response = await BTSession.otpVerify(phone10, otp);
+
+                if (!response.ok) {
+                    resetBtn();
+                    throw new Error('Invalid OTP');
+                }
+
+                const data = await response.json();
+
+                // Success gate: mkt-otp-verify returns a token (no properties)
+                if (!(data && data.ok !== false && data.token)) {
+                    resetBtn();
+                    alert('गलत OTP। कृपया पुनः प्रयास करें।');
+                    return;
+                }
+
+                // Persist the shared session (reused across all features)
+                BTSession.set(phone10, data.token, ownerName);
+
+                currentUser = {
+                    name: ownerName,
+                    phone: '+91' + phone10
+                };
+
+                closeAuthModal();
+                // mkt-otp-verify does NOT return properties — fetch + suffix-filter from API_GET_RENTALS
+                await loadProperties();
+                showDashboard();
+            } catch (error) {
+                resetBtn();
                 alert('गलत OTP। कृपया पुनः प्रयास करें।');
             }
         }
@@ -886,6 +886,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             
             document.getElementById('formOwnerName').value = currentUser.name;
             document.getElementById('formOwnerWhatsapp').value = currentUser.phone;
+            // Pre-fill owner name (from this session or a session verified on another feature)
+            const nameInput = document.getElementById('ownerNameInput');
+            if (nameInput) nameInput.value = (currentUser && currentUser.name) ? currentUser.name : (BTSession.name() || '');
             document.getElementById('propertyModal').classList.remove('hidden');
         }
 
@@ -981,12 +984,21 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         document.getElementById('propertyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Owner name is mandatory — may be blank if OTP was verified on another feature
+            const enteredName = (document.getElementById('ownerNameInput').value || '').trim();
+            if (!enteredName) {
+                alert('कृपया अपना नाम दर्ज करें (Please enter your name).');
+                document.getElementById('ownerNameInput').focus();
+                return;
+            }
+            const ownerWhatsapp = '+91' + BTSession.phone();
+
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerText;
             submitBtn.disabled = true;
             submitBtn.innerText = 'सेव हो रहा है...';
             submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
-            
+
             try {
                 const propertyId = document.getElementById('propertyId').value || `prop_${Date.now()}`;
 
@@ -1014,8 +1026,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 
                 const propertyData = {
                     propertyId: propertyId,
-                    ownerName: currentUser.name,
-                    ownerWhatsapp: currentUser.phone,
+                    ownerName: enteredName,
+                    ownerWhatsapp: ownerWhatsapp,
                     rentAmount: document.getElementById('rentAmount').value,
                     advanceAmount: document.getElementById('advanceAmount').value,
                     propertyType: document.getElementById('propertyType').value,
@@ -1043,7 +1055,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 });
                 
                 if (!response.ok) throw new Error('Failed to save property');
-                
+
+                // Persist the entered name into the shared session (keeps prior token)
+                BTSession.set(BTSession.phone(), BTSession.token(), enteredName);
+                if (currentUser) currentUser.name = enteredName;
+                document.getElementById('userName').textContent = enteredName;
+
                 alert('प्रॉपर्टी सफलतापूर्वक सेव हो गई!');
                 closePropertyModal();
                 await loadProperties();
@@ -1097,7 +1114,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
         // Logout
         function logout() {
-            sessionStorage.removeItem('rentalUser');
+            BTSession.clear();
             currentUser = null;
             document.getElementById('userDashboard').classList.add('hidden');
             document.getElementById('publicView').classList.remove('hidden');
@@ -1150,10 +1167,22 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 e.target.value = '';
             });
 
-            const savedUser = sessionStorage.getItem('rentalUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                loadProperties().then(() => showDashboard());
+            // Restore the shared BTSession (one OTP reused across all features)
+            const session = BTSession.get();
+            if (session) {
+                const phone10 = BTSession.digits10(session.phone);
+                currentUser = { name: session.name || '', phone: '+91' + phone10 };
+                loadProperties().then(() => {
+                    // If no name was captured (verified on another feature), derive it
+                    // from the first matched property's ownerName if available.
+                    if (!currentUser.name && Array.isArray(allProperties)) {
+                        const mine = allProperties.find(p =>
+                            p.ownerWhatsapp && String(p.ownerWhatsapp).trim().endsWith(phone10) && p.ownerName
+                        );
+                        if (mine && mine.ownerName) currentUser.name = String(mine.ownerName).trim();
+                    }
+                    showDashboard();
+                });
             } else {
                 loadProperties();
             }

@@ -52,15 +52,27 @@
             <a href="rentals.html?type=rent" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">किराये की प्रॉपर्टी</a>
             <a href="rentals.html?type=sell" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी बेचें</a>
             <a href="agents.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी एक्सपर्ट्स</a>
-            <a href="floorplan.html" class="px-4 py-3 rounded-lg bg-blue-600 border border-blue-400 text-white font-semibold tracking-wide transition-all">2D फ्लोर प्लान</a>
+            <a href="floorplan.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">2D फ्लोर प्लान</a>
             <a href="marketing.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">मार्केटिंग</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">लीगल एक्सपर्ट्स</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">बैंकिंग एक्सपर्ट्स</a>
         </nav>
+        <!-- Theme selector — real Light / Dark experience. The logo color is never themed. -->
         <div class="mt-auto p-4 border-t border-slate-700">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">थीम चुनें</p>
             <div class="grid grid-cols-3 gap-2 mb-3">
-                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-[10px] text-slate-300">सिस्टम</span></button>
-                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-[10px] text-slate-300">लाइट</span></button>
-                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-[10px] text-slate-300">डार्क</span></button>
+                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">सिस्टम</span>
+                </button>
+                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">लाइट</span>
+                </button>
+                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">डार्क</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm text-slate-400">
+                स्थान: सिरोही
             </div>
         </div>
     </aside>
@@ -196,11 +208,12 @@ html[data-theme="dark"] input,html[data-theme="dark"] select{background-color:#0
         </div>
     </main>
 
+    <script src="bt-session.js"></script>
     <script>
     // ============ FLOOR PLAN APP ============
     const N8N = 'https://llcsolution.duckdns.org/webhook';
-    const WH = { otpSend: N8N + '/mkt-otp-send', otpVerify: N8N + '/mkt-otp-verify', lead: N8N + '/floorplan-lead' };
-    let fpBusy = false, fpToken = '', fpPhone = '', fpName = '';
+    const WH = { lead: N8N + '/floorplan-lead' };
+    let fpBusy = false, fpPhone = '', fpName = '';
     const $ = id => document.getElementById(id);
     const digits = s => String(s == null ? '' : s).replace(/\D/g, '');
 
@@ -212,6 +225,13 @@ html[data-theme="dark"] input,html[data-theme="dark"] select{background-color:#0
     function unspin(b, t) { b.disabled = false; b.textContent = t; }
     function fpBackToDetails() { $('fpOtpForm').classList.add('hidden'); $('fpDetailsForm').classList.remove('hidden'); ghide(); }
 
+    // ---- session restore: skip the OTP gate if already verified (cross-feature) ----
+    if (BTSession.isValid()) {
+        fpPhone = BTSession.phone(); fpName = BTSession.name();
+        $('fpGate').classList.add('hidden'); $('fpApp').classList.remove('hidden');
+        generatePlan(); // no lead re-POST on restore
+    }
+
     // ---- gate: send OTP ----
     $('fpDetailsForm').addEventListener('submit', async e => {
         e.preventDefault(); ghide();
@@ -221,7 +241,7 @@ html[data-theme="dark"] input,html[data-theme="dark"] select{background-color:#0
         if (!/^[6-9]\d{9}$/.test(p)) return gmsg('सही 10-अंकों का नंबर डालें।');
         fpBusy = true; const b = $('fpSendOtp'); spin(b, 'OTP भेज रहे हैं…');
         try {
-            const r = await fetch(WH.otpSend, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: p }) });
+            const r = await BTSession.otpSend(p);
             const d = await r.json().catch(() => ({}));
             if (r.ok && d.ok !== false) { fpName = nm; fpPhone = p; $('fpOtpPhone').textContent = '+91 ' + p; $('fpDetailsForm').classList.add('hidden'); $('fpOtpForm').classList.remove('hidden'); $('fpOtp').focus(); }
             else gmsg(d.error || 'OTP नहीं भेज सके।');
@@ -236,11 +256,11 @@ html[data-theme="dark"] input,html[data-theme="dark"] select{background-color:#0
         const otp = $('fpOtp').value; if (otp.length < 4) return gmsg('OTP डालें।');
         fpBusy = true; const b = $('fpVerify'); spin(b, 'जाँच हो रही है…');
         try {
-            const r = await fetch(WH.otpVerify, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: fpPhone, otp }) });
+            const r = await BTSession.otpVerify(fpPhone, otp);
             const d = await r.json().catch(() => ({}));
             if (r.ok && d.ok !== false && d.token) {
-                fpToken = d.token;
-                try { await fetch(WH.lead, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: fpToken, phone: fpPhone, name: fpName }) }); } catch (le) {}
+                BTSession.set(fpPhone, d.token, fpName);
+                try { await fetch(WH.lead, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: BTSession.token(), phone: fpPhone, name: fpName }) }); } catch (le) {}
                 $('fpGate').classList.add('hidden'); $('fpApp').classList.remove('hidden');
                 generatePlan();
             } else gmsg(d.error || 'गलत या एक्सपायर OTP।');

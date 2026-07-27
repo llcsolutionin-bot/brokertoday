@@ -65,14 +65,27 @@
             <a href="rentals.html?type=rent" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">किराये की प्रॉपर्टी</a>
             <a href="rentals.html?type=sell" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी बेचें</a>
             <a href="agents.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी एक्सपर्ट्स</a>
-            <a href="marketing.html" class="px-4 py-3 rounded-lg bg-blue-600 border border-blue-400 text-white font-semibold tracking-wide transition-all">मार्केटिंग</a>
+            <a href="floorplan.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">2D फ्लोर प्लान</a>
+            <a href="marketing.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">मार्केटिंग</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">लीगल एक्सपर्ट्स</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">बैंकिंग एक्सपर्ट्स</a>
         </nav>
+        <!-- Theme selector — real Light / Dark experience. The logo color is never themed. -->
         <div class="mt-auto p-4 border-t border-slate-700">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">थीम चुनें</p>
             <div class="grid grid-cols-3 gap-2 mb-3">
-                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-[10px] text-slate-300">सिस्टम</span></button>
-                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-[10px] text-slate-300">लाइट</span></button>
-                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all"><span class="text-[10px] text-slate-300">डार्क</span></button>
+                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">सिस्टम</span>
+                </button>
+                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">लाइट</span>
+                </button>
+                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">डार्क</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm text-slate-400">
+                स्थान: सिरोही
             </div>
         </div>
     </aside>
@@ -389,6 +402,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         </div>
     </div>
 
+    <script src="bt-session.js"></script>
     <script>
     // ============================================================
     //  MARKETING FRONTEND  —  talks ONLY to n8n webhooks
@@ -405,11 +419,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     };
     const GST_RATE = 0.18;
 
-    // ---- session ----
-    function getToken() { return localStorage.getItem('mkt_token') || ''; }
-    function getPhone() { return localStorage.getItem('mkt_phone') || ''; }
-    function setSession(token, phone) { localStorage.setItem('mkt_token', token); localStorage.setItem('mkt_phone', phone); }
-    function logout() { localStorage.removeItem('mkt_token'); localStorage.removeItem('mkt_phone'); ACCOUNT = null; showGate(); }
+    // ---- session (shared across all Broker Today features via BTSession) ----
+    function getToken() { return BTSession.token(); }
+    function getPhone() { return BTSession.phone(); }
+    function setSession(token, phone) { BTSession.set(phone, token); }
+    function logout() { BTSession.clear(); ACCOUNT = null; showGate(); }
 
     let ACCOUNT = null; // { user, templates, contacts, campaigns, billing }
 
@@ -489,7 +503,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             const r = await fetch(WH.otpVerify, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: PENDING_PHONE, otp }) });
             const data = await r.json().catch(() => ({}));
             if (r.ok && data.ok !== false && data.token) {
-                setSession(data.token, PENDING_PHONE);
+                BTSession.set(PENDING_PHONE, data.token);
                 clearInterval(resendInterval);
                 await loadAccount();
                 showApp();
@@ -837,7 +851,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
     // ============ BOOT ============
     (function boot() {
-        if (getToken() && getPhone()) { showApp(); loadAccount(); }
+        if (BTSession.isValid()) { showApp(); loadAccount(); }
         else { showGate(); }
     })();
     </script>

@@ -655,11 +655,17 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <button type="submit" id="adSubmitBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-lg transition-opacity">विज्ञापन सबमिट करें</button>
                 </form>
                 <p id="adMsg" class="hidden mt-4 text-center text-sm font-semibold"></p>
+                <!-- shown only when logged in: current phone + logout (clears the shared site session) -->
+                <div id="adAccount" class="hidden mt-5 pt-4 border-t border-slate-100 text-center">
+                    <p class="text-xs text-slate-500 mb-2">लॉग इन: <span id="adAccountPhone" class="font-bold text-slate-700"></span></p>
+                    <button type="button" onclick="AdApp.logout()" class="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>लॉग आउट</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ===== AD APP SCRIPT (isolated) ===== -->
+    <script src="bt-session.js"></script>
     <script>
     window.AdApp = (function () {
         var BASE = 'https://llcsolution.duckdns.org/webhook';
@@ -668,16 +674,17 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         var W = { list: BASE + '/ads-list', otpSend: BASE + '/mkt-otp-send', verify: BASE + '/mkt-otp-verify', mine: BASE + '/ads-mine', submit: BASE + '/ads-submit', like: BASE + '/ads-like', manage: BASE + '/ads-manage' };
         var IMGBB_KEY = 'a31e91458ccc1c4896125f42c4c3d7f8'; // same key used across the site (aerocity/news/rentals…)
         var ADS = [], idx = 0, timer = null, token = '', phone = '', existing = null, imgData = '', replaceMode = false, busy = false;
-        var LIKED = 'bt_ad_liked', SESS = 'bt_ad_sess';
+        var LIKED = 'bt_ad_liked';
         function $(id) { return document.getElementById(id); }
         function digits(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
         function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
         function liked() { try { return JSON.parse(localStorage.getItem(LIKED) || '[]'); } catch (e) { return []; } }
         function spin(b, t) { if (!b) return; b.disabled = true; b.innerHTML = '<span class="ad-spinner"></span> ' + t; }
         function unspin(b, t) { if (!b) return; b.disabled = false; b.textContent = t; }
-        function saveSession(ph, tok) { try { localStorage.setItem(SESS, JSON.stringify({ phone: ph, token: tok, t: Date.now() })); } catch (e) {} }
-        function loadSession() { try { var x = JSON.parse(localStorage.getItem(SESS) || 'null'); if (x && x.token && (Date.now() - x.t) < 5 * 86400000) return x; } catch (e) {} return null; }
-        function clearSession() { try { localStorage.removeItem(SESS); } catch (e) {} }
+        // Shared "until logout" session (no client TTL). Reuses one phone-OTP across the whole site.
+        function saveSession(ph, tok) { BTSession.set(ph, tok); }
+        function loadSession() { return BTSession.get(); }               // {phone, token, name?} or null
+        function clearSession() { BTSession.clear(); }
 
         // ---------- banner ----------
         async function loadAds() {
@@ -745,17 +752,25 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
 
         // ---------- form ----------
-        function show(which) { ['adPhoneForm', 'adOtpForm', 'adExisting', 'adUploadForm'].forEach(function (id) { $(id).classList.toggle('hidden', id !== which); }); }
+        function show(which) {
+            ['adPhoneForm', 'adOtpForm', 'adExisting', 'adUploadForm'].forEach(function (id) { $(id).classList.toggle('hidden', id !== which); });
+            // show the "logged in as … / logout" footer only on the post-login screens
+            var loggedIn = (which === 'adExisting' || which === 'adUploadForm');
+            var acc = $('adAccount');
+            if (acc) { acc.classList.toggle('hidden', !loggedIn); if (loggedIn) $('adAccountPhone').textContent = '+91 ' + BTSession.phone(); }
+        }
         function msg(t, ok) { var m = $('adMsg'); m.textContent = t; m.className = 'mt-4 text-center text-sm font-semibold ' + (ok ? 'text-green-600' : 'text-red-600'); m.classList.remove('hidden'); }
         function hideMsg() { $('adMsg').classList.add('hidden'); }
         async function openForm() {
             reset(); $('adModal').classList.remove('hidden');
-            var sess = loadSession(); if (!sess) return;                 // no cached login -> phone step
+            if (!BTSession.isValid()) return;                             // no cached login -> phone step
+            var sess = BTSession.get();
             phone = sess.phone; token = sess.token; msg('जाँच हो रही है…', true);
-            var mr, md; try { mr = await fetch(W.mine, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, phone: phone }) }); md = await mr.json().catch(function () { return {}; }); } catch (e) { mr = null; }
+            var mr, md; try { mr = await fetch(W.mine, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: BTSession.token(), phone: BTSession.phone() }) }); md = await mr.json().catch(function () { return {}; }); } catch (e) { mr = null; }
             hideMsg();
             if (mr && mr.ok && md && md.ok !== false) { existing = md.ad || md.existingAd || null; afterAuthRoute(); }
-            else { token = ''; phone = ''; clearSession(); show('adPhoneForm'); }     // expired -> ask OTP
+            else if (mr && (mr.status === 401 || (md && md.ok === false))) { token = ''; phone = ''; clearSession(); show('adPhoneForm'); }  // token actually rejected -> re-verify
+            else { existing = null; afterAuthRoute(); }     // transient/network error -> keep the shared session, proceed optimistically
         }
         function afterAuthRoute() {
             if (existing && existing.id) { renderExisting(); show('adExisting'); }
@@ -852,8 +867,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     var r = await fetch(W.verify, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: phone, otp: otp }) });
                     var d = await r.json().catch(function () { return {}; });
                     if (r.ok && d.ok !== false && d.token) {
-                        token = d.token; saveSession(phone, token);
-                        try { var mr = await fetch(W.mine, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, phone: phone }) }); var md = await mr.json().catch(function () { return {}; }); existing = md.ad || md.existingAd || null; } catch (me) { existing = null; }
+                        token = d.token; BTSession.set(phone, d.token);
+                        try { var mr = await fetch(W.mine, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: BTSession.token(), phone: BTSession.phone() }) }); var md = await mr.json().catch(function () { return {}; }); existing = md.ad || md.existingAd || null; } catch (me) { existing = null; }
                         if (existing && existing.id) {
                             $('adExistingImg').style.backgroundImage = "url('" + esc(existing.imageUrl || '') + "')";
                             $('adExistingText').textContent = existing.text || '';
@@ -879,9 +894,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     var up = await uploadImgBB(imgData); // browser -> ImgBB, same as the rest of the site
                     b.innerHTML = '<span class="ad-spinner"></span> सबमिट हो रहा है…';
                     var adId = (existing && existing.id) ? existing.id : ('ad_' + Array.from({ length: 6 }, function () { return Math.floor(Math.random() * 16).toString(16); }).join(''));
-                    var r = await fetch(W.submit, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, phone: phone, id: adId, imageUrl: up.url, deleteUrl: up.deleteUrl, text: txt, status: 'active', replace: replaceMode }) });
+                    var r = await fetch(W.submit, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: BTSession.token(), phone: BTSession.phone(), id: adId, imageUrl: up.url, deleteUrl: up.deleteUrl, text: txt, status: 'active', replace: replaceMode }) });
                     var d = await r.json().catch(function () { return {}; });
-                    if (r.ok && d.ok !== false) { msg('✅ विज्ञापन जुड़ गया! जल्द ही बैनर में दिखेगा।', true); loadAds(); setTimeout(closeForm, 1800); }
+                    if (r.status === 401 || (d && d.ok === false && !d.error)) { clearSession(); token = ''; phone = ''; show('adPhoneForm'); msg('कृपया दोबारा वेरिफाई करें।', false); }
+                    else if (r.ok && d.ok !== false) { msg('✅ विज्ञापन जुड़ गया! जल्द ही बैनर में दिखेगा।', true); loadAds(); setTimeout(closeForm, 1800); }
                     else msg(d.error || 'सबमिट नहीं हो सका।', false);
                 } catch (err) { msg('इमेज अभी अपलोड नहीं हो पा रही। कृपया थोड़ी देर बाद फिर कोशिश करें।', false); }
                 finally { busy = false; unspin(b, 'विज्ञापन सबमिट करें'); }
@@ -889,8 +905,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
         async function manage(action) {
             try {
-                var r = await fetch(W.manage, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, phone: phone, action: action }) });
+                var r = await fetch(W.manage, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: BTSession.token(), phone: BTSession.phone(), action: action }) });
                 var d = await r.json().catch(function () { return {}; });
+                if (r.status === 401 || (d && d.ok === false && !d.error)) { clearSession(); token = ''; phone = ''; show('adPhoneForm'); }
                 return r.ok && d.ok !== false;
             } catch (e) { return false; }
         }
@@ -910,7 +927,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         function closeZoom() { var z = $('adZoom'); if (z) z.classList.add('hidden'); startRotate(); }
 
         if (document.readyState !== 'loading') init(); else document.addEventListener('DOMContentLoaded', init);
-        return { openForm: openForm, closeForm: closeForm, backToPhone: backToPhone, startReplace: startReplace, onFile: onFile, countWords: countWords, like: like, toggleActive: toggleActive, deleteAd: deleteAd, zoom: zoom, closeZoom: closeZoom, userPrev: userPrev, userNext: userNext, chooseImage: chooseImage, closeImgChoice: closeImgChoice, pickDevice: pickDevice, pickCamera: pickCamera };
+        function logout() {
+            BTSession.clear();                 // shared session → logs out of every feature
+            existing = null; token = ''; phone = '';
+            reset();                            // back to the phone step; hides the account footer via show()
+            msg('आप लॉग आउट हो गए हैं।', true);
+        }
+        return { openForm: openForm, closeForm: closeForm, backToPhone: backToPhone, startReplace: startReplace, onFile: onFile, countWords: countWords, like: like, toggleActive: toggleActive, deleteAd: deleteAd, logout: logout, zoom: zoom, closeZoom: closeZoom, userPrev: userPrev, userNext: userNext, chooseImage: chooseImage, closeImgChoice: closeImgChoice, pickDevice: pickDevice, pickCamera: pickCamera };
     })();
     </script>
 
