@@ -182,7 +182,31 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <span id="btnListPropertyText">अपनी प्रॉपर्टी किराये पर दें</span>
             </button>
         </div>
-        
+
+        <!-- Rent/Sell tabs + search/filter/sort (all client-side) -->
+        <div class="mb-6 space-y-4">
+            <div class="inline-flex rounded-xl bg-slate-100 p-1" role="tablist" aria-label="प्रॉपर्टी श्रेणी">
+                <button id="tabRent" type="button" role="tab" onclick="setCategory('rent')" class="px-5 py-2 rounded-lg text-sm font-bold transition-colors">किराया</button>
+                <button id="tabSell" type="button" role="tab" onclick="setCategory('sell')" class="px-5 py-2 rounded-lg text-sm font-bold transition-colors">बिक्री</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <input id="fltSearch" type="text" oninput="renderPublicListings()" placeholder="गाँव, शहर या टाइप खोजें…" aria-label="खोजें" class="w-full border-2 border-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500">
+                <select id="fltType" onchange="renderPublicListings()" aria-label="प्रॉपर्टी टाइप" class="w-full border-2 border-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500">
+                    <option value="">सभी टाइप</option>
+                </select>
+                <div class="flex gap-2">
+                    <input id="fltMin" type="number" inputmode="numeric" oninput="renderPublicListings()" placeholder="न्यूनतम ₹" aria-label="न्यूनतम कीमत" class="w-full border-2 border-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500">
+                    <input id="fltMax" type="number" inputmode="numeric" oninput="renderPublicListings()" placeholder="अधिकतम ₹" aria-label="अधिकतम कीमत" class="w-full border-2 border-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <select id="fltSort" onchange="renderPublicListings()" aria-label="क्रमबद्ध करें" class="w-full border-2 border-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500">
+                    <option value="new">नई पहले</option>
+                    <option value="plow">कीमत: कम से ज़्यादा</option>
+                    <option value="phigh">कीमत: ज़्यादा से कम</option>
+                </select>
+            </div>
+            <p id="fltCount" class="text-sm text-slate-500"></p>
+        </div>
+
         <div id="listingsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="col-span-full flex justify-center py-12">
                 <div class="loader"></div>
@@ -466,7 +490,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
 
         // --- LISTING CATEGORY (Rent / Sell) ---
         const urlParams = new URLSearchParams(window.location.search);
-        const currentCategory = urlParams.get('type') || 'rent'; // Default to rent
+        let currentCategory = urlParams.get('type') || 'rent'; // Default to rent (mutable — Rent/Sell tabs switch it)
 
         // Backward-compatible category resolver: missing/empty => 'rent'
         function getCategory(property) {
@@ -548,27 +572,78 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 if (!response.ok) throw new Error('Failed to fetch properties');
                 
                 allProperties = await response.json();
+                populateTypeFilter();
                 renderPublicListings();
             } catch (error) {
                 console.error('Error loading properties:', error);
-                document.getElementById('listingsGrid').innerHTML = '<div class="col-span-full text-center py-12 text-red-500">Failed to load properties</div>';
+                document.getElementById('listingsGrid').innerHTML = '<div class="col-span-full text-center py-12"><p class="text-slate-500 mb-3">प्रॉपर्टी लोड नहीं हो पाईं।</p><button onclick="loadProperties()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-lg">फिर से कोशिश करें</button></div>';
             }
         }
 
-        // Render public listings
+        // --- Search / filter / sort + Rent<->Sell tabs (all client-side; data already in allProperties) ---
+        function fltVal(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+        function propPrice(p) { return parseFloat(String(p.rentAmount == null ? '' : p.rentAmount).replace(/[^0-9.]/g, '')) || 0; }
+
+        function setCategory(cat) {
+            currentCategory = (cat === 'sell') ? 'sell' : 'rent';
+            try { var u = new URL(location.href); u.searchParams.set('type', currentCategory); history.replaceState(null, '', u); } catch (e) {}
+            applyCategoryUI();
+            updateCategoryTabs();
+            updateCategoryTabs();
+            renderPublicListings();
+        }
+        function updateCategoryTabs() {
+            var r = document.getElementById('tabRent'), s = document.getElementById('tabSell');
+            if (!r || !s) return;
+            var base = 'px-5 py-2 rounded-lg text-sm font-bold transition-colors ';
+            var on = 'bg-white text-slate-900 shadow-sm', off = 'text-slate-500 hover:text-slate-700';
+            r.className = base + (currentCategory === 'rent' ? on : off);
+            s.className = base + (currentCategory === 'sell' ? on : off);
+            r.setAttribute('aria-selected', currentCategory === 'rent');
+            s.setAttribute('aria-selected', currentCategory === 'sell');
+        }
+        function populateTypeFilter() {
+            var sel = document.getElementById('fltType'); if (!sel) return;
+            var seen = {}, types = [];
+            allProperties.forEach(function (p) {
+                var t = p && p.propertyType ? String(p.propertyType).trim() : '';
+                if (t && !seen[t]) { seen[t] = 1; types.push(t); }
+            });
+            types.sort();
+            var cur = sel.value;
+            sel.innerHTML = '<option value="">सभी टाइप</option>' + types.map(function (t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
+            sel.value = cur;
+        }
+
+        // Render public listings (active category + search + type + price range + sort)
         function renderPublicListings() {
-            const grid = document.getElementById('listingsGrid');
-            const activeProperties = allProperties.filter(p =>
-                (p.isActive === true || p.isActive === 'true') &&
-                getCategory(p) === currentCategory
-            );
-            
-            if (activeProperties.length === 0) {
-                grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">कोई प्रॉपर्टी उपलब्ध नहीं है</div>';
+            var grid = document.getElementById('listingsGrid');
+            if (!grid) return;
+            var q = fltVal('fltSearch').trim().toLowerCase();
+            var type = fltVal('fltType');
+            var min = parseFloat(fltVal('fltMin')), max = parseFloat(fltVal('fltMax'));
+            var sort = fltVal('fltSort') || 'new';
+
+            var list = allProperties.filter(function (p) {
+                return (p.isActive === true || p.isActive === 'true') && getCategory(p) === currentCategory;
+            });
+            if (type) list = list.filter(function (p) { return String(p.propertyType || '').trim() === type; });
+            if (q) list = list.filter(function (p) {
+                return (String(p.village || '') + ' ' + String(p.city || '') + ' ' + String(p.propertyType || '') + ' ' + String(p.propertySize || '')).toLowerCase().indexOf(q) !== -1;
+            });
+            if (!isNaN(min)) list = list.filter(function (p) { return propPrice(p) >= min; });
+            if (!isNaN(max)) list = list.filter(function (p) { return propPrice(p) <= max; });
+            if (sort === 'plow') list.sort(function (a, b) { return propPrice(a) - propPrice(b); });
+            else if (sort === 'phigh') list.sort(function (a, b) { return propPrice(b) - propPrice(a); });
+
+            var countEl = document.getElementById('fltCount');
+            if (countEl) countEl.textContent = list.length + ' प्रॉपर्टी मिलीं';
+
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">आपके फ़िल्टर से मेल खाती कोई प्रॉपर्टी नहीं मिली।</div>';
                 return;
             }
-            
-            grid.innerHTML = activeProperties.map(property => createPropertyCard(property)).join('');
+            grid.innerHTML = list.map(function (property) { return createPropertyCard(property); }).join('');
         }
 
         // Create property card HTML
@@ -1163,6 +1238,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         window.addEventListener('DOMContentLoaded', function() {
             // Apply Rent/Sell context to page text
             applyCategoryUI();
+            updateCategoryTabs();
 
             // Toggle modal fields whenever the listing category changes
             document.querySelectorAll('input[name="listingCategory"]').forEach(radio => {
