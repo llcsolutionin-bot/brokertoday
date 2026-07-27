@@ -180,19 +180,28 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <h2 id="publicHeader" class="text-3xl font-extrabold text-slate-800">किराये की प्रॉपर्टी (Rental Properties)</h2>
                 <p id="publicSubtext" class="text-slate-500 mt-2">सिरोही में उपलब्ध किराये की प्रॉपर्टीज देखें</p>
             </div>
-            <button id="btnListProperty" onclick="openAuthModal()" class="group inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold px-7 py-3.5 rounded-xl shadow-lg shadow-emerald-600/30 hover:shadow-xl hover:shadow-emerald-600/40 transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap shrink-0">
-                <svg aria-hidden="true" class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                <span id="btnListPropertyText">अपनी प्रॉपर्टी किराये पर दें</span>
-            </button>
+            <div class="flex gap-2 shrink-0">
+                <button id="btnMyProps" onclick="showDashboard()" class="hidden inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-3.5 rounded-xl transition-colors">मेरी प्रॉपर्टीज</button>
+                <button id="btnListProperty" onclick="openAuthModal()" class="group inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold px-7 py-3.5 rounded-xl shadow-lg shadow-emerald-600/30 hover:shadow-xl hover:shadow-emerald-600/40 transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">
+                    <svg aria-hidden="true" class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    <span id="btnListPropertyText">अपनी प्रॉपर्टी किराये पर दें</span>
+                </button>
+            </div>
         </div>
 
-        <!-- Rent/Sell tabs + search/filter/sort (all client-side) -->
+        <!-- Rent/Sell tabs + collapsible search/filter/sort (all client-side) -->
         <div class="mb-6 space-y-4">
-            <div class="inline-flex rounded-xl bg-slate-100 p-1" role="tablist" aria-label="प्रॉपर्टी श्रेणी">
-                <button id="tabRent" type="button" role="tab" onclick="setCategory('rent')" class="px-5 py-2 rounded-lg text-sm font-bold transition-colors">किराया</button>
-                <button id="tabSell" type="button" role="tab" onclick="setCategory('sell')" class="px-5 py-2 rounded-lg text-sm font-bold transition-colors">बिक्री</button>
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="inline-flex rounded-xl bg-slate-100 p-1" role="tablist" aria-label="प्रॉपर्टी श्रेणी">
+                    <button id="tabRent" type="button" role="tab" onclick="setCategory('rent')" class="px-5 py-2 rounded-lg text-sm font-bold transition-colors">किराया</button>
+                    <button id="tabSell" type="button" role="tab" onclick="setCategory('sell')" class="px-5 py-2 rounded-lg text-sm font-bold transition-colors">बिक्री</button>
+                </div>
+                <button type="button" id="fltToggle" onclick="toggleFilters()" aria-expanded="false" class="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-blue-400 text-slate-700 font-semibold text-sm px-4 py-2 rounded-lg transition-colors">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M6 12h12M10 20h4"></path></svg>
+                    फ़िल्टर / खोजें
+                </button>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div id="fltPanel" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <input id="fltSearch" type="text" oninput="renderPublicListings()" placeholder="गाँव, शहर या टाइप खोजें…" aria-label="खोजें" class="w-full border-2 border-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500">
                 <select id="fltType" onchange="renderPublicListings()" aria-label="प्रॉपर्टी टाइप" class="w-full border-2 border-slate-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-500">
                     <option value="">सभी टाइप</option>
@@ -223,6 +232,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             <div>
                 <h2 id="dashboardHeader" class="text-3xl font-extrabold text-slate-800">मेरी प्रॉपर्टीज</h2>
                 <p class="text-slate-500 mt-1">Welcome, <span id="userName" class="font-bold"></span></p>
+                <button type="button" onclick="showPublicView()" class="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700">← सभी प्रॉपर्टी देखें (बिना लॉगआउट)</button>
             </div>
             <div class="flex flex-col items-end gap-1.5">
                 <p class="text-xs text-slate-500">लॉग इन: <span id="userPhone" class="font-bold text-slate-700"></span></p>
@@ -617,6 +627,24 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             var cur = sel.value;
             sel.innerHTML = '<option value="">सभी टाइप</option>' + types.map(function (t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
             sel.value = cur;
+        }
+
+        function toggleFilters() {
+            var p = document.getElementById('fltPanel'), t = document.getElementById('fltToggle');
+            if (!p) return;
+            var willShow = p.classList.contains('hidden');
+            p.classList.toggle('hidden');
+            if (t) t.setAttribute('aria-expanded', willShow ? 'true' : 'false');
+        }
+        // Browse all public listings WITHOUT logging out (logged-in users can switch views).
+        function showPublicView() {
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('publicView').classList.remove('hidden');
+            var loggedIn = !!(window.BTSession && BTSession.isValid());
+            var my = document.getElementById('btnMyProps'), list = document.getElementById('btnListProperty');
+            if (my) my.classList.toggle('hidden', !loggedIn);
+            if (list) list.classList.toggle('hidden', loggedIn);
+            renderPublicListings();
         }
 
         // Render public listings (active category + search + type + price range + sort)
