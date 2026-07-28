@@ -36,17 +36,28 @@
         return s;
     }
 
-    function clear() { localStorage.removeItem(KEY); }
+    function clear() {
+        localStorage.removeItem(KEY);
+        // Also purge the legacy per-feature keys, else migrate() below would re-create the
+        // session on the next load and logout would never stick.
+        try { localStorage.removeItem('mkt_token'); localStorage.removeItem('mkt_phone'); localStorage.removeItem('bt_ad_sess'); } catch (e) {}
+    }
 
-    // One-time migration from the older per-feature keys, so users who already
-    // verified (marketing mkt_token / ads bt_ad_sess) are not logged out.
+    // One-time migration from the older per-feature keys, THEN delete them so a stale key can
+    // never resurrect a session after logout.
     (function migrate() {
-        if (read()) return;
         try {
-            var mt = localStorage.getItem('mkt_token'), mp = localStorage.getItem('mkt_phone');
-            if (mt && mp) { save(mp, mt); return; }
-            var ad = JSON.parse(localStorage.getItem('bt_ad_sess') || 'null');
-            if (ad && ad.token && ad.phone) { save(ad.phone, ad.token); return; }
+            if (!read()) {
+                var mt = localStorage.getItem('mkt_token'), mp = localStorage.getItem('mkt_phone');
+                if (mt && mp) { save(mp, mt); }
+                else {
+                    var ad = JSON.parse(localStorage.getItem('bt_ad_sess') || 'null');
+                    if (ad && ad.token && ad.phone) save(ad.phone, ad.token);
+                }
+            }
+            localStorage.removeItem('mkt_token');
+            localStorage.removeItem('mkt_phone');
+            localStorage.removeItem('bt_ad_sess');
         } catch (e) { /* ignore */ }
     })();
 
