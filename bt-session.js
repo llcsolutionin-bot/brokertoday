@@ -90,12 +90,12 @@
         var el = document.getElementById('btMenuAccount'); if (!el) return;
         var s = read();
         if (!s) {
-            el.innerHTML = '<button type="button" onclick="BTSession.openLogin()" class="w-full mt-3 pt-3 border-t border-slate-700 text-left text-sm font-bold text-[#FF6D5A] hover:text-white transition-colors">लॉगिन / साइन-अप →</button>';
+            el.innerHTML = '<button type="button" onclick="BTSession.openLogin()" class="w-full text-left px-4 py-3 border-b border-slate-700 text-sm font-bold text-[#FF6D5A] hover:bg-slate-800 transition-colors">लॉगिन / साइन-अप →</button>';
             return;
         }
         el.innerHTML =
-            '<div class="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-700">' +
-                '<span class="text-xs text-slate-400 truncate">लॉग इन: <span class="font-bold text-slate-200">+91 ' + s.phone + '</span></span>' +
+            '<div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-700 bg-slate-800/40">' +
+                '<span class="text-xs text-slate-300 truncate">लॉग इन: <span class="font-bold text-white">+91 ' + s.phone + '</span></span>' +
                 '<button type="button" onclick="BTSession.logout()" class="text-xs font-bold text-red-400 hover:text-red-300 whitespace-nowrap">लॉग आउट</button>' +
             '</div>';
     }
