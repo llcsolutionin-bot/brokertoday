@@ -177,7 +177,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
     <main id="publicView" class="container mx-auto px-4 py-8 max-w-7xl">
         <div id="main" class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
             <div>
-                <h2 id="publicHeader" class="text-3xl font-extrabold text-slate-800">किराये की प्रॉपर्टी (Rental Properties)</h2>
+                <h2 id="publicHeader" class="text-3xl font-extrabold text-slate-800">किराये की प्रॉपर्टी</h2>
                 <p id="publicSubtext" class="text-slate-500 mt-2">सिरोही में उपलब्ध किराये की प्रॉपर्टीज देखें</p>
             </div>
             <div class="flex gap-2 shrink-0">
@@ -527,13 +527,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             const dashHeader = document.getElementById('dashboardHeader');
 
             if (isRent) {
-                if (publicHeader) publicHeader.textContent = 'किराये की प्रॉपर्टी (Rental Properties)';
+                if (publicHeader) publicHeader.textContent = 'किराये की प्रॉपर्टी';
                 if (publicSubtext) publicSubtext.textContent = 'सिरोही में उपलब्ध किराये की प्रॉपर्टीज देखें';
                 if (listBtnText) listBtnText.textContent = 'अपनी प्रॉपर्टी किराये पर दें';
                 if (addBtn) addBtn.textContent = '➕ नई प्रॉपर्टी जोड़ें (किराया)';
                 if (dashHeader) dashHeader.textContent = 'मेरी किराये की प्रॉपर्टीज';
             } else {
-                if (publicHeader) publicHeader.textContent = 'बिक्री के लिए प्रॉपर्टी (Properties for Sale)';
+                if (publicHeader) publicHeader.textContent = 'बिक्री के लिए प्रॉपर्टी';
                 if (publicSubtext) publicSubtext.textContent = 'सिरोही में बिक्री के लिए उपलब्ध प्रॉपर्टीज देखें';
                 if (listBtnText) listBtnText.textContent = 'अपनी प्रॉपर्टी बेचने के लिए लिस्ट करें';
                 if (addBtn) addBtn.textContent = '➕ नई प्रॉपर्टी जोड़ें (बिक्री)';
@@ -705,37 +705,54 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
 
         // Create property card HTML
+        // Indian comma formatting for amounts (₹12,34,567)
+        function inr(v) { var n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.]/g, '')); return isNaN(n) ? String(v == null ? '' : v) : n.toLocaleString('en-IN'); }
+        // A colored gradient per property so cards without photos aren't a boring grey "No Image".
+        function propGradient(property) {
+            var pals = [['#6366f1', '#3b82f6'], ['#f59e0b', '#f97316'], ['#10b981', '#22c55e'], ['#f43f5e', '#ec4899'], ['#8b5cf6', '#a855f7'], ['#06b6d4', '#14b8a6']];
+            var key = String(property.propertyId || property.propertyType || '');
+            var h = 0; for (var i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+            var c = pals[h % pals.length];
+            return 'linear-gradient(135deg,' + c[0] + ',' + c[1] + ')';
+        }
+        function propPlaceholder(property, tall) {
+            return '<div class="' + (tall ? 'h-64' : 'h-48') + ' flex flex-col items-center justify-center text-white" style="background:' + propGradient(property) + '">' +
+                '<svg class="w-14 h-14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>' +
+                '<span class="mt-2 text-sm font-bold">' + (property.propertyType || 'प्रॉपर्टी') + '</span></div>';
+        }
+
         function createPropertyCard(property) {
             const images = property.images ? property.images.split(',').map(img => img.trim()).slice(0, 5) : [];
+            const grad = propGradient(property);
             const imageSlider = images.length > 0 ? `
-                <div class="image-slider h-48 bg-slate-200 relative">
+                <div class="image-slider h-48 relative" style="background:${grad}">
                     <div class="slider-track" id="slider-${property.propertyId}">
-                        ${images.map(img => `<img src="${img}" alt="${property.propertyType || 'प्रॉपर्टी'} फोटो - ${property.village || ''}" loading="lazy" decoding="async" class="w-full h-48 object-cover flex-shrink-0" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">`).join('')}
+                        ${images.map(img => `<img src="${img}" alt="${property.propertyType || 'प्रॉपर्टी'} फोटो - ${property.village || ''}" loading="lazy" decoding="async" class="w-full h-48 object-cover flex-shrink-0" onerror="this.style.display='none'">`).join('')}
                     </div>
                     ${images.length > 1 ? `
-                        <button class="slider-btn prev" aria-label="पिछली फ़ोटो" onclick="slideImage('${property.propertyId}', -1)">‹</button>
-                        <button class="slider-btn next" aria-label="अगली फ़ोटो" onclick="slideImage('${property.propertyId}', 1)">›</button>
+                        <button class="slider-btn prev" aria-label="पिछली फ़ोटो" onclick="event.stopPropagation(); slideImage('${property.propertyId}', -1)">‹</button>
+                        <button class="slider-btn next" aria-label="अगली फ़ोटो" onclick="event.stopPropagation(); slideImage('${property.propertyId}', 1)">›</button>
                     ` : ''}
                 </div>
-            ` : '<div class="h-48 bg-slate-200 flex items-center justify-center text-slate-500">No Image</div>';
-            
+            ` : propPlaceholder(property);
+
             const isRent = getCategory(property) === 'rent';
             const sizeBadge = property.propertySize
                 ? `<span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold">${property.propertySize}</span>`
                 : '';
             const priceBlock = isRent
-                ? `<h3 class="text-2xl font-bold text-green-600">₹${property.rentAmount}/माह</h3>
-                                <p class="text-sm text-slate-500">Advance: ₹${property.advanceAmount}</p>`
-                : `<h3 class="text-2xl font-bold text-green-600">₹${property.rentAmount}</h3>
-                                <p class="text-sm text-slate-500">बिक्री के लिए (For Sale)</p>`;
+                ? `<h3 class="text-2xl font-bold text-green-600">₹${inr(property.rentAmount)}/माह</h3>
+                                <p class="text-sm text-slate-500">एडवांस: ₹${inr(property.advanceAmount)}</p>`
+                : `<h3 class="text-2xl font-bold text-green-600">₹${inr(property.rentAmount)}</h3>
+                                <p class="text-sm text-slate-500">बिक्री के लिए</p>`;
             const rentOnlyRows = isRent
-                ? `<p><strong>Duration:</strong> ${property.duration}</p>
-                            <p><strong>Vacant:</strong> ${property.vacantDate}</p>
-                            <p><strong>Tenant:</strong> ${property.tenantPreference}</p>`
+                ? `<p><strong>अवधि:</strong> ${property.duration}</p>
+                            <p><strong>खाली:</strong> ${property.vacantDate}</p>
+                            <p><strong>किरायेदार:</strong> ${property.tenantPreference}</p>`
                 : '';
 
             return `
-                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-shadow">
+                <div onclick="openEnlarge('${property.propertyId}')" class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
                     ${imageSlider}
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-3">
@@ -749,13 +766,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         </div>
                         <div class="space-y-2 text-sm text-slate-600 mb-4">
                             ${rentOnlyRows}
-                            <p><strong>Floor:</strong> ${property.floor || 'N/A'} | <strong>Parking:</strong> ${property.parking || 'N/A'}</p>
+                            <p><strong>मंज़िल:</strong> ${property.floor || 'N/A'} | <strong>पार्किंग:</strong> ${property.parking || 'N/A'}</p>
                             <p><strong>📍</strong> ${property.village}, ${property.city}</p>
                         </div>
-                        <button onclick="openContactModal('${property.propertyId}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                        <button onclick="event.stopPropagation(); openContactModal('${property.propertyId}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
                             WhatsApp पर संपर्क करें
                         </button>
-                        <button type="button" onclick="shareProperty('${property.propertyId}', '${String((property.propertyType || 'प्रॉपर्टी') + ' · ' + (property.village || '')).replace(/'/g, "\\'")}')" class="w-full mt-2 border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 font-semibold py-2.5 rounded-lg text-sm inline-flex items-center justify-center gap-1.5 transition-colors">
+                        <button type="button" onclick="event.stopPropagation(); shareProperty('${property.propertyId}', '${String((property.propertyType || 'प्रॉपर्टी') + ' · ' + (property.village || '')).replace(/'/g, "\\'")}')" class="w-full mt-2 border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 font-semibold py-2.5 rounded-lg text-sm inline-flex items-center justify-center gap-1.5 transition-colors">
                             <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                             शेयर करें
                         </button>
@@ -763,6 +780,49 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     </div>
                 </div>
             `;
+        }
+
+        // --- Enlarge a property card into a modal (#5) ---
+        function enlargedCardHtml(property) {
+            var images = property.images ? property.images.split(',').map(function (s) { return s.trim(); }).slice(0, 5) : [];
+            var grad = propGradient(property);
+            var media = images.length
+                ? '<div class="flex overflow-x-auto snap-x rounded-t-2xl" style="background:' + grad + '">' + images.map(function (img) { return '<img src="' + img + '" alt="प्रॉपर्टी फोटो" class="h-72 object-cover snap-center flex-shrink-0" style="min-width:100%" onerror="this.style.display=\'none\'">'; }).join('') + '</div>'
+                : propPlaceholder(property, true).replace('h-64', 'h-64 rounded-t-2xl');
+            var isRent = getCategory(property) === 'rent';
+            var price = isRent
+                ? '<h3 class="text-3xl font-bold text-green-600">₹' + inr(property.rentAmount) + '/माह</h3><p class="text-slate-500">एडवांस: ₹' + inr(property.advanceAmount) + '</p>'
+                : '<h3 class="text-3xl font-bold text-green-600">₹' + inr(property.rentAmount) + '</h3><p class="text-slate-500">बिक्री के लिए</p>';
+            var rows = '';
+            if (isRent) rows += '<p><strong>अवधि:</strong> ' + (property.duration || '-') + '</p><p><strong>खाली:</strong> ' + (property.vacantDate || '-') + '</p><p><strong>किरायेदार:</strong> ' + (property.tenantPreference || '-') + '</p>';
+            rows += '<p><strong>मंज़िल:</strong> ' + (property.floor || 'N/A') + ' | <strong>पार्किंग:</strong> ' + (property.parking || 'N/A') + '</p>';
+            rows += '<p><strong>📍</strong> ' + (property.village || '') + ', ' + (property.city || '') + '</p>';
+            var shareArg = String((property.propertyType || 'प्रॉपर्टी') + ' · ' + (property.village || '')).replace(/'/g, "\\'");
+            return '<div class="relative">' +
+                '<button type="button" onclick="closeEnlarge()" aria-label="बंद करें" class="absolute top-3 right-3 z-10 bg-white/90 hover:bg-white text-slate-700 rounded-full w-10 h-10 flex items-center justify-center shadow text-xl leading-none">✖</button>' +
+                media +
+                '<div class="p-6">' +
+                    '<div class="flex justify-between items-start gap-3 mb-4"><div>' + price + '</div>' +
+                    '<div class="flex flex-col items-end gap-1.5"><span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold">' + (property.propertyType || '') + '</span>' + (property.propertySize ? '<span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full font-bold">' + property.propertySize + '</span>' : '') + '</div></div>' +
+                    '<div class="space-y-2 text-slate-600 mb-5">' + rows + '</div>' +
+                    '<div class="grid grid-cols-2 gap-2">' +
+                        '<button onclick="closeEnlarge(); openContactModal(\'' + property.propertyId + '\')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">WhatsApp पर संपर्क करें</button>' +
+                        '<button type="button" onclick="shareProperty(\'' + property.propertyId + '\', \'' + shareArg + '\')" class="border border-slate-200 hover:border-slate-300 text-slate-600 font-semibold py-3 rounded-lg">शेयर करें</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+        function openEnlarge(id) {
+            var p = (allProperties || []).find(function (x) { return String(x.propertyId) === String(id); });
+            if (!p) return;
+            var c = document.getElementById('enlargeContent'); if (!c) return;
+            c.innerHTML = enlargedCardHtml(p);
+            document.getElementById('enlargeModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeEnlarge() {
+            var m = document.getElementById('enlargeModal'); if (m) m.classList.add('hidden');
+            document.body.style.overflow = '';
         }
 
         // Image slider
@@ -945,7 +1005,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 return `
                 <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
                     <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-slate-800">₹${property.rentAmount}${priceSuffix}</h3>
+                        <h3 class="text-xl font-bold text-slate-800">₹${inr(property.rentAmount)}${priceSuffix}</h3>
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="checkbox" ${isActive ? 'checked' : ''} onchange="togglePropertyStatus('${property.propertyId}', this.checked)" class="w-5 h-5 text-green-600 rounded">
                             <span class="ml-2 text-sm font-medium ${isActive ? 'text-green-600' : 'text-red-600'}">${isActive ? 'Active' : 'Inactive'}</span>
@@ -1345,6 +1405,11 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             }
         });
     </script>
+    <!-- Enlarge property modal (#5) -->
+    <div id="enlargeModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] p-4 overflow-y-auto flex items-start justify-center" onclick="closeEnlarge()">
+        <div id="enlargeContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-6" onclick="event.stopPropagation()"></div>
+    </div>
+
     <!-- ===== BROKER TODAY CHAT WIDGET (shared across all pages except admin) ===== -->
     <div id="bt-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
         <button id="bt-chat-toggle" aria-label="चैट खोलें" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2 transition-transform transform hover:scale-105">

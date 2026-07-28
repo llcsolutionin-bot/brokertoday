@@ -463,6 +463,18 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         <!-- Dynamic Projects Container -->
         <div id="dynamic-projects-list" class="grid md:grid-cols-2 gap-8 mb-20"></div>
 
+        <!-- Rent / Sell property strip (horizontal scroll; loaded from rentals data) -->
+        <div id="propStripSection" class="mb-20 hidden">
+            <div class="flex items-end justify-between gap-3 mb-6">
+                <div>
+                    <span class="text-[#FF6D5A] font-bold text-sm uppercase tracking-widest">किराया व बिक्री</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-800 mt-2 tracking-tight">उपलब्ध प्रॉपर्टीज</h2>
+                </div>
+                <a href="rentals.html?type=rent" class="shrink-0 text-sm font-bold text-[#FF6D5A] hover:underline whitespace-nowrap">सभी देखें →</a>
+            </div>
+            <div id="propStrip" class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x"></div>
+        </div>
+
         <!-- Get-started CTA band -->
         <div class="mb-20 bt-reveal relative rounded-3xl overflow-hidden bg-slate-950">
             <div class="bt-aurora" style="width:300px;height:300px;background:#FF6D5A;top:-60px;right:10%"></div>
@@ -1345,6 +1357,42 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         }
 
         // --- DYNAMIC PROJECT RENDERING LOGIC ---
+        // --- Rent/Sell property strip on the homepage (tap a card -> its rentals deep-link) ---
+        function propStripGradient(p) {
+            var pals = [['#6366f1', '#3b82f6'], ['#f59e0b', '#f97316'], ['#10b981', '#22c55e'], ['#f43f5e', '#ec4899'], ['#8b5cf6', '#a855f7'], ['#06b6d4', '#14b8a6']];
+            var key = String(p.propertyId || p.propertyType || ''); var h = 0; for (var i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+            var c = pals[h % pals.length]; return 'linear-gradient(135deg,' + c[0] + ',' + c[1] + ')';
+        }
+        function propStripCard(p) {
+            var cat = (String(p.listingCategory || '').toLowerCase() === 'sell') ? 'sell' : 'rent';
+            var isRent = cat === 'rent';
+            var imgs = p.images ? String(p.images).split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [];
+            var media = imgs.length ? '<img src="' + imgs[0] + '" alt="" loading="lazy" decoding="async" class="w-full h-36 object-cover" onerror="this.style.display=\'none\'">' : '';
+            var price = '₹' + (parseFloat(String(p.rentAmount || '').replace(/[^0-9.]/g, '')) || 0).toLocaleString('en-IN') + (isRent ? '/माह' : '');
+            var href = 'rentals.html?type=' + cat + '&id=' + encodeURIComponent(p.propertyId);
+            return '<a href="' + href + '" class="snap-start shrink-0 w-60 bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-0.5 transition-all">' +
+                '<div class="h-36" style="background:' + propStripGradient(p) + '">' + media + '</div>' +
+                '<div class="p-4">' +
+                    '<div class="flex items-center justify-between gap-2"><span class="text-lg font-bold text-green-600">' + price + '</span>' +
+                    '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + (isRent ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700') + '">' + (isRent ? 'किराया' : 'बिक्री') + '</span></div>' +
+                    '<p class="text-sm font-semibold text-slate-700 mt-1 truncate">' + (p.propertyType || 'प्रॉपर्टी') + '</p>' +
+                    '<p class="text-xs text-slate-500 truncate">📍 ' + (p.village || '') + ', ' + (p.city || '') + '</p>' +
+                '</div></a>';
+        }
+        async function loadPropertyStrip() {
+            var strip = document.getElementById('propStrip'), section = document.getElementById('propStripSection');
+            if (!strip || !section) return;
+            try {
+                var res = await fetch('https://llcsolution.duckdns.org/webhook/79621d58-d31e-4f18-a02a-5bf179ea23f3', { method: 'GET', headers: { 'Cache-Control': 'no-cache' } });
+                if (!res.ok) return;
+                var props = await res.json();
+                var active = (Array.isArray(props) ? props : []).filter(function (p) { return p && (p.isActive === true || p.isActive === 'true'); }).slice(0, 12);
+                if (!active.length) return;
+                strip.innerHTML = active.map(propStripCard).join('');
+                section.classList.remove('hidden');
+            } catch (e) { /* silent — strip stays hidden */ }
+        }
+
         async function loadDynamicProjects() {
             const container = document.getElementById('dynamic-projects-list');
             
@@ -1570,6 +1618,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             if (aero) aero.innerHTML = ratingBlock('aerocity');
             if (shet) shet.innerHTML = ratingBlock('shetrapal');
             loadDynamicProjects();
+            loadPropertyStrip();
         });
     </script>
 </body>
