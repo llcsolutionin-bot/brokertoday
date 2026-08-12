@@ -156,7 +156,7 @@
                     '<a href="privacy.html" class="hover:text-white">गोपनीयता नीति</a>' +
                     '<a href="refund.html" class="hover:text-white">रिफंड नीति</a>' +
                 '</nav>' +
-                '<p class="text-xs mt-5 pt-4 border-t border-slate-800">© 2026 Broker Today · सिरोही, राजस्थान · सभी अधिकार सुरक्षित</p>' +
+                '<p class="text-xs mt-5 pt-4 border-t border-slate-800">© 2026 Broker Today · brokertoday.in — LLC Solution (Udyam UDYAM-RJ-31-0033742) · सिरोही, राजस्थान · सभी अधिकार सुरक्षित</p>' +
             '</div>';
         document.body.appendChild(f);
     }
