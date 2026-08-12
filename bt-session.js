@@ -152,7 +152,9 @@
                     '<a href="rentals.html?type=sell" class="hover:text-white">बिक्री</a>' +
                     '<a href="agents.html" class="hover:text-white">एक्सपर्ट्स</a>' +
                     '<a href="news.html" class="hover:text-white">न्यूज़</a>' +
+                    '<a href="terms.html" class="hover:text-white">नियम व शर्तें</a>' +
                     '<a href="privacy.html" class="hover:text-white">गोपनीयता नीति</a>' +
+                    '<a href="refund.html" class="hover:text-white">रिफंड नीति</a>' +
                 '</nav>' +
                 '<p class="text-xs mt-5 pt-4 border-t border-slate-800">© 2026 Broker Today · सिरोही, राजस्थान · सभी अधिकार सुरक्षित</p>' +
             '</div>';
