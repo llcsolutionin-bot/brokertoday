@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Today — सर्विस रिकॉर्ड और रिमाइंडर | Broker Today</title>
+    <link rel="icon" type="image/svg+xml" href="brokertoday.svg">
+    <meta name="description" content="Service Today — अपने ग्राहकों की सर्विस विज़िट का रिकॉर्ड रखें, WhatsApp कन्फर्मेशन भेजें और अगली विज़िट के ऑटो-रिमाइंडर पाएँ।">
+    <link rel="canonical" href="https://brokertoday.in/service.html">
+    <link rel="stylesheet" href="bt.css">
+    <style>
+        .glass-nav { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Navigation Bar — hamburger + logo only -->
+    <nav class="glass-nav text-white p-4 sticky top-0 z-50 border-b border-slate-700 shadow-md">
+        <div class="container mx-auto max-w-6xl flex items-center gap-3">
+            <button onclick="toggleMainMenu()" aria-label="मेन्यू खोलें" class="text-white p-2 rounded-md hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6D5A] focus-visible:ring-offset-2">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <a href="index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M14 44 L32 22 L50 44" fill="none" stroke="#FF6D5A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1 class="text-2xl font-extrabold tracking-tight">Broker Today</h1>
+            </a>
+        </div>
+    </nav>
+
+    <!-- ===== SITE MENU (Hamburger Drawer) — shared across all pages ===== -->
+    <div id="mainMenuOverlay" onclick="closeMainMenu()" class="hidden fixed inset-0 bg-black/50 z-[90]"></div>
+    <aside id="mainMenu" class="hidden fixed top-0 left-0 h-full w-72 max-w-[80%] bg-slate-900 text-white z-[100] shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b border-slate-700">
+            <span class="text-lg font-extrabold tracking-tight">मेन्यू</span>
+            <button onclick="closeMainMenu()" aria-label="बंद करें" class="p-1.5 hover:bg-slate-700 rounded-md text-xl leading-none">✕</button>
+        </div>
+        <div id="btMenuAccount"></div>
+        <nav class="flex flex-col p-3 gap-1.5 overflow-y-auto">
+            <a href="index.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">होम</a>
+            <a href="news.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">न्यूज़ अपडेट्स</a>
+            <a href="rentals.html?type=rent" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">किराये की प्रॉपर्टी</a>
+            <a href="rentals.html?type=sell" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी बेचें</a>
+            <a href="agents.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">प्रॉपर्टी एक्सपर्ट्स</a>
+            <a href="floorplan.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">2D फ्लोर प्लान</a>
+            <a href="marketing.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">मार्केटिंग</a>
+            <a href="service.html" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">सर्विस टुडे</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">लीगल एक्सपर्ट्स</a>
+            <a href="#" class="px-4 py-3 rounded-lg bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-400 text-[#FF6D5A] hover:text-white font-semibold tracking-wide transition-all">बैंकिंग एक्सपर्ट्स</a>
+        </nav>
+        <!-- Theme selector — real Light / Dark experience. The logo color is never themed. -->
+        <div class="mt-auto p-4 border-t border-slate-700">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">थीम चुनें</p>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <button type="button" data-theme-value="system" onclick="setTheme('system')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">सिस्टम</span>
+                </button>
+                <button type="button" data-theme-value="light" onclick="setTheme('light')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">लाइट</span>
+                </button>
+                <button type="button" data-theme-value="dark" onclick="setTheme('dark')" class="theme-opt flex flex-col items-center gap-1 p-2.5 rounded-lg border border-slate-700 hover:border-slate-400 transition-all">
+                    <span class="text-[10px] text-slate-300">डार्क</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm text-slate-400">
+                स्थान: सिरोही
+            </div>
+        </div>
+    </aside>
+    <script>
+        function toggleMainMenu() {
+            document.getElementById('mainMenu').classList.toggle('hidden');
+            document.getElementById('mainMenuOverlay').classList.toggle('hidden');
+        }
+        function closeMainMenu() {
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('mainMenuOverlay').classList.add('hidden');
+        }
+
+        // --- BROKER TODAY THEME (Light / Dark / System). Logo color is NEVER themed. ---
+        (function () {
+            const css = `
+:root{--brand:#FF6D5A;--brand-dark:#F04E38;--brand-ring:#FF8A7A;}
+
+/* Brand accent (coral) for primary actions — identical in every theme */
+.bg-blue-600,.bg-blue-500,.bg-green-600,.bg-green-500,.bg-indigo-600,.bg-indigo-500{background-color:var(--brand)!important;}
+.hover\\:bg-blue-700:hover,.hover\\:bg-blue-600:hover,.hover\\:bg-green-700:hover,.hover\\:bg-green-600:hover,.hover\\:bg-indigo-700:hover,.hover\\:bg-black:hover{background-color:var(--brand-dark)!important;}
+.text-\\[\\#FF6D5A\\]{color:var(--brand)!important;}
+.focus\\:border-blue-500:focus,.focus\\:border-indigo-500:focus{border-color:var(--brand)!important;}
+.focus\\:ring-blue-500:focus{--tw-ring-color:var(--brand-ring)!important;}
+.from-blue-600,.from-green-600{--tw-gradient-from:var(--brand)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important;}
+.to-indigo-600,.to-emerald-600{--tw-gradient-to:var(--brand-dark)!important;}
+
+/* DARK THEME — surfaces, text, borders, inputs */
+html[data-theme="dark"] body{background-color:#0B1220!important;color:#E2E8F0!important;}
+html[data-theme="dark"] .bg-white{background-color:#1E293B!important;}
+html[data-theme="dark"] .bg-slate-50{background-color:#0F172A!important;}
+html[data-theme="dark"] .bg-slate-100{background-color:#334155!important;}
+html[data-theme="dark"] .bg-slate-200{background-color:#475569!important;}
+html[data-theme="dark"] .text-slate-900,html[data-theme="dark"] .text-slate-800,html[data-theme="dark"] .text-slate-700{color:#E2E8F0!important;}
+html[data-theme="dark"] .text-slate-600,html[data-theme="dark"] .text-slate-500{color:#94A3B8!important;}
+html[data-theme="dark"] .border-slate-100,html[data-theme="dark"] .border-slate-200,html[data-theme="dark"] .border-slate-300{border-color:#334155!important;}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background-color:#0F172A!important;color:#E2E8F0!important;border-color:#334155!important;}
+html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-theme="dark"] .shadow-2xl{box-shadow:0 10px 30px rgba(0,0,0,.55)!important;}
+`;
+            const style = document.createElement('style');
+            style.textContent = css;
+            document.head.appendChild(style);
+        })();
+
+        const _btDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
+        function applySavedTheme() {
+            const stored = localStorage.getItem('bt_theme') || 'system';
+            const useDark = stored === 'dark' || (stored === 'system' && _btDarkMQL.matches);
+            if (useDark) document.documentElement.setAttribute('data-theme', 'dark');
+            else document.documentElement.removeAttribute('data-theme');
+            document.querySelectorAll('.theme-opt').forEach(function (b) {
+                const active = b.getAttribute('data-theme-value') === stored;
+                b.classList.toggle('ring-2', active);
+                b.classList.toggle('ring-white', active);
+            });
+        }
+        function setTheme(t) {
+            localStorage.setItem('bt_theme', t);
+            applySavedTheme();
+        }
+        if (_btDarkMQL.addEventListener) {
+            _btDarkMQL.addEventListener('change', function () {
+                if ((localStorage.getItem('bt_theme') || 'system') === 'system') applySavedTheme();
+            });
+        }
+        applySavedTheme();
+    </script>
+    <!-- ===== END SITE MENU ===== -->
+
+    <div class="flex-1 w-full max-w-5xl mx-auto px-4 py-6">
+
+        <!-- ============ VIEW: LOGIN ============ -->
+        <section id="viewLogin" class="hidden">
+            <div class="max-w-sm mx-auto mt-16 sm:mt-24 bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center">
+                <h1 class="text-3xl font-extrabold text-slate-800 mb-6">Service Today</h1>
+                <form id="lgForm" class="space-y-3">
+                    <div class="flex items-stretch rounded-xl border border-slate-300 bg-white overflow-hidden focus-within:border-[#FF6D5A] text-left">
+                        <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">+91</span>
+                        <input id="lgPhone" data-bt="loginphone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-अंकों का नंबर" aria-label="WhatsApp नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="flex-1 min-w-0 px-3 py-3 focus:outline-none">
+                    </div>
+                    <button type="submit" id="lgBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-xl transition-opacity">लॉगिन</button>
+                </form>
+                <form id="lgOtpForm" class="space-y-3 hidden">
+                    <p class="text-sm text-slate-500">OTP भेजा गया <span id="lgOtpPhone" class="font-bold"></span> पर</p>
+                    <input id="lgOtp" autocomplete="one-time-code" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" aria-label="OTP" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full text-center text-2xl tracking-[0.3em] font-bold px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#FF6D5A]">
+                    <button type="submit" id="lgVerifyBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-xl transition-opacity">वेरिफाई करें</button>
+                    <p class="text-center text-sm text-slate-500">OTP नहीं मिला? <button type="button" id="lgResend" data-label="दोबारा भेजें" class="font-semibold text-[#FF6D5A]">दोबारा भेजें</button></p>
+                </form>
+                <p id="lgMsg" class="hidden mt-3 text-center text-sm font-semibold"></p>
+            </div>
+        </section>
+
+        <!-- ============ VIEW: BUSINESS SETUP (new user) ============ -->
+        <section id="viewSetup" class="hidden">
+            <div class="max-w-md mx-auto mt-8 bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
+                <h1 class="text-xl font-extrabold text-slate-800">अपने बिज़नेस की जानकारी</h1>
+                <p class="text-sm text-slate-500 mt-1 mb-5">पहली बार सेटअप — यह जानकारी ग्राहकों को भेजे जाने वाले WhatsApp मैसेज में दिखेगी।</p>
+                <form id="setupForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">बिज़नेस का नाम *</label>
+                        <input id="suName" type="text" required maxlength="60" placeholder="जैसे: शर्मा RO &amp; AC सर्विस" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6D5A]/40 focus:border-[#FF6D5A] focus:bg-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">फ़ोन नंबर (बदला नहीं जा सकता)</label>
+                        <input id="suPhone" type="tel" readonly class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">बिज़नेस का पता *</label>
+                        <textarea id="suAddr" rows="2" required maxlength="200" placeholder="दुकान/ऑफिस का पता" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#FF6D5A]/40 focus:border-[#FF6D5A] focus:bg-white outline-none resize-none"></textarea>
+                    </div>
+                    <button type="submit" id="suBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-xl transition-opacity">सेव करें →</button>
+                    <p id="suMsg" class="hidden text-center text-sm font-semibold"></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- ============ VIEW: DASHBOARD ============ -->
+        <section id="viewDash" class="hidden">
+            <div class="flex items-center justify-between gap-2 flex-wrap mb-4">
+                <div class="min-w-0">
+                    <h1 id="dashBizName" class="text-xl sm:text-2xl font-extrabold text-slate-800 truncate"></h1>
+                    <p id="dashBizAddr" class="text-xs text-slate-500 truncate"></p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="ST.openInstance('')" class="bg-[#FF6D5A] hover:opacity-90 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow whitespace-nowrap">＋ आज की एंट्री / नया ग्राहक</button>
+                    <button type="button" onclick="ST.openRecharge(false)" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow whitespace-nowrap">💳 रीचार्ज</button>
+                    <button type="button" onclick="ST.openSettings()" aria-label="सेटिंग्स" title="सेटिंग्स" class="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm hover:bg-slate-100 text-lg">⚙️</button>
+                    <button type="button" onclick="BTSession.logout()" class="h-10 px-3 rounded-xl bg-white border border-slate-200 shadow-sm hover:bg-red-50 text-xs font-bold text-red-500 whitespace-nowrap">लॉग आउट</button>
+                </div>
+            </div>
+
+            <p id="rcBanner" class="hidden mb-4 text-sm font-semibold rounded-xl px-4 py-2.5"></p>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-5">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-5 text-center">
+                    <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">बैलेंस</p>
+                    <p id="statBalance" class="text-lg sm:text-2xl font-extrabold text-green-600 mt-0.5">—</p>
+                    <p class="text-[10px] text-slate-400">₹0.25 / मैसेज</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-5 text-center">
+                    <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">आज के रिमाइंडर</p>
+                    <p id="statReminders" class="text-lg sm:text-2xl font-extrabold text-[#FF6D5A] mt-0.5">—</p>
+                    <p class="text-[10px] text-slate-400">ग्राहकों को भेजे गए</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-5 text-center">
+                    <p class="text-[11px] sm:text-xs text-slate-500 font-semibold">कुल ग्राहक</p>
+                    <p id="statCustomers" class="text-lg sm:text-2xl font-extrabold text-slate-800 mt-0.5">—</p>
+                    <p class="text-[10px] text-slate-400">रिकॉर्ड में</p>
+                </div>
+            </div>
+            <div id="lowBalWarn" class="hidden mb-4 text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+                <span>⚠️ बैलेंस कम है — मैसेज/रिमाइंडर रुक सकते हैं।</span>
+                <button type="button" onclick="ST.openRecharge(false)" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap">💳 अभी रीचार्ज करें</button>
+            </div>
+
+            <!-- Search -->
+            <div class="mb-3">
+                <input id="custSearch" type="search" placeholder="🔍 नाम या नंबर से खोजें…" oninput="ST.renderCustomers(true)" class="w-full sm:max-w-xs p-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#FF6D5A]/40 focus:border-[#FF6D5A] outline-none">
+            </div>
+
+            <!-- Customer list (rows, due-first, 10 per page) -->
+            <div id="custList" class="space-y-2"></div>
+            <p id="custEmpty" class="hidden text-center text-slate-400 text-sm py-10">अभी कोई ग्राहक नहीं — ऊपर “＋ आज की एंट्री” से पहला ग्राहक जोड़ें।</p>
+            <div id="custPager" class="hidden mt-4 flex items-center justify-center gap-3">
+                <button type="button" id="custPrevBtn" onclick="ST.custNav(-1)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">‹ पिछला</button>
+                <span id="custPageInfo" class="text-sm font-semibold text-slate-500"></span>
+                <button type="button" id="custNextBtn" onclick="ST.custNav(1)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">अगला ›</button>
+            </div>
+        </section>
+
+        <!-- Loading -->
+        <div id="viewLoading" class="text-center py-24 text-slate-400 text-sm">लोड हो रहा है…</div>
+        <div id="viewError" class="hidden text-center py-24">
+            <p class="text-slate-500 text-sm mb-4">डेटा लोड नहीं हो सका — नेटवर्क जाँचें।</p>
+            <button type="button" onclick="ST.load()" class="bg-slate-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl">फिर कोशिश करें</button>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: add today's instance ============ -->
+    <div id="instModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-start justify-center p-3 overflow-y-auto" onclick="if(event.target===this)ST.closeInstance()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-6 p-5 sm:p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800">आज की एंट्री</h3>
+                <button type="button" onclick="ST.closeInstance()" aria-label="बंद करें" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+            </div>
+            <form id="instForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">ग्राहक चुनें</label>
+                    <select id="inCustSel" onchange="ST.onCustSel()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none"></select>
+                </div>
+                <div id="inNewPhoneWrap">
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">ग्राहक का WhatsApp नंबर *</label>
+                    <div class="flex items-stretch rounded-xl border border-slate-200 bg-slate-50 overflow-hidden focus-within:border-[#FF6D5A]">
+                        <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-200">+91</span>
+                        <input id="inPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-अंकों का नंबर" oninput="this.value=this.value.replace(/[^0-9]/g,''); ST.onPhoneTyped()" class="flex-1 px-3 py-3 bg-transparent focus:outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">ग्राहक का नाम</label>
+                        <input id="inName" type="text" maxlength="50" placeholder="(वैकल्पिक)" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">एरिया / पता</label>
+                        <input id="inArea" type="text" maxlength="80" placeholder="जैसे: सरजावाव गेट" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">सर्विस / डिवाइस *</label>
+                    <input id="inService" type="text" required maxlength="80" placeholder="जैसे: RO फ़िल्टर बदला, AC गैस चार्ज" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">विज़िट की तारीख *</label>
+                        <input id="inVisit" type="date" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">अगली विज़िट</label>
+                        <input id="inNext" type="date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">कमेंट</label>
+                    <textarea id="inComment" rows="2" maxlength="300" placeholder="(वैकल्पिक)" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">फोटो (अधिकतम 3)</label>
+                    <div id="inImgRow" class="flex gap-2 flex-wrap"></div>
+                    <input id="inFile" type="file" accept="image/*" multiple class="hidden" onchange="ST.onFiles(this)">
+                </div>
+                <button type="submit" id="inSaveBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-xl transition-opacity">💾 सेव करें — ग्राहक को WhatsApp जाएगा</button>
+                <p id="inMsg" class="hidden text-center text-sm font-semibold"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: customer history ============ -->
+    <div id="histModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[110] flex items-start justify-center p-3 overflow-y-auto" onclick="if(event.target===this)ST.closeHist()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-6">
+            <div class="sticky top-0 bg-white rounded-t-2xl border-b border-slate-100 p-4 flex items-center justify-between gap-2 z-10">
+                <div class="min-w-0">
+                    <h3 id="histName" class="text-lg font-bold text-slate-800 truncate"></h3>
+                    <p id="histSub" class="text-xs text-slate-500 truncate"></p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" id="histAddBtn" class="bg-[#FF6D5A] hover:opacity-90 text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap">＋ आज की एंट्री</button>
+                    <button type="button" onclick="ST.closeHist()" aria-label="बंद करें" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+                </div>
+            </div>
+            <div id="histBody" class="p-4 space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: settings ============ -->
+    <div id="setModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-center justify-center p-4" onclick="if(event.target===this)ST.closeSettings()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800">⚙️ बिज़नेस सेटिंग्स</h3>
+                <button type="button" onclick="ST.closeSettings()" aria-label="बंद करें" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+            </div>
+            <form id="setForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">बिज़नेस का नाम *</label>
+                    <input id="stName" type="text" required maxlength="60" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">फ़ोन नंबर (बदला नहीं जा सकता)</label>
+                    <input id="stPhone" type="tel" readonly class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">बिज़नेस का पता *</label>
+                    <textarea id="stAddr" rows="2" required maxlength="200" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none resize-none"></textarea>
+                </div>
+                <button type="submit" id="stBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-xl transition-opacity">सेव करें</button>
+                <p id="stMsg" class="hidden text-center text-sm font-semibold"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: recharge (PhonePe UPI) ============ -->
+    <div id="payModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-center justify-center p-4" onclick="if(event.target===this)ST.closeRecharge()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-800">💳 बैलेंस रीचार्ज</h3>
+                <button type="button" onclick="ST.closeRecharge()" aria-label="बंद करें" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">✖</button>
+            </div>
+            <p id="payNote" class="hidden mb-3 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">बैलेंस खत्म हो गया है — सेवा जारी रखने के लिए रीचार्ज करें।</p>
+            <div class="grid grid-cols-4 gap-2 mb-3">
+                <button type="button" onclick="ST.payChip(50)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm">₹50</button>
+                <button type="button" onclick="ST.payChip(100)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm">₹100</button>
+                <button type="button" onclick="ST.payChip(200)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm">₹200</button>
+                <button type="button" onclick="ST.payChip(500)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm">₹500</button>
+            </div>
+            <div class="flex items-stretch rounded-xl border border-slate-300 bg-white overflow-hidden focus-within:border-[#FF6D5A] mb-4">
+                <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">₹</span>
+                <input id="payAmt" type="number" inputmode="numeric" min="10" max="10000" step="1" value="100" aria-label="राशि" class="flex-1 min-w-0 px-3 py-3 focus:outline-none">
+            </div>
+            <button type="button" id="payBtn" onclick="ST.doRecharge()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors">PhonePe UPI से पेमेंट करें</button>
+            <p class="text-[11px] text-slate-400 mt-2 text-center">पेमेंट सफल होते ही बैलेंस अपने-आप जुड़ जाएगा (₹10 – ₹10,000)।</p>
+            <p id="payMsg" class="hidden mt-2 text-center text-sm font-semibold"></p>
+        </div>
+    </div>
+
+    <!-- image lightbox -->
+    <div id="imgZoom" class="hidden fixed inset-0 bg-black/90 z-[130] flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
+        <img id="imgZoomEl" src="" alt="फोटो" class="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl">
+    </div>
+
+    <script src="bt-session.js" defer></script>
+    <script>
+    (function () {
+        'use strict';
+        // ---- backend endpoints (n8n) — create these three webhooks ----
+        var WH = {
+            get:            'https://llcsolution.duckdns.org/webhook/service-get',
+            saveBusiness:   'https://llcsolution.duckdns.org/webhook/service-business-save',
+            saveInstance:   'https://llcsolution.duckdns.org/webhook/service-instance-save',
+            rechargeInit:   'https://llcsolution.duckdns.org/webhook/service-recharge-init',
+            rechargeStatus: 'https://llcsolution.duckdns.org/webhook/service-recharge-status'
+        };
+        var IMGBB_KEY = 'a31e91458ccc1c4896125f42c4c3d7f8'; // same key used across the site
+
+        var DATA = null;          // { business, customers[], visits[] }
+        var instImages = [];      // resized dataURLs pending upload (max 3)
+
+        function $(id) { return document.getElementById(id); }
+        function digits10(p) { return String(p == null ? '' : p).replace(/\D/g, '').slice(-10); }
+        function todayISO() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+        function addDaysISO(iso, n) { var p = String(iso || '').split('-'); var d = new Date(+p[0], +p[1] - 1, +p[2]); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+        function fmtIN(iso) { if (!iso) return '—'; var p = String(iso).split('T')[0].split('-'); return (p.length === 3) ? (p[2] + '/' + p[1] + '/' + p[0]) : String(iso); }
+        function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+        function inr(n) { return '₹' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function show(id) { $(id).classList.remove('hidden'); }
+        function hide(id) { $(id).classList.add('hidden'); }
+        function pmsg(id, t, ok) { var m = $(id); m.textContent = t; m.className = 'mt-1 text-center text-sm font-semibold ' + (ok ? 'text-green-600' : 'text-red-600'); m.classList.remove('hidden'); }
+
+        function setView(name) {
+            ['viewLogin', 'viewSetup', 'viewDash', 'viewLoading', 'viewError'].forEach(hide);
+            show(name);
+        }
+
+        // ---------- inline login (phone → OTP, same shared session as the whole site) ----------
+        var _lgPhone = '';
+        function lgSend(ev) {
+            ev.preventDefault();
+            var p = digits10($('lgPhone').value);
+            if (!/^[6-9]\d{9}$/.test(p)) { pmsg('lgMsg', 'सही 10-अंकों का नंबर डालें।', false); return; }
+            _lgPhone = p;
+            var b = $('lgBtn'); b.disabled = true; b.textContent = 'OTP भेज रहे हैं…';
+            BTSession.otpSend(p)
+                .then(function (r) { return r.json().catch(function () { return {}; }); })
+                .then(function (d) {
+                    if (d && d.ok !== false) {
+                        hide('lgForm'); show('lgOtpForm'); hide('lgMsg');
+                        $('lgOtpPhone').textContent = '+91 ' + p;
+                        $('lgOtp').value = ''; $('lgOtp').focus();
+                        BTSession.startResend('lgResend', function () { BTSession.otpSend(p); }, 30);
+                    } else pmsg('lgMsg', (d && d.error) || 'OTP नहीं भेज सके।', false);
+                })
+                .catch(function () { pmsg('lgMsg', 'नेटवर्क त्रुटि।', false); })
+                .then(function () { b.disabled = false; b.textContent = 'लॉगिन'; });
+        }
+        function lgVerify(ev) {
+            ev.preventDefault();
+            var otp = $('lgOtp').value.trim();
+            if (otp.length < 4) { pmsg('lgMsg', 'OTP डालें।', false); return; }
+            var b = $('lgVerifyBtn'); b.disabled = true; b.textContent = 'जाँच हो रही है…';
+            BTSession.otpVerify(_lgPhone, otp)
+                .then(function (r) { return r.json().catch(function () { return {}; }); })
+                .then(function (d) {
+                    if (d && d.ok !== false && d.token) {
+                        BTSession.set(_lgPhone, d.token);
+                        BTSession.renderMenuAccount();
+                        show('lgForm'); hide('lgOtpForm'); hide('lgMsg');
+                        load();
+                    } else pmsg('lgMsg', (d && d.error) || 'गलत या एक्सपायर OTP।', false);
+                })
+                .catch(function () { pmsg('lgMsg', 'नेटवर्क त्रुटि।', false); })
+                .then(function () { b.disabled = false; b.textContent = 'वेरिफाई करें'; });
+        }
+
+        // ---------- load account ----------
+        function load() {
+            if (!window.BTSession || !BTSession.isValid()) { setView('viewLogin'); return; }
+            setView('viewLoading');
+            fetch(WH.get, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: BTSession.phone(), token: BTSession.token() }) })
+                .then(function (r) {
+                    if (r.status === 401) { BTSession.clear(); setView('viewLogin'); throw 'auth'; }
+                    return r.json();
+                })
+                .then(function (d) {
+                    if (Array.isArray(d)) d = d[0] || {};   // tolerate n8n "All Incoming Items" responses
+                    if (!d || d.ok === false) { BTSession.clear(); setView('viewLogin'); return; }
+                    DATA = { business: d.business || null, customers: d.customers || [], visits: d.visits || [] };
+                    if (!DATA.business || !DATA.business.name) {
+                        $('suPhone').value = '+91 ' + BTSession.phone();
+                        setView('viewSetup');
+                    } else renderDash();
+                })
+                .catch(function (e) { if (e !== 'auth') setView('viewError'); });
+        }
+
+        // ---------- dashboard ----------
+        function remindersSentToday() {
+            // rem0_sent_for == today (day-of reminder) OR rem1_sent_for == tomorrow (sent today, for tomorrow)
+            var t = todayISO(), tm = addDaysISO(t, 1), n = 0;
+            (DATA.customers || []).forEach(function (c) {
+                if (String(c.rem0SentFor || '') === t) n++;
+                if (String(c.rem1SentFor || '') === tm) n++;
+            });
+            return n;
+        }
+        function renderDash() {
+            var b = DATA.business;
+            $('dashBizName').textContent = b.name;
+            $('dashBizAddr').textContent = b.address || '';
+            $('statBalance').textContent = inr(b.balance);
+            $('statBalance').className = 'text-lg sm:text-2xl font-extrabold mt-0.5 ' + ((Number(b.balance) || 0) < 1 ? 'text-red-600' : 'text-green-600');
+            $('statReminders').textContent = remindersSentToday();
+            $('statCustomers').textContent = (DATA.customers || []).length;
+            if ((Number(b.balance) || 0) < 1) show('lowBalWarn'); else hide('lowBalWarn');
+            renderCustomers();
+            setView('viewDash');
+        }
+
+        function dueBadge(nextISO) {
+            if (!nextISO) return '<span class="text-slate-400">—</span>';
+            var t = todayISO();
+            if (nextISO < t) return '<span class="inline-block bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full text-[11px]">बाकी · ' + fmtIN(nextISO) + '</span>';
+            if (nextISO === t) return '<span class="inline-block bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full text-[11px]">आज</span>';
+            if (nextISO === addDaysISO(t, 1)) return '<span class="inline-block bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full text-[11px]">कल</span>';
+            return '<span class="text-slate-600 font-semibold">' + fmtIN(nextISO) + '</span>';
+        }
+
+        var CUST_PER_PAGE = 10, custPage = 1;
+        function renderCustomers(resetPage) {
+            if (resetPage) custPage = 1;
+            var q = ($('custSearch').value || '').toLowerCase().trim();
+            var list = (DATA.customers || []).slice();
+            if (q) list = list.filter(function (c) { return String(c.name || '').toLowerCase().indexOf(q) !== -1 || String(c.phone || '').indexOf(q) !== -1; });
+            // upcoming first: overdue/today on top, then ascending by next visit, no-date last
+            list.sort(function (a, b) { return String(a.nextVisit || '9999') < String(b.nextVisit || '9999') ? -1 : 1; });
+
+            var pages = Math.max(1, Math.ceil(list.length / CUST_PER_PAGE));
+            if (custPage > pages) custPage = pages;
+            if (custPage < 1) custPage = 1;
+            var slice = list.slice((custPage - 1) * CUST_PER_PAGE, custPage * CUST_PER_PAGE);
+
+            $('custList').innerHTML = slice.map(function (c) {
+                var name = c.name || ('+91 ' + c.phone);
+                var p = esc(digits10(c.phone));
+                return '<div class="bg-white rounded-xl border border-slate-100 shadow-sm px-3 py-2.5 flex items-center gap-3 flex-wrap sm:flex-nowrap">' +
+                    '<div class="min-w-0 flex-1 basis-40">' +
+                        '<p class="font-bold text-slate-800 text-sm truncate">' + esc(name) + '</p>' +
+                        '<p class="text-[11px] text-slate-500 truncate">' + esc(c.area || '') + '</p>' +
+                    '</div>' +
+                    '<div class="text-xs whitespace-nowrap"><span class="text-slate-400">अगली:</span> ' + dueBadge(c.nextVisit) + '</div>' +
+                    '<div class="text-[11px] text-slate-400 whitespace-nowrap hidden md:block">पिछली: ' + fmtIN(c.lastVisit) + '</div>' +
+                    '<div class="flex items-center gap-1.5 shrink-0 ml-auto">' +
+                        '<a href="tel:+91' + p + '" aria-label="कॉल करें" class="w-8 h-8 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center text-sm">📞</a>' +
+                        '<button type="button" onclick="ST.openHist(\'' + p + '\')" class="h-8 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg">👁 देखें</button>' +
+                        '<button type="button" onclick="ST.openInstance(\'' + p + '\')" class="h-8 px-2.5 bg-[#FF6D5A]/10 hover:bg-[#FF6D5A]/20 text-[#F04E38] text-xs font-bold rounded-lg">＋ एंट्री</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            if (!list.length) show('custEmpty'); else hide('custEmpty');
+
+            var pager = $('custPager');
+            if (list.length > CUST_PER_PAGE) {
+                pager.classList.remove('hidden');
+                $('custPageInfo').textContent = 'पेज ' + custPage + ' / ' + pages;
+                $('custPrevBtn').disabled = custPage <= 1;
+                $('custNextBtn').disabled = custPage >= pages;
+            } else pager.classList.add('hidden');
+        }
+        function custNav(d) { custPage += d; renderCustomers(); }
+
+        // ---------- business save (setup + settings) ----------
+        function saveBusiness(nameEl, addrEl, btnEl, msgId, onDone) {
+            var name = $(nameEl).value.trim(), addr = $(addrEl).value.trim();
+            if (!name || !addr) { pmsg(msgId, 'नाम और पता दोनों भरें।', false); return; }
+            var b = $(btnEl); b.disabled = true; b.textContent = 'सेव हो रहा है…';
+            fetch(WH.saveBusiness, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: BTSession.phone(), token: BTSession.token(), name: name, address: addr }) })
+                .then(function (r) { if (r.status === 401) { BTSession.clear(); location.reload(); throw 'auth'; } return r.json(); })
+                .then(function (d) {
+                    if (d && d.ok !== false) {
+                        DATA.business = DATA.business || {};
+                        DATA.business.name = name; DATA.business.address = addr;
+                        if (d.business && d.business.balance != null) DATA.business.balance = d.business.balance;
+                        pmsg(msgId, '✔ सेव हो गया', true);
+                        onDone();
+                    } else pmsg(msgId, (d && d.error) || 'सेव नहीं हो सका।', false);
+                })
+                .catch(function (e) { if (e !== 'auth') pmsg(msgId, 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
+                .then(function () { b.disabled = false; b.textContent = 'सेव करें'; });
+        }
+
+        // ---------- settings ----------
+        function openSettings() {
+            $('stName').value = DATA.business.name || '';
+            $('stAddr').value = DATA.business.address || '';
+            $('stPhone').value = '+91 ' + BTSession.phone();
+            hide('stMsg'); show('setModal');
+        }
+        function closeSettings() { hide('setModal'); }
+
+        // Normalize a visit's images: accepts clean URLs and legacy cells holding a
+        // JSON-stringified array (e.g. '["https://..."]' or '[]').
+        function imgList(v) {
+            var out = [];
+            (v.images || []).forEach(function (u) {
+                u = String(u == null ? '' : u).trim();
+                if (!u) return;
+                if (u.charAt(0) === '[') {
+                    try { JSON.parse(u).forEach(function (x) { if (x) out.push(String(x)); }); } catch (e) {}
+                    return;
+                }
+                if (/^https?:/.test(u)) out.push(u);
+            });
+            return out;
+        }
+
+        // ---------- history ----------
+        var histPhone = '';
+        function openHist(phone) {
+            histPhone = digits10(phone);
+            var c = (DATA.customers || []).find(function (x) { return digits10(x.phone) === histPhone; }) || {};
+            $('histName').textContent = c.name || ('+91 ' + histPhone);
+            $('histSub').textContent = '+91 ' + histPhone + (c.area ? ' · ' + c.area : '');
+            $('histAddBtn').onclick = function () { closeHist(); openInstance(histPhone); };
+            var visits = (DATA.visits || []).filter(function (v) { return digits10(v.customerPhone) === histPhone; });
+            visits.sort(function (a, b) { return String(b.visitDate || '') < String(a.visitDate || '') ? -1 : 1; }); // desc
+            $('histBody').innerHTML = visits.length ? visits.map(function (v) {
+                var imgs = imgList(v).map(function (u) {
+                    return '<img src="' + esc(u) + '" loading="lazy" alt="फोटो" onclick="ST.zoom(this.src)" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer">';
+                }).join('');
+                return '<div class="border border-slate-100 rounded-xl p-3 bg-slate-50/60">' +
+                    '<div class="flex items-center justify-between gap-2">' +
+                        '<span class="font-bold text-slate-800 text-sm">' + esc(v.service || '—') + '</span>' +
+                        '<span class="text-xs font-semibold text-slate-500">' + fmtIN(v.visitDate) + '</span>' +
+                    '</div>' +
+                    (v.area ? '<p class="text-xs text-slate-500 mt-0.5">📍 ' + esc(v.area) + '</p>' : '') +
+                    (v.nextVisit ? '<p class="text-xs text-slate-600 mt-1">अगली विज़िट: <b>' + fmtIN(v.nextVisit) + '</b></p>' : '') +
+                    (v.comment ? '<p class="text-xs text-slate-600 mt-1 whitespace-pre-wrap">💬 ' + esc(v.comment) + '</p>' : '') +
+                    (imgs ? '<div class="flex gap-2 mt-2 flex-wrap">' + imgs + '</div>' : '') +
+                '</div>';
+            }).join('') : '<p class="text-center text-slate-400 text-sm py-8">कोई हिस्ट्री नहीं।</p>';
+            show('histModal');
+        }
+        function closeHist() { hide('histModal'); }
+        function zoom(src) { $('imgZoomEl').src = src; show('imgZoom'); }
+
+        // ---------- add instance ----------
+        function fillCustSelect(selectedPhone) {
+            var sel = $('inCustSel');
+            var opts = '<option value="">— नया ग्राहक (नंबर टाइप करें) —</option>';
+            (DATA.customers || []).slice().sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || '')); })
+                .forEach(function (c) {
+                    var label = (c.name ? c.name + ' · ' : '') + c.phone;
+                    opts += '<option value="' + esc(digits10(c.phone)) + '"' + (digits10(c.phone) === selectedPhone ? ' selected' : '') + '>' + esc(label) + '</option>';
+                });
+            sel.innerHTML = opts;
+        }
+        function latestVisitOf(phone) {
+            var vs = (DATA.visits || []).filter(function (v) { return digits10(v.customerPhone) === phone; });
+            vs.sort(function (a, b) { return String(b.visitDate || '') < String(a.visitDate || '') ? -1 : 1; });
+            return vs[0] || null;
+        }
+        function fillFromCustomer(phone) {
+            var c = (DATA.customers || []).find(function (x) { return digits10(x.phone) === phone; });
+            if (!c) return;
+            $('inName').value = c.name || '';
+            $('inArea').value = c.area || '';
+            var lv = latestVisitOf(phone);
+            if (lv && lv.service) $('inService').value = lv.service;
+        }
+        function onCustSel() {
+            var p = $('inCustSel').value;
+            if (p) { hide('inNewPhoneWrap'); $('inPhone').value = p; fillFromCustomer(p); }
+            else { show('inNewPhoneWrap'); $('inPhone').value = ''; $('inName').value = ''; $('inArea').value = ''; $('inService').value = ''; }
+        }
+        function onPhoneTyped() {
+            var p = digits10($('inPhone').value);
+            if (p.length === 10) {
+                var c = (DATA.customers || []).find(function (x) { return digits10(x.phone) === p; });
+                if (c) { fillCustSelect(p); hide('inNewPhoneWrap'); fillFromCustomer(p); }
+            }
+        }
+        // ---------- recharge (PhonePe UPI via n8n → PhonePe PG) ----------
+        function rcShow(text, ok) {
+            var b = $('rcBanner');
+            b.textContent = text;
+            b.className = 'mb-4 text-sm font-semibold rounded-xl px-4 py-2.5 ' + (ok ? 'text-green-700 bg-green-50 border border-green-200' : 'text-amber-700 bg-amber-50 border border-amber-200');
+        }
+        function openRecharge(locked) {
+            $('payNote').classList.toggle('hidden', !locked);
+            hide('payMsg');
+            show('payModal');
+        }
+        function closeRecharge() { hide('payModal'); }
+        function payChip(n) { $('payAmt').value = n; }
+        function doRecharge() {
+            var amt = Math.round(Number($('payAmt').value));
+            if (!amt || amt < 10 || amt > 10000) { pmsg('payMsg', '₹10 से ₹10,000 के बीच राशि डालें।', false); return; }
+            var b = $('payBtn'); b.disabled = true; b.textContent = 'PhonePe खोल रहे हैं…';
+            hide('payMsg');
+            fetch(WH.rechargeInit, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: BTSession.phone(), token: BTSession.token(), amount: amt, returnUrl: location.origin + location.pathname })
+            })
+                .then(function (r) { if (r.status === 401) { BTSession.clear(); location.reload(); throw 'auth'; } return r.json(); })
+                .then(function (d) {
+                    if (d && d.ok !== false && d.url) { location.href = d.url; }   // → PhonePe checkout
+                    else pmsg('payMsg', (d && d.error) || 'पेमेंट शुरू नहीं हो सका — फिर कोशिश करें।', false);
+                })
+                .catch(function (e) { if (e !== 'auth') pmsg('payMsg', 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
+                .then(function () { b.disabled = false; b.textContent = 'PhonePe UPI से पेमेंट करें'; });
+        }
+        // Called when PhonePe redirects back with ?recharge=return&order=...
+        function checkRecharge(orderId, attempt) {
+            setView('viewLoading');
+            fetch(WH.rechargeStatus, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: BTSession.phone(), token: BTSession.token(), orderId: orderId })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var st = d && d.status;
+                    if (st === 'SUCCESS') { rcShow('✔ रीचार्ज सफल — बैलेंस जुड़ गया।', true); load(); }
+                    else if (st === 'PENDING' && attempt < 3) { setTimeout(function () { checkRecharge(orderId, attempt + 1); }, 4000); }
+                    else if (st === 'PENDING') { rcShow('पेमेंट प्रोसेस में है — कुछ देर में बैलेंस अपने-आप जुड़ जाएगा।', false); load(); }
+                    else { rcShow('पेमेंट पूरा नहीं हुआ। पैसे कटे हों तो बैलेंस अपने-आप जुड़ जाएगा।', false); load(); }
+                })
+                .catch(function () { rcShow('पेमेंट स्टेटस नहीं मिला — पेज रीफ्रेश करके देखें।', false); load(); });
+        }
+
+        function openInstance(prefPhone) {
+            // service locked until there is balance for at least one message
+            if (DATA && DATA.business && (Number(DATA.business.balance) || 0) < 0.25) { openRecharge(true); return; }
+            $('instForm').reset();
+            instImages = []; renderImgRow();
+            hide('inMsg');
+            fillCustSelect(prefPhone || '');
+            $('inVisit').value = todayISO();
+            if (prefPhone) { hide('inNewPhoneWrap'); $('inPhone').value = prefPhone; fillFromCustomer(prefPhone); }
+            else show('inNewPhoneWrap');
+            show('instModal');
+        }
+        function closeInstance() { hide('instModal'); }
+
+        // images
+        function resizeImage(file) {
+            return new Promise(function (resolve, reject) {
+                var img = new Image(), url = URL.createObjectURL(file);
+                img.onload = function () {
+                    var w = img.width, h = img.height, MAX = 1280;
+                    if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                    var c = document.createElement('canvas'); c.width = w; c.height = h;
+                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    URL.revokeObjectURL(url);
+                    resolve(c.toDataURL('image/jpeg', 0.82));
+                };
+                img.onerror = reject; img.src = url;
+            });
+        }
+        function renderImgRow() {
+            var row = $('inImgRow');
+            var html = instImages.map(function (d, i) {
+                return '<div class="relative w-20 h-20"><img src="' + d + '" alt="फोटो" class="w-full h-full object-cover rounded-xl border border-slate-200">' +
+                    '<button type="button" onclick="ST.rmImg(' + i + ')" aria-label="हटाएँ" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-xs font-bold shadow">✖</button></div>';
+            }).join('');
+            if (instImages.length < 3) html += '<button type="button" onclick="document.getElementById(\'inFile\').click()" class="w-20 h-20 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-[#FF6D5A] text-slate-400 text-2xl">＋</button>';
+            row.innerHTML = html;
+        }
+        function rmImg(i) { instImages.splice(i, 1); renderImgRow(); }
+        function onFiles(input) {
+            var files = Array.prototype.slice.call(input.files || []);
+            input.value = '';
+            files.slice(0, 3 - instImages.length).forEach(function (f) {
+                if (!/^image\//.test(f.type)) return;
+                resizeImage(f).then(function (d) { if (instImages.length < 3) { instImages.push(d); renderImgRow(); } })
+                    .catch(function () { pmsg('inMsg', 'एक इमेज पढ़ी नहीं जा सकी।', false); });
+            });
+        }
+        function uploadImgBB(dataUrl) {
+            var fd = new FormData();
+            fd.append('image', dataUrl.split(',').pop());
+            return fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_KEY, { method: 'POST', body: fd })
+                .then(function (r) { return r.json(); })
+                .then(function (d) { if (d && d.success && d.data) return d.data.url; throw new Error('upload failed'); });
+        }
+
+        function saveInstance(ev) {
+            ev.preventDefault();
+            var phone = digits10($('inCustSel').value || $('inPhone').value);
+            if (!/^[6-9]\d{9}$/.test(phone)) { pmsg('inMsg', 'ग्राहक का सही 10-अंकों का नंबर डालें।', false); return; }
+            var service = $('inService').value.trim();
+            if (!service) { pmsg('inMsg', 'सर्विस / डिवाइस भरें।', false); return; }
+            var visitDate = $('inVisit').value;
+            if (!visitDate) { pmsg('inMsg', 'विज़िट की तारीख चुनें।', false); return; }
+            var nextVisit = $('inNext').value || '';
+            if (nextVisit && nextVisit < visitDate) { pmsg('inMsg', 'अगली विज़िट, विज़िट की तारीख से पहले नहीं हो सकती।', false); return; }
+            var btn = $('inSaveBtn'); btn.disabled = true; btn.textContent = 'सेव हो रहा है…';
+            hide('inMsg');
+            Promise.all(instImages.map(uploadImgBB))
+                .catch(function () { pmsg('inMsg', 'फोटो अपलोड नहीं हो सकी — बिना फोटो सेव कर रहे हैं।', false); return []; })
+                .then(function (urls) {
+                    return fetch(WH.saveInstance, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            phone: BTSession.phone(), token: BTSession.token(),
+                            customerPhone: phone,
+                            customerName: $('inName').value.trim(),
+                            service: service,
+                            area: $('inArea').value.trim(),
+                            visitDate: visitDate,
+                            nextVisit: nextVisit,
+                            comment: $('inComment').value.trim(),
+                            images: urls || []
+                        })
+                    });
+                })
+                .then(function (r) { if (r.status === 401) { BTSession.clear(); location.reload(); throw 'auth'; } return r.json(); })
+                .then(function (d) {
+                    if (d && d.ok !== false) {
+                        pmsg('inMsg', '✔ सेव हो गया' + (d.sent ? ' — ग्राहक को WhatsApp भेज दिया गया' : ''), true);
+                        setTimeout(function () { closeInstance(); load(); }, 900);
+                    } else pmsg('inMsg', (d && d.error) || 'सेव नहीं हो सका।', false);
+                })
+                .catch(function (e) { if (e !== 'auth') pmsg('inMsg', 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
+                .then(function () { btn.disabled = false; btn.textContent = '💾 सेव करें — ग्राहक को WhatsApp जाएगा'; });
+        }
+
+        // ---------- wire up ----------
+        function init() {
+            $('lgForm').addEventListener('submit', lgSend);
+            $('lgOtpForm').addEventListener('submit', lgVerify);
+            $('setupForm').addEventListener('submit', function (e) { e.preventDefault(); saveBusiness('suName', 'suAddr', 'suBtn', 'suMsg', function () { setTimeout(load, 500); }); });
+            $('setForm').addEventListener('submit', function (e) { e.preventDefault(); saveBusiness('stName', 'stAddr', 'stBtn', 'stMsg', function () { setTimeout(function () { closeSettings(); renderDash(); }, 500); }); });
+            $('instForm').addEventListener('submit', saveInstance);
+            // back from PhonePe? confirm + credit before first load
+            var qp = new URLSearchParams(location.search);
+            var ord = (qp.get('recharge') === 'return') ? qp.get('order') : null;
+            if (ord && window.BTSession && BTSession.isValid()) {
+                history.replaceState(null, '', location.pathname);
+                checkRecharge(ord, 0);
+            } else load();
+        }
+
+        window.ST = {
+            load: load, openSettings: openSettings, closeSettings: closeSettings,
+            openHist: openHist, closeHist: closeHist, zoom: zoom,
+            openInstance: openInstance, closeInstance: closeInstance,
+            onCustSel: onCustSel, onPhoneTyped: onPhoneTyped,
+            onFiles: onFiles, rmImg: rmImg,
+            renderCustomers: renderCustomers, custNav: custNav,
+            openRecharge: openRecharge, closeRecharge: closeRecharge,
+            payChip: payChip, doRecharge: doRecharge
+        };
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+    })();
+    </script>
+</body>
+</html>
