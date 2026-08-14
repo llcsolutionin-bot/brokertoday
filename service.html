@@ -285,8 +285,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         <input id="inVisit" type="date" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1.5">अगली विज़िट</label>
-                        <input id="inNext" type="date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">अगली विज़िट *</label>
+                        <input id="inNext" type="date" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[#FF6D5A] outline-none">
                     </div>
                 </div>
                 <div>
@@ -297,6 +297,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     <label class="block text-sm font-bold text-slate-700 mb-1.5">फोटो (अधिकतम 3)</label>
                     <div id="inImgRow" class="flex gap-2 flex-wrap"></div>
                     <input id="inFile" type="file" accept="image/*" multiple class="hidden" onchange="ST.onFiles(this)">
+                    <input id="inFileCam" type="file" accept="image/*" capture="environment" class="hidden" onchange="ST.onFiles(this)">
                 </div>
                 <button type="submit" id="inSaveBtn" class="w-full bg-[#FF6D5A] hover:opacity-90 text-white font-bold py-3 rounded-xl transition-opacity">💾 सेव करें — ग्राहक को WhatsApp जाएगा</button>
                 <p id="inMsg" class="hidden text-center text-sm font-semibold"></p>
@@ -724,7 +725,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: BTSession.phone(), token: BTSession.token(), customerPhone: delPhone })
             })
-                .then(function (r) { if (r.status === 401) { BTSession.clear(); location.reload(); throw 'auth'; } return r.json(); })
+                // never bounce to login from here — stay on the dashboard and show the outcome
+                .then(function (r) { return r.json().catch(function () { return {}; }); })
                 .then(function (d) {
                     if (Array.isArray(d)) d = d[0] || {};
                     if (d && d.ok !== false) {
@@ -733,7 +735,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         renderDash();
                     } else pmsg('delMsg', (d && d.error) || 'हटा नहीं सके — फिर कोशिश करें।', false);
                 })
-                .catch(function (e) { if (e !== 'auth') pmsg('delMsg', 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
+                .catch(function () { pmsg('delMsg', 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
                 .then(function () { b.disabled = false; b.textContent = 'हाँ, हटाएँ'; });
         }
 
@@ -820,7 +822,10 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 return '<div class="relative w-20 h-20"><img src="' + d + '" alt="फोटो" class="w-full h-full object-cover rounded-xl border border-slate-200">' +
                     '<button type="button" onclick="ST.rmImg(' + i + ')" aria-label="हटाएँ" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-xs font-bold shadow">✖</button></div>';
             }).join('');
-            if (instImages.length < 3) html += '<button type="button" onclick="document.getElementById(\'inFile\').click()" class="w-20 h-20 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-[#FF6D5A] text-slate-400 text-2xl">＋</button>';
+            if (instImages.length < 3) {
+                html += '<button type="button" onclick="document.getElementById(\'inFileCam\').click()" class="w-20 h-20 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-[#FF6D5A] text-slate-500 flex flex-col items-center justify-center"><span class="text-2xl">📷</span><span class="text-[10px] font-semibold">कैमरा</span></button>';
+                html += '<button type="button" onclick="document.getElementById(\'inFile\').click()" class="w-20 h-20 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-[#FF6D5A] text-slate-500 flex flex-col items-center justify-center"><span class="text-2xl">🖼️</span><span class="text-[10px] font-semibold">गैलरी</span></button>';
+            }
             row.innerHTML = html;
         }
         function rmImg(i) { instImages.splice(i, 1); renderImgRow(); }
@@ -849,8 +854,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             if (!service) { pmsg('inMsg', 'सर्विस / डिवाइस भरें।', false); return; }
             var visitDate = $('inVisit').value;
             if (!visitDate) { pmsg('inMsg', 'विज़िट की तारीख चुनें।', false); return; }
-            var nextVisit = $('inNext').value || '';
-            if (nextVisit && nextVisit < visitDate) { pmsg('inMsg', 'अगली विज़िट, विज़िट की तारीख से पहले नहीं हो सकती।', false); return; }
+            var nextVisit = $('inNext').value;
+            if (!nextVisit) { pmsg('inMsg', 'अगली विज़िट की तारीख चुनें।', false); return; }
+            if (nextVisit < visitDate) { pmsg('inMsg', 'अगली विज़िट, विज़िट की तारीख से पहले नहीं हो सकती।', false); return; }
             var btn = $('inSaveBtn'); btn.disabled = true; btn.textContent = 'सेव हो रहा है…';
             hide('inMsg');
             Promise.all(instImages.map(uploadImgBB))
