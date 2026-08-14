@@ -349,6 +349,21 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         </div>
     </div>
 
+    <!-- ============ MODAL: delete customer confirm ============ -->
+    <div id="delModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-center justify-center p-4" onclick="if(event.target===this)ST.closeDelete()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <div class="text-4xl mb-2">🗑️</div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">ग्राहक हटाएँ?</h3>
+            <p class="text-sm text-slate-500 mb-1">क्या आप वाकई <b id="delName" class="text-slate-800"></b> को हटाना चाहते हैं?</p>
+            <p class="text-xs text-red-600 font-semibold mb-4">डैशबोर्ड से हट जाएगा और सभी भविष्य के रिमाइंडर तुरंत बंद हो जाएँगे।</p>
+            <div class="flex gap-2">
+                <button type="button" onclick="ST.closeDelete()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl">रद्द करें</button>
+                <button type="button" id="delBtn" onclick="ST.confirmDelete()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl">हाँ, हटाएँ</button>
+            </div>
+            <p id="delMsg" class="hidden mt-3 text-center text-sm font-semibold"></p>
+        </div>
+    </div>
+
     <!-- ============ MODAL: recharge (PhonePe UPI) ============ -->
     <div id="payModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-center justify-center p-4" onclick="if(event.target===this)ST.closeRecharge()">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
@@ -389,7 +404,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             saveBusiness:   'https://llcsolution.duckdns.org/webhook/service-business-save',
             saveInstance:   'https://llcsolution.duckdns.org/webhook/service-instance-save',
             rechargeInit:   'https://llcsolution.duckdns.org/webhook/service-recharge-init',
-            rechargeStatus: 'https://llcsolution.duckdns.org/webhook/service-recharge-status'
+            rechargeStatus: 'https://llcsolution.duckdns.org/webhook/service-recharge-status',
+            customerDelete: 'https://llcsolution.duckdns.org/webhook/service-customer-delete'
         };
         var IMGBB_KEY = 'a31e91458ccc1c4896125f42c4c3d7f8'; // same key used across the site
 
@@ -549,6 +565,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                         '<a href="https://wa.me/91' + p + '" target="_blank" rel="noopener" aria-label="WhatsApp पर मैसेज करें" class="w-8 h-8 rounded-lg text-white flex items-center justify-center hover:opacity-90" style="background:#25D366">' + WA_ICO + '</a>' +
                         '<button type="button" onclick="ST.openHist(\'' + p + '\')" class="h-8 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg">👁 देखें</button>' +
                         '<button type="button" onclick="ST.openInstance(\'' + p + '\')" class="h-8 px-2.5 bg-[#FF6D5A]/10 hover:bg-[#FF6D5A]/20 text-[#F04E38] text-xs font-bold rounded-lg">＋ एंट्री</button>' +
+                        '<button type="button" onclick="ST.askDelete(\'' + p + '\')" aria-label="ग्राहक हटाएँ" title="हटाएँ" class="w-8 h-8 rounded-lg bg-red-50 border border-red-200 text-red-500 hover:bg-red-100 flex items-center justify-center text-sm">🗑</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -689,6 +706,35 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 if (c) { fillCustSelect(p); hide('inNewPhoneWrap'); fillFromCustomer(p); }
             }
         }
+        // ---------- delete customer ----------
+        var delPhone = '';
+        function askDelete(phone) {
+            delPhone = digits10(phone);
+            var c = (DATA.customers || []).find(function (x) { return digits10(x.phone) === delPhone; }) || {};
+            $('delName').textContent = c.name || ('+91 ' + delPhone);
+            hide('delMsg'); show('delModal');
+        }
+        function closeDelete() { hide('delModal'); }
+        function confirmDelete() {
+            var b = $('delBtn'); b.disabled = true; b.textContent = 'हटा रहे हैं…';
+            hide('delMsg');
+            fetch(WH.customerDelete, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: BTSession.phone(), token: BTSession.token(), customerPhone: delPhone })
+            })
+                .then(function (r) { if (r.status === 401) { BTSession.clear(); location.reload(); throw 'auth'; } return r.json(); })
+                .then(function (d) {
+                    if (Array.isArray(d)) d = d[0] || {};
+                    if (d && d.ok !== false) {
+                        DATA.customers = (DATA.customers || []).filter(function (c) { return digits10(c.phone) !== delPhone; });
+                        closeDelete();
+                        renderDash();
+                    } else pmsg('delMsg', (d && d.error) || 'हटा नहीं सके — फिर कोशिश करें।', false);
+                })
+                .catch(function (e) { if (e !== 'auth') pmsg('delMsg', 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
+                .then(function () { b.disabled = false; b.textContent = 'हाँ, हटाएँ'; });
+        }
+
         // ---------- recharge (PhonePe UPI via n8n → PhonePe PG) ----------
         function rcShow(text, ok) {
             var b = $('rcBanner');
@@ -858,7 +904,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             onFiles: onFiles, rmImg: rmImg,
             renderCustomers: renderCustomers, custNav: custNav,
             openRecharge: openRecharge, closeRecharge: closeRecharge,
-            payChip: payChip, doRecharge: doRecharge
+            payChip: payChip, doRecharge: doRecharge,
+            askDelete: askDelete, closeDelete: closeDelete, confirmDelete: confirmDelete
         };
 
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
