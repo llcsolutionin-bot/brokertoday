@@ -461,7 +461,12 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 .then(function (d) {
                     if (Array.isArray(d)) d = d[0] || {};   // tolerate n8n "All Incoming Items" responses
                     if (!d || d.ok === false) { BTSession.clear(); setView('viewLogin'); return; }
-                    DATA = { business: d.business || null, customers: d.customers || [], visits: d.visits || [] };
+                    // One entry per customer — keep only the LATEST record. Sheet rows arrive in
+                    // append order, so a later row for the same phone is the newer one.
+                    var byPhone = {};
+                    (d.customers || []).forEach(function (c) { var k = digits10(c.phone); if (k) byPhone[k] = c; });
+                    var customers = Object.keys(byPhone).map(function (k) { return byPhone[k]; });
+                    DATA = { business: d.business || null, customers: customers, visits: d.visits || [] };
                     if (!DATA.business || !DATA.business.name) {
                         $('suPhone').value = '+91 ' + BTSession.phone();
                         setView('viewSetup');
