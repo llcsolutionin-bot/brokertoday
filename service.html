@@ -486,7 +486,9 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                     // append order, so a later row for the same phone is the newer one.
                     var byPhone = {};
                     (d.customers || []).forEach(function (c) { var k = digits10(c.phone); if (k) byPhone[k] = c; });
-                    var customers = Object.keys(byPhone).map(function (k) { return byPhone[k]; });
+                    // soft delete: rows marked inactive stay in the sheet but never render
+                    var customers = Object.keys(byPhone).map(function (k) { return byPhone[k]; })
+                        .filter(function (c) { return String(c.status || '').toLowerCase() !== 'inactive'; });
                     // Drop exact-duplicate visit rows (an n8n node running once per input item
                     // returns the whole visits sheet N times).
                     var seenV = {}, visits = [];
