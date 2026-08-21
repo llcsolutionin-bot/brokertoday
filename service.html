@@ -365,7 +365,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         </div>
     </div>
 
-    <!-- ============ MODAL: recharge (PhonePe UPI) ============ -->
+    <!-- ============ MODAL: recharge (Cashfree UPI) ============ -->
     <div id="payModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[120] flex items-center justify-center p-4" onclick="if(event.target===this)ST.closeRecharge()">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
             <div class="flex justify-between items-center mb-4">
@@ -383,8 +383,8 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 <span class="px-3 flex items-center bg-slate-100 text-slate-600 font-bold border-r border-slate-300">₹</span>
                 <input id="payAmt" type="number" inputmode="numeric" min="10" max="10000" step="1" value="100" aria-label="राशि" class="flex-1 min-w-0 px-3 py-3 focus:outline-none">
             </div>
-            <button type="button" id="payBtn" onclick="ST.doRecharge()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors">PhonePe UPI से पेमेंट करें</button>
-            <p class="text-[11px] text-slate-400 mt-2 text-center">पेमेंट सफल होते ही बैलेंस अपने-आप जुड़ जाएगा (₹10 – ₹10,000)।</p>
+            <button type="button" id="payBtn" onclick="ST.doRecharge()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors">UPI से पेमेंट करें (QR / UPI ऐप)</button>
+            <p class="text-[11px] text-slate-400 mt-2 text-center">QR स्कैन करें या फोन पर आपका UPI ऐप खुलेगा। पेमेंट सफल होते ही बैलेंस अपने-आप जुड़ जाएगा (₹10 – ₹10,000)।</p>
             <p id="payMsg" class="hidden mt-2 text-center text-sm font-semibold"></p>
         </div>
     </div>
@@ -739,7 +739,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 .then(function () { b.disabled = false; b.textContent = 'हाँ, हटाएँ'; });
         }
 
-        // ---------- recharge (PhonePe UPI via n8n → PhonePe PG) ----------
+        // ---------- recharge (UPI via n8n → Cashfree Payment Link) ----------
         function rcShow(text, ok) {
             var b = $('rcBanner');
             b.textContent = text;
@@ -755,7 +755,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
         function doRecharge() {
             var amt = Math.round(Number($('payAmt').value));
             if (!amt || amt < 10 || amt > 10000) { pmsg('payMsg', '₹10 से ₹10,000 के बीच राशि डालें।', false); return; }
-            var b = $('payBtn'); b.disabled = true; b.textContent = 'PhonePe खोल रहे हैं…';
+            var b = $('payBtn'); b.disabled = true; b.textContent = 'पेमेंट पेज खोल रहे हैं…';
             hide('payMsg');
             fetch(WH.rechargeInit, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -763,13 +763,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             })
                 .then(function (r) { if (r.status === 401) { BTSession.clear(); location.reload(); throw 'auth'; } return r.json(); })
                 .then(function (d) {
-                    if (d && d.ok !== false && d.url) { location.href = d.url; }   // → PhonePe checkout
+                    if (d && d.ok !== false && d.url) { location.href = d.url; }   // → Cashfree UPI payment page
                     else pmsg('payMsg', (d && d.error) || 'पेमेंट शुरू नहीं हो सका — फिर कोशिश करें।', false);
                 })
                 .catch(function (e) { if (e !== 'auth') pmsg('payMsg', 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
-                .then(function () { b.disabled = false; b.textContent = 'PhonePe UPI से पेमेंट करें'; });
+                .then(function () { b.disabled = false; b.textContent = 'UPI से पेमेंट करें (QR / UPI ऐप)'; });
         }
-        // Called when PhonePe redirects back with ?recharge=return&order=...
+        // Called when the payment page redirects back with ?recharge=return&order=...
         function checkRecharge(orderId, attempt) {
             setView('viewLoading');
             fetch(WH.rechargeStatus, {
@@ -895,7 +895,7 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             $('setupForm').addEventListener('submit', function (e) { e.preventDefault(); saveBusiness('suName', 'suAddr', 'suBtn', 'suMsg', function () { setTimeout(load, 500); }); });
             $('setForm').addEventListener('submit', function (e) { e.preventDefault(); saveBusiness('stName', 'stAddr', 'stBtn', 'stMsg', function () { setTimeout(function () { closeSettings(); renderDash(); }, 500); }); });
             $('instForm').addEventListener('submit', saveInstance);
-            // back from PhonePe? confirm + credit before first load
+            // back from the payment page? confirm + credit before first load
             var qp = new URLSearchParams(location.search);
             var ord = (qp.get('recharge') === 'return') ? qp.get('order') : null;
             if (ord && window.BTSession && BTSession.isValid()) {
