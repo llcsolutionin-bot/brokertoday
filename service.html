@@ -739,7 +739,19 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
                 .then(function () { b.disabled = false; b.textContent = 'हाँ, हटाएँ'; });
         }
 
-        // ---------- recharge (UPI via n8n → Cashfree Payment Link) ----------
+        // ---------- recharge (UPI via n8n → Cashfree) ----------
+        // init may return {url} (Payment Link) or {sessionId} (Orders API — needs the CF JS SDK)
+        var _cfSdk = null;
+        function loadCashfree() {
+            if (window.Cashfree) return Promise.resolve();
+            if (!_cfSdk) _cfSdk = new Promise(function (resolve, reject) {
+                var s = document.createElement('script');
+                s.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+                s.onload = resolve; s.onerror = reject;
+                document.head.appendChild(s);
+            });
+            return _cfSdk;
+        }
         function rcShow(text, ok) {
             var b = $('rcBanner');
             b.textContent = text;
@@ -763,7 +775,13 @@ html[data-theme="dark"] .shadow-lg,html[data-theme="dark"] .shadow-xl,html[data-
             })
                 .then(function (r) { if (r.status === 401) { BTSession.clear(); location.reload(); throw 'auth'; } return r.json(); })
                 .then(function (d) {
-                    if (d && d.ok !== false && d.url) { location.href = d.url; }   // → Cashfree UPI payment page
+                    if (Array.isArray(d)) d = d[0] || {};
+                    if (d && d.ok !== false && d.url) { location.href = d.url; }   // Payment Link page
+                    else if (d && d.ok !== false && d.sessionId) {
+                        loadCashfree().then(function () {
+                            window.Cashfree({ mode: 'production' }).checkout({ paymentSessionId: d.sessionId, redirectTarget: '_self' });
+                        }).catch(function () { pmsg('payMsg', 'पेमेंट पेज लोड नहीं हो सका — फिर कोशिश करें।', false); });
+                    }
                     else pmsg('payMsg', (d && d.error) || 'पेमेंट शुरू नहीं हो सका — फिर कोशिश करें।', false);
                 })
                 .catch(function (e) { if (e !== 'auth') pmsg('payMsg', 'नेटवर्क त्रुटि — फिर कोशिश करें।', false); })
